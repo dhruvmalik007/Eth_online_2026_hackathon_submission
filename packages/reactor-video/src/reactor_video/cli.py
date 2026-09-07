@@ -19,7 +19,6 @@ from reactor_video.personas import available_personas, get_persona
 def build_parser() -> argparse.ArgumentParser:
     """Build the shared argument parser."""
     parser = argparse.ArgumentParser(
-        prog="analyze_videos",
         description=(
             "Persona-driven video analysis (Gemini/Vertex). One entry point "
             "for every reference video of the Reactor pipeline."
