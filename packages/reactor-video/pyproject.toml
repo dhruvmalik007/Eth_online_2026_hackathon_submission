@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "reactor-video"
+version = "0.1.0"
+description = "Reactor video-analysis package: persona-driven Gemini video summarization and POV frame manifests"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "google-genai>=1.0.0",
+]
+
+[project.scripts]
+reactor-analyze = "reactor_video.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/reactor_video"]
