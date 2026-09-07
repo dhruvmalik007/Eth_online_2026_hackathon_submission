@@ -143,23 +143,19 @@ Default Credentials (ADC), exactly like the legacy scripts.
 
 ## Tests (offline, no API calls)
 
-Or install the package for shell-wide use:
+Run the offline unit tests:
 
-```bash
-pip install -e packages/reactor-video
-reactor-analyze vanguard
-```
+    python3 -m unittest discover -s packages/reactor-video/tests -v
+
+Or install the package for shell-wide use (still offline with --dry-run):
+
+    pip install -e packages/reactor-video
+    reactor-analyze all --dry-run
 
 Environment overrides: `REACTOR_GCP_PROJECT`, `REACTOR_GCP_LOCATION`
 (defaults: `ultimate3dreconstructionstack`, `us-central1`).
 Gemini authentication uses Application Default Credentials (same as the
 original scripts).
-
-## Tests (offline, no API calls)
-
-```bash
-python3 -m unittest discover -s packages/reactor-video/tests -v
-```
 
 ## Relationship to the legacy scripts
 
