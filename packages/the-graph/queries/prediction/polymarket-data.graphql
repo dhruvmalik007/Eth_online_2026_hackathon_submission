@@ -1,0 +1,22 @@
+query PolymarketData($first: Int!) {
+  _meta {
+    block {
+      number
+    }
+  }
+  conditions(first: $first) {
+    id
+  }
+  fixedProductMarketMakers(first: $first) {
+    id
+  }
+  redemptions(first: $first, orderBy: payout, orderDirection: desc) {
+    id
+    payout
+    redeemer
+    timestamp
+  }
+  positions(first: $first) {
+    id
+  }
+}
