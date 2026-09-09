@@ -1,0 +1,20 @@
+query ProtocolSnapshot($protocol: Bytes!) {
+  derivPerpProtocol(id: $protocol) {
+    id
+    name
+    totalValueLockedUSD
+    longOpenInterestUSD
+    shortOpenInterestUSD
+    totalOpenInterestUSD
+    cumulativeVolumeUSD
+    cumulativeTotalRevenueUSD
+    financialMetrics(first: 30, orderBy: days, orderDirection: desc) {
+      days
+      dailyVolumeUSD
+      dailyTotalOpenInterestUSD
+      dailyTotalRevenueUSD
+      dailySupplySideRevenueUSD
+      dailyProtocolSideRevenueUSD
+    }
+  }
+}

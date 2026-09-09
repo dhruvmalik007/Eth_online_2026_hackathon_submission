@@ -1,0 +1,15 @@
+query Funding($pool: Bytes!, $hours: Int!) {
+  liquidityPool(id: $pool) {
+    id
+    fundingrate
+    inputTokenBalances
+    inputTokenWeights
+    totalValueLockedUSD
+    hourlySnapshots(first: $hours, orderBy: hours, orderDirection: desc) {
+      hours
+      hourlyFundingrate
+      hourlyVolumeUSD
+      hourlyTotalOpenInterestUSD
+    }
+  }
+}
