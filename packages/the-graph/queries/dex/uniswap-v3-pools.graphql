@@ -1,0 +1,21 @@
+query UniswapV3Pools($first: Int!) {
+  pools(first: $first, orderBy: totalValueLockedUSD, orderDirection: desc) {
+    id
+    token0 {
+      symbol
+      decimals
+    }
+    token1 {
+      symbol
+      decimals
+    }
+    feeTier
+    liquidity
+    sqrtPrice
+    tick
+    totalValueLockedUSD
+    volumeUSD
+    feesUSD
+    txCount
+  }
+}
