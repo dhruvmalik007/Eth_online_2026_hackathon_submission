@@ -1,0 +1,20 @@
+query AaveV3Reserves($first: Int!) {
+  reserves(first: $first, orderBy: totalLiquidity, orderDirection: desc) {
+    id
+    symbol
+    name
+    totalLiquidity
+    totalCurrentVariableDebt
+    totalCurrentStableDebt
+    variableBorrowRate
+    stableBorrowRate
+    liquidityRate
+    availableLiquidity
+    utilizationRate
+    reserveLiquidationThreshold
+    reserveFactor
+    decimals
+    isActive
+    isFrozen
+  }
+}
