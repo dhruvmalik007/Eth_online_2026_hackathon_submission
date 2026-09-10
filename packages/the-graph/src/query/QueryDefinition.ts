@@ -109,16 +109,22 @@ const opName = def0.name?.value;
     throw new QueryDefinitionError(`[${def.id}] SDL contains "\${" — value interpolation is banned; declare a GraphQL variable instead`);
   }
 
-  // Every variable the SDL declares must be produced by the variables schema.
-  // We cannot execute the schema here, but we check the declared names against
-  // the zod shape keys when the schema is an object schema.
-  const declared = varNames(document);
-  const shape = varShapeKeys(def.variables);
-  if (shape !== null) {
-    for (const name of declared) {
-      if (!shape.has(name)) {
-        throw new EveryVariableDeclaredError(def.id, name, shape);
-      }
+// Every variable the SDL declares must be produced by the variables schema.
+// Additionally, every variable the SDL *uses* must be declared at the operation root.
+const declared = declaredVariableNames(document);
+const used = usedVariableNames(document);
+for (const name of used) {
+  if (!declared.has(name)) {
+    throw new QueryDefinitionError(
+      `[${def.id}] SDL references variable "$${name}" but it is not declared in the operation signature`,
+    );
+  }
+}
+const shape = varShapeKeys(def.variables);
+if (shape !== null) {
+  for (const name of declared) {
+    if (!shape.has(name)) {
+      throw new EveryVariableDeclaredError(def.id, name, shape);
     }
   }
 }
