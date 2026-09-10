@@ -92,11 +92,11 @@ export function validateDefinition(def: AnyQueryDefinition): void {
   } catch (err) {
     throw new QueryDefinitionError(`[${def.id}] SDL does not parse: ${(err as Error).message}`);
   }
-  const def0 = document.definitions.at(0);
-  if (def0?.kind !== KindOperationDefinition) {
-    throw new QueryDefinitionError(`[${def.id}] SDL must contain exactly one anonymous-root operation named "${def.operationName}"`);
-  }
-  const opName = def0.name?.value;
+const def0 = document.definitions.at(0);
+if (document.definitions.length !== 1 || def0?.kind !== KindOperationDefinition) {
+  throw new QueryDefinitionError(`[${def.id}] SDL must contain exactly one operation named "${def.operationName}"`);
+}
+const opName = def0.name?.value;
   if (opName !== def.operationName) {
     throw new QueryDefinitionError(`[${def.id}] SDL operation name "${opName ?? '(anonymous)'}" does not match operationName "${def.operationName}"`);
   }
