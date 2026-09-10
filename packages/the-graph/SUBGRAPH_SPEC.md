@@ -36,7 +36,7 @@ These are load-bearing facts — the testnet workflow depends on them. Re-verify
 | Account limit | **3 deployed (unpublished) subgraphs** per account — plan slots accordingly | Studio docs |
 | Publishing to network | `graph publish` → onchain (Arbitrum One / Arbitrum Sepolia only, via `cli.thegraph.com/publish`). **Not needed for testing** | quick-start docs |
 | Query URL (dev) | `https://api.studio.thegraph.com/query/<ID>/<SUBGRAPH_NAME>/<VERSION>` | "Querying from an app" docs |
-| Query URL (network) | `https://gateway.thegraph.com/api/<API_KEY>/subgraphs/id/<SUBGRAPH_ID>` | same |
+| Query URL (network) | `https://gateway.thegraph.com/api/subgraphs/id/<SUBGRAPH_ID>` (Authorization: `Bearer <API_KEY>`) | same |
 | Indexing status | `_meta { block { number hash timestamp } deployment hasIndexingErrors }` | GraphQL API docs |
 | Messari repo state | **Dormant** — last push 2025-03-25, 121 open issues, hosted-service endpoints dead since The Graph hosted-service shutdown (issue #2563). Use as **schema/template reference only** | GitHub |
 | Substreams speed | Parallelized sync, official 2022 claim: "some subgraphs could sync more than 100x faster" (PancakeSwap-scale: weeks → ~6h). No newer official SPS benchmark | The Graph blog |
