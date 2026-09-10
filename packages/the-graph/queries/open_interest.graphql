@@ -1,0 +1,22 @@
+query OpenPositions($pool: Bytes!, $first: Int!, $lastID: Bytes) {
+  positions(
+    first: $first
+    where: { liquidityPool: $pool, hashClosed: null, id_gt: $lastID }
+    orderBy: id
+    orderDirection: asc
+  ) {
+    id
+    side
+    leverage
+    balance
+    balanceUSD
+    collateralBalanceUSD
+    realisedPnlUSD
+    account {
+      id
+      openPositionCount
+    }
+    fundingrateOpen
+    timestampOpened
+  }
+}

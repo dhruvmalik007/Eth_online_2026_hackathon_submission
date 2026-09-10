@@ -1,0 +1,16 @@
+query Deltas($lastBlock: Int!, $lastID: Bytes, $first: Int!) {
+  swaps(first: $first, where: { _change_block: { number_gte: $lastBlock }, id_gt: $lastID }) {
+    id
+    hash
+    blockNumber
+    timestamp
+    amountInUSD
+    amountOutUSD
+  }
+  liquidates(first: $first, where: { _change_block: { number_gte: $lastBlock } }) {
+    id
+    hash
+    blockNumber
+    timestamp
+  }
+}

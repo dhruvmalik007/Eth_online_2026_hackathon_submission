@@ -1,0 +1,11 @@
+query Fdv($first: Int!, $lastID: Bytes) {
+  tokens(first: $first, where: { id_gt: $lastID, fdvUSD_not: null }) {
+    id
+    symbol
+    lastPriceUSD
+    totalSupply
+    maxSupply
+    fdvUSD
+    circulatingMarketCapUSD
+  }
+}

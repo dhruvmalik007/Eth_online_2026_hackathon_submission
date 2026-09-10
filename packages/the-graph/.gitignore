@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.graphclient/
+.env
+*.log
+.DS_Store
+.commandcode/
