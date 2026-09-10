@@ -72,7 +72,7 @@ async function cmdHealth(): Promise<void> {
 
 async function cmdQuery(args: Args): Promise<void> {
   const { readFileSync } = await import('node:fs');
-  const file = args._ as string;
+  const file = args._[0];
   if (!file) throw new Error('usage: graph-fno query <file.graphql> [--vars \'{"k":"v"}\']');
   const reg = registry();
   const client = await reg.firstHealthy();
