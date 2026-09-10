@@ -13,7 +13,13 @@ import {
   type PublicClient,
   type WalletClient,
 } from 'viem';
-import { sepolia, arbitrumSepolia, baseSepolia, optimismSepolia } from 'viem/chains';
+import {
+  sepolia,
+  arbitrumSepolia,
+  baseSepolia,
+  optimismSepolia,
+  polygonAmoy,
+} from 'viem/chains';
 import type { Chain } from 'viem';
 import type { Env, TestnetChain } from '../config/index.js';
 import { CHAIN_INFO } from '../config/index.js';
@@ -23,7 +29,7 @@ const VIEM_CHAINS: Record<TestnetChain, Chain> = {
   'arbitrum-sepolia': arbitrumSepolia,
   'base-sepolia': baseSepolia,
   'optimism-sepolia': optimismSepolia,
-  'polygon-amoy': sepolia, // replace with polygonAmoy import when signing on Amoy
+  'polygon-amoy': polygonAmoy,
 };
 
 export interface WalletSession {
@@ -53,7 +59,8 @@ export class WalletSigner {
   async session(chain: TestnetChain = 'sepolia'): Promise<WalletSession> {
     const info = CHAIN_INFO[chain];
     const viemChain = VIEM_CHAINS[chain];
-    const rpcUrl = this.env[info.rpcEnvKey] as string | undefined;
+    // Every key in ChainInfo['rpcEnvKey'] is a defaulted, validated Env entry.
+    const rpcUrl = this.env[info.rpcEnvKey];
     const publicClient = createPublicClient({
       chain: viemChain,
       transport: http(rpcUrl),

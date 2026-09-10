@@ -11,8 +11,13 @@ export type TestnetChain = (typeof TESTNET_CHAINS)[number];
 export interface ChainInfo {
   readonly id: number;
   readonly name: TestnetChain;
-  readonly viemChain: 'sepolia' | 'arbitrumSepolia' | 'baseSepolia' | 'optimismSepolia';
-  readonly rpcEnvKey: 'RPC_URL_SEPOLIA' | 'RPC_URL_BASE_SEPOLIA' | 'RPC_URL_ARBITRUM_SEPOLIA' | 'RPC_URL_OPTIMISM_SEPOLIA';
+  readonly viemChain: 'sepolia' | 'arbitrumSepolia' | 'baseSepolia' | 'optimismSepolia' | 'polygonAmoy';
+  readonly rpcEnvKey:
+    | 'RPC_URL_SEPOLIA'
+    | 'RPC_URL_BASE_SEPOLIA'
+    | 'RPC_URL_ARBITRUM_SEPOLIA'
+    | 'RPC_URL_OPTIMISM_SEPOLIA'
+    | 'RPC_URL_POLYGON_AMOY';
   readonly explorer: string;
 }
 
@@ -48,8 +53,8 @@ export const CHAIN_INFO: Record<TestnetChain, ChainInfo> = {
   'polygon-amoy': {
     id: 80002,
     name: 'polygon-amoy',
-    viemChain: 'sepolia', // not used for signing in dry-run default
-    rpcEnvKey: 'RPC_URL_SEPOLIA',
+    viemChain: 'polygonAmoy',
+    rpcEnvKey: 'RPC_URL_POLYGON_AMOY',
     explorer: 'https://amoy.polygonscan.com',
   },
 };
@@ -65,6 +70,8 @@ const envSchema = z.object({
   RPC_URL_BASE_SEPOLIA: z.string().url().default('https://base-sepolia-rpc.publicnode.com'),
   RPC_URL_ARBITRUM_SEPOLIA: z.string().url().default('https://arbitrum-sepolia-rpc.publicnode.com'),
   RPC_URL_OPTIMISM_SEPOLIA: z.string().url().default('https://optimism-sepolia-rpc.publicnode.com'),
+  // Official Polygon Amoy public RPC (docs.polygon.technology — chain id 80002)
+  RPC_URL_POLYGON_AMOY: z.string().url().default('https://polygon-amoy.drpc.org'),
 });
 
 export type Env = z.infer<typeof envSchema>;

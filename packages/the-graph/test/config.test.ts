@@ -26,6 +26,22 @@ describe('config', () => {
     expect(CHAIN_INFO['polygon-amoy'].id).toBe(80002);
   });
 
+  it('routes polygon-amoy to its own viem chain and RPC env key (never Sepolia)', () => {
+    expect(CHAIN_INFO['polygon-amoy'].viemChain).toBe('polygonAmoy');
+    expect(CHAIN_INFO['polygon-amoy'].rpcEnvKey).toBe('RPC_URL_POLYGON_AMOY');
+    // Each chain owns a distinct rpcEnvKey — no silent cross-chain reuse.
+    const keys = TESTNET_CHAINS.map((c) => CHAIN_INFO[c].rpcEnvKey);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('defaults RPC_URL_POLYGON_AMOY to the official Polygon public RPC', () => {
+    const prev = process.env.RPC_URL_POLYGON_AMOY;
+    delete process.env.RPC_URL_POLYGON_AMOY;
+    const env = loadEnv();
+    expect(env.RPC_URL_POLYGON_AMOY).toBe('https://polygon-amoy.drpc.org');
+    if (prev !== undefined) process.env.RPC_URL_POLYGON_AMOY = prev;
+  });
+
   it('rejects a bad wallet address shape', () => {
     const prev = process.env.WALLET_ADDRESS;
     process.env.WALLET_ADDRESS = 'not-an-address';
