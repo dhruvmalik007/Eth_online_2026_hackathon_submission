@@ -41,10 +41,10 @@ export function amountsSumTo100(
  */
 export function citationsGrounded(s: SynthesisMatrix): boolean {
   const isCitation = (id: string): boolean => id.startsWith('proj-') || id.startsWith('c-');
+  // Note: feasibility.risk is deterministic pre-compute echoed back by the LLM; it is not citation-validated here.
   return (
     s.violations.every((v) => isCitation(v.constraintId) && isCitation(v.projectionId)) &&
-    s.alpha.every((a) => isCitation(a.projectionId)) &&
-    s.feasibility.every(() => true)
+    s.alpha.every((a) => isCitation(a.projectionId))
   );
 }
 
