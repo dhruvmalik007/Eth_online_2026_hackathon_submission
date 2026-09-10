@@ -42,6 +42,14 @@ const envSchema = z.object({
   // Optional Studio URL override for self-deployed Sepolia instances
   UNISWAP_V4_STUDIO_ENDPOINT: z.string().url().optional(),
 
+  // TimesFM-3 inference service (deployed Cloud Run, GPU) + TimescaleDB store
+  TIMESFM3_SERVICE_URL: z.string().url().default('https://timesfm3-inference-887606357212.us-central1.run.app'),
+  TIMESERIES_DB_HOST: z.string().default('localhost'),
+  TIMESERIES_DB_PORT: z.coerce.number().default(5432),
+  TIMESERIES_DB_NAME: z.string().default('agentic_ems'),
+  TIMESERIES_DB_USER: z.string().default('postgres'),
+  TIMESERIES_DB_PASSWORD: z.string().default(''),
+
   // Wallet (optional)
   WALLET_MODE: z.enum(['ledger', 'private-key', 'readonly']).default('readonly'),
   WALLET_PRIVATE_KEY: z.string().optional(),

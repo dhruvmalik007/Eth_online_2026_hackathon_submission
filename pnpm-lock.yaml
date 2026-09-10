@@ -82,6 +82,9 @@ importers:
       '@ethonline2026/graph-fno-indexer':
         specifier: workspace:*
         version: link:../the-graph
+      '@ethonline2026/timeseries':
+        specifier: workspace:*
+        version: link:../timeseries
       '@graphprotocol/client-auto-pagination':
         specifier: ^2.0.0
         version: 2.0.7(@graphql-mesh/types@0.104.30(graphql@16.14.2))(@graphql-tools/delegate@12.1.3(graphql@16.14.2))(@graphql-tools/utils@12.0.0(graphql@16.14.2))(@graphql-tools/wrap@10.1.4(graphql@16.14.2))(graphql@16.14.2)
