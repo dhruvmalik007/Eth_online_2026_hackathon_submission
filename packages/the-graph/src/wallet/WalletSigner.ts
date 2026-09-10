@@ -1,7 +1,6 @@
 /**
- * @todo this will be transfered to the @ethonline-2026/wallet section. 
- * just for the personal testing we are incorporating the personal 
- * 
+ * @todo Move this to the @ethonline-2026/wallet package.
+ * Currently used only for local/testnet integration testing.
  */
 
 
