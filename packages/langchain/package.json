@@ -22,7 +22,8 @@
     "probe:levelA": "tsx scripts/levelA-tool-probe.ts",
     "probe:levelB": "tsx scripts/levelB-trace-probe.ts",
     "graphclient:build": "graphclient build",
-    "graphclient:serve-dev": "graphclient serve-dev"
+    "graphclient:serve-dev": "graphclient serve-dev",
+    "probe:levelA-v01": "tsx scripts/levelA-v01-probe.ts"
   },
   "dependencies": {
     "@ethonline2026/arc-client": "workspace:*",
