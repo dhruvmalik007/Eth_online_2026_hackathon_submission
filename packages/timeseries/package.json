@@ -15,11 +15,16 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint src test",
+    "lint": "eslint src test scripts",
     "test": "vitest run",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "migrate": "tsx scripts/migrate.ts",
+    "verify:live": "tsx scripts/verify-live.ts",
+    "backfill:embeddings": "tsx scripts/backfill-embeddings.ts"
   },
   "dependencies": {
+    "@timescaledb/core": "^0.0.1",
+    "google-auth-library": "^11.0.2",
     "pg": "^8.16.0",
     "zod": "^4.2.1"
   },

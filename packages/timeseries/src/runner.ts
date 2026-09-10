@@ -1,9 +1,12 @@
+import { readFileSync } from 'node:fs';
 import { Pool, type PoolConfig } from 'pg';
+import { z } from 'zod';
 
 /**
- * Transport port (DIP): the client depends on this abstraction, never on pg
- * directly. `query` returns raw pg rows (snake_case columns) — the validation
- * frontier, mirroring the SubgraphTransport pattern.
+ * Transport port (DIP): the client and every repository depend on this
+ * abstraction, never on pg directly. `query` returns raw pg rows
+ * (snake_case columns) — the validation frontier, mirroring the
+ * SubgraphTransport pattern in `@ethonline2026/graph-fno-indexer`.
  */
 export interface SqlRunner {
   query(text: string, values?: readonly unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
@@ -16,15 +19,317 @@ export class TimeseriesRunnerError extends Error {
   }
 }
 
-/** pg.Pool adapter — the composition root wires this in once. */
-export class PgSqlRunner implements SqlRunner {
-  private readonly pool: Pool;
+/** Env keys the connection resolver reads. */
+export const TIMESERIES_DEFAULT_ENV_KEYS = {
+  url: 'TIMESERIES_DATABASE_URL',
+  host: 'TIMESERIES_DB_HOST',
+  port: 'TIMESERIES_DB_PORT',
+  database: 'TIMESERIES_DB_NAME',
+  user: 'TIMESERIES_DB_USER',
+  password: 'TIMESERIES_DB_PASSWORD',
+  maxConnections: 'TIMESERIES_DB_MAX_CONNECTIONS',
+} as const;
 
-  constructor(config: PoolConfig | string) {
-    this.pool = new Pool(typeof config === 'string' ? { connectionString: config } : config);
+/**
+ * Connection environment. `TIMESERIES_DATABASE_URL` (Tiger Cloud / any
+ * Postgres DSN) takes precedence; the discrete keys remain as a fallback so
+ * local development does not require a DSN.
+ */
+export const TimeseriesEnvSchema = z.object({
+  TIMESERIES_DATABASE_URL: z.string().min(1).optional(),
+  TIMESERIES_DB_HOST: z.string().min(1).default('localhost'),
+  TIMESERIES_DB_PORT: z.coerce.number().int().positive().max(65_535).default(5432),
+  TIMESERIES_DB_NAME: z.string().min(1).default('agentic_ems'),
+  TIMESERIES_DB_USER: z.string().min(1).default('postgres'),
+  TIMESERIES_DB_PASSWORD: z.string().default(''),
+  /** Tiger Cloud free tier is connection-capped; keep this small. */
+  TIMESERIES_DB_MAX_CONNECTIONS: z.coerce.number().int().positive().max(20).default(5),
+});
+
+export type TimeseriesEnv = z.infer<typeof TimeseriesEnvSchema>;
+
+/**
+ * Validate and coerce the connection environment. The source is typed loosely
+ * because a process env only ever holds strings while tests inject literals —
+ * the schema's `coerce` calls normalize both.
+ */
+export function loadTimeseriesEnv(
+  source: Readonly<Record<string, unknown>> = process.env,
+): TimeseriesEnv {
+  const parsed = TimeseriesEnvSchema.safeParse(source);
+  if (!parsed.success) {
+    const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    throw new Error(`Invalid TimescaleDB environment: ${issues}`);
+  }
+  return parsed.data;
+}
+
+/** `pg` SSL option: off, or on with an explicit certificate policy. */
+export type SslSetting =
+  | false
+  | { readonly rejectUnauthorized: boolean; readonly ca?: string };
+
+/**
+ * libpq SSL parameters. These are stripped from the DSN before it reaches
+ * `pg`, because `ConnectionParameters` merges the parsed DSN *over* the
+ * explicit config (`Object.assign({}, config, parse(connectionString))`) —
+ * so a leftover `sslmode` silently overrides the policy resolved here.
+ */
+const SSL_DSN_PARAMS = [
+  'sslmode',
+  'ssl',
+  'sslrootcert',
+  'sslcert',
+  'sslkey',
+  'sslnegotiation',
+  'uselibpqcompat',
+] as const;
+
+/** Drop libpq SSL parameters so our resolved `ssl` option is authoritative. */
+export function stripSslParams(connectionString: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(connectionString);
+  } catch {
+    return connectionString;
+  }
+  let changed = false;
+  for (const param of SSL_DSN_PARAMS) {
+    if (parsed.searchParams.has(param)) {
+      parsed.searchParams.delete(param);
+      changed = true;
+    }
+  }
+  return changed ? parsed.toString() : connectionString;
+}
+
+export interface PgConnectionSpec {
+  readonly connectionString: string;
+  readonly ssl: SslSetting;
+  readonly maxConnections: number;
+  readonly applicationName: string;
+  /** True when SSL was enabled automatically because the host is remote. */
+  readonly sslAutoEnabled: boolean;
+  /** True when the DSN form was used (vs. discrete keys). */
+  readonly fromConnectionString: boolean;
+}
+
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '0.0.0.0']);
+
+/** Local hosts (and *.local) are the only ones we dial without TLS. */
+export function isLocalHost(host: string): boolean {
+  const h = host.toLowerCase();
+  return LOCAL_HOSTS.has(h) || h.endsWith('.local');
+}
+
+/**
+ * TLS policy resolution (libpq semantics).
+ *
+ * Tiger Cloud terminates TLS with its own CA, so Node's bundled trust store
+ * rejects the chain; `require`/`prefer` therefore encrypt without verifying,
+ * exactly as libpq does. Supplying `sslrootcert` (a PEM path) upgrades the
+ * connection to real verification, and `verify-full` demands it.
+ */
+export function resolveSsl(
+  host: string,
+  sslMode: string | null,
+  caPem?: string,
+): { readonly setting: SslSetting; readonly auto: boolean } {
+  const mode = sslMode?.toLowerCase();
+  const verified = (): SslSetting =>
+    caPem === undefined
+      ? { rejectUnauthorized: true }
+      : { rejectUnauthorized: true, ca: caPem };
+
+  switch (mode) {
+    case 'disable':
+      return { setting: false, auto: false };
+    case 'verify-full':
+      return { setting: verified(), auto: false };
+    case 'verify-ca':
+      // `verify-ca` cannot be expressed without a CA; without one we fall back
+      // to the documented `no-verify` behaviour rather than failing open.
+      return { setting: caPem === undefined ? { rejectUnauthorized: false } : verified(), auto: false };
+    case 'allow':
+    case 'prefer':
+    case 'require':
+    case 'no-verify':
+      // libpq `require`: encrypt, do not verify.
+      return {
+        setting: caPem === undefined ? { rejectUnauthorized: false } : verified(),
+        auto: false,
+      };
+    default:
+      break;
+  }
+  if (isLocalHost(host)) return { setting: false, auto: false };
+  return {
+    setting: caPem === undefined ? { rejectUnauthorized: false } : verified(),
+    auto: true,
+  };
+}
+
+function parseConnectionUrl(url: string): URL {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.length === 0) throw new Error('missing host');
+    return parsed;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new TimeseriesRunnerError(
+      `TIMESERIES_DATABASE_URL is not a valid Postgres DSN (${message})`,
+      err,
+    );
+  }
+}
+
+/**
+ * Env → connection-spec resolution. Reads the CA file when `sslrootcert` is
+ * present in the DSN; everything else is pure so the DSN/SSL decisions are
+ * unit-testable offline.
+ */
+export function resolveConnectionSpec(
+  env: TimeseriesEnv,
+  applicationName = 'agentic-ems',
+): PgConnectionSpec {
+  const maxConnections = env.TIMESERIES_DB_MAX_CONNECTIONS;
+  const url = env.TIMESERIES_DATABASE_URL;
+
+  if (url !== undefined) {
+    const parsed = parseConnectionUrl(url);
+    const caPem = readCaPem(parsed.searchParams.get('sslrootcert'));
+    const { setting, auto } = resolveSsl(
+      parsed.hostname,
+      parsed.searchParams.get('sslmode'),
+      caPem,
+    );
+    return {
+      connectionString: stripSslParams(url),
+      ssl: setting,
+      maxConnections,
+      applicationName,
+      sslAutoEnabled: auto,
+      fromConnectionString: true,
+    };
   }
 
-  async query(text: string, values: readonly unknown[] = []): Promise<{ rows: Record<string, unknown>[] }> {
+  const credentials =
+    env.TIMESERIES_DB_PASSWORD.length > 0
+      ? `${encodeURIComponent(env.TIMESERIES_DB_USER)}:${encodeURIComponent(env.TIMESERIES_DB_PASSWORD)}`
+      : encodeURIComponent(env.TIMESERIES_DB_USER);
+  const connectionString =
+    `postgres://${credentials}@${env.TIMESERIES_DB_HOST}:${env.TIMESERIES_DB_PORT}` +
+    `/${encodeURIComponent(env.TIMESERIES_DB_NAME)}`;
+  const { setting, auto } = resolveSsl(env.TIMESERIES_DB_HOST, null);
+  return {
+    connectionString,
+    ssl: setting,
+    maxConnections,
+    applicationName,
+    sslAutoEnabled: auto,
+    fromConnectionString: false,
+  };
+}
+
+/** Load a PEM CA bundle referenced by `sslrootcert` (Tiger Cloud downloadable). */
+function readCaPem(path: string | null): string | undefined {
+  if (path === null || path.length === 0) return undefined;
+  try {
+    return readFileSync(path, 'utf8');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new TimeseriesRunnerError(
+      `sslrootcert="${path}" could not be read (${message})`,
+      err,
+    );
+  }
+}
+
+export function toPoolConfig(spec: PgConnectionSpec): PoolConfig {
+  return {
+    connectionString: spec.connectionString,
+    ssl:
+      spec.ssl === false
+        ? false
+        : spec.ssl.ca === undefined
+          ? { rejectUnauthorized: spec.ssl.rejectUnauthorized }
+          : { rejectUnauthorized: spec.ssl.rejectUnauthorized, ca: spec.ssl.ca },
+    max: spec.maxConnections,
+    application_name: spec.applicationName,
+    // Serverless instances idle-freeze; keep sockets short-lived so a
+    // throttled Tiger tier does not accumulate dead connections.
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
+  };
+}
+
+function poolKey(spec: PgConnectionSpec): string {
+  const sslFlag = spec.ssl === false ? 'off' : `on:${String(spec.ssl.rejectUnauthorized)}`;
+  return `${spec.connectionString}|max=${spec.maxConnections}|ssl=${sslFlag}`;
+}
+
+interface GlobalPoolRegistry {
+  __agenticEmsPgPools?: Map<string, Pool>;
+}
+
+const globalScope = globalThis as unknown as GlobalPoolRegistry;
+
+/**
+ * Module-level pools die with serverless instances but are re-created on every
+ * warm invocation; hanging them off globalThis means one pool per process,
+ * which is what keeps connection counts inside the Tiger free-tier cap.
+ */
+function poolRegistry(): Map<string, Pool> {
+  globalScope.__agenticEmsPgPools ??= new Map<string, Pool>();
+  return globalScope.__agenticEmsPgPools;
+}
+
+function getSharedPool(spec: PgConnectionSpec): Pool {
+  const registry = poolRegistry();
+  const key = poolKey(spec);
+  const existing = registry.get(key);
+  if (existing !== undefined) return existing;
+  const pool = new Pool(toPoolConfig(spec));
+  pool.on('error', () => {
+    // Idle-client errors must not crash the process; the next query surfaces
+    // the failure through TimeseriesRunnerError instead.
+  });
+  registry.set(key, pool);
+  return pool;
+}
+
+/** Drain every cached pool — used by scripts and tests so the process exits. */
+export async function closeAllPools(): Promise<void> {
+  const registry = poolRegistry();
+  const pools = [...registry.values()];
+  registry.clear();
+  await Promise.all(pools.map((p) => p.end().catch(() => undefined)));
+}
+
+/** pg.Pool adapter — the composition root wires this in once. */
+export class PgSqlRunner implements SqlRunner {
+  private readonly spec: PgConnectionSpec;
+  private readonly pool: Pool;
+
+  constructor(spec: PgConnectionSpec) {
+    this.spec = spec;
+    this.pool = getSharedPool(spec);
+  }
+
+  /** Composition-root helper: validate env, resolve the DSN, return a runner. */
+  static fromEnv(env: TimeseriesEnv = loadTimeseriesEnv()): PgSqlRunner {
+    return new PgSqlRunner(resolveConnectionSpec(env));
+  }
+
+  /** The resolved connection (SSL + DSN decisions) for diagnostics/health. */
+  get connection(): PgConnectionSpec {
+    return this.spec;
+  }
+
+  async query(
+    text: string,
+    values: readonly unknown[] = [],
+  ): Promise<{ rows: Record<string, unknown>[] }> {
     try {
       const result = await this.pool.query(text, values as unknown[]);
       return { rows: result.rows as Record<string, unknown>[] };
@@ -33,12 +338,14 @@ export class PgSqlRunner implements SqlRunner {
       throw new TimeseriesRunnerError(`TimescaleDB query failed: ${message}`, err);
     }
   }
-}
 
-export const TIMESERIES_DEFAULT_ENV_KEYS = {
-  host: 'TIMESERIES_DB_HOST',
-  port: 'TIMESERIES_DB_PORT',
-  database: 'TIMESERIES_DB_NAME',
-  user: 'TIMESERIES_DB_USER',
-  password: 'TIMESERIES_DB_PASSWORD',
-} as const;
+  /** Release this runner's shared pool (scripts/tests). */
+  async close(): Promise<void> {
+    const registry = poolRegistry();
+    const key = poolKey(this.spec);
+    const pool = registry.get(key);
+    if (pool === undefined) return;
+    registry.delete(key);
+    await pool.end();
+  }
+}
