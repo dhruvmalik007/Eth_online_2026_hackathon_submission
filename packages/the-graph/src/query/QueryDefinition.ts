@@ -92,11 +92,11 @@ export function validateDefinition(def: AnyQueryDefinition): void {
   } catch (err) {
     throw new QueryDefinitionError(`[${def.id}] SDL does not parse: ${(err as Error).message}`);
   }
-const def0 = document.definitions.at(0);
-if (document.definitions.length !== 1 || def0?.kind !== KindOperationDefinition) {
-  throw new QueryDefinitionError(`[${def.id}] SDL must contain exactly one operation named "${def.operationName}"`);
-}
-const opName = def0.name?.value;
+  const def0 = document.definitions.at(0);
+  if (document.definitions.length !== 1 || def0?.kind !== KindOperationDefinition) {
+    throw new QueryDefinitionError(`[${def.id}] SDL must contain exactly one operation named "${def.operationName}"`);
+  }
+  const opName = def0.name?.value;
   if (opName !== def.operationName) {
     throw new QueryDefinitionError(`[${def.id}] SDL operation name "${opName ?? '(anonymous)'}" does not match operationName "${def.operationName}"`);
   }
@@ -109,22 +109,23 @@ const opName = def0.name?.value;
     throw new QueryDefinitionError(`[${def.id}] SDL contains "\${" — value interpolation is banned; declare a GraphQL variable instead`);
   }
 
-// Every variable the SDL declares must be produced by the variables schema.
-// Additionally, every variable the SDL *uses* must be declared at the operation root.
-const declared = declaredVariableNames(document);
-const used = usedVariableNames(document);
-for (const name of used) {
-  if (!declared.has(name)) {
-    throw new QueryDefinitionError(
-      `[${def.id}] SDL references variable "$${name}" but it is not declared in the operation signature`,
-    );
+  // Every variable the SDL declares must be produced by the variables schema.
+  // Additionally, every variable the SDL *uses* must be declared at the operation root.
+  const declared = declaredVariableNames(document);
+  const used = usedVariableNames(document);
+  for (const name of used) {
+    if (!declared.has(name)) {
+      throw new QueryDefinitionError(
+        `[${def.id}] SDL references variable "$${name}" but it is not declared in the operation signature`,
+      );
+    }
   }
-}
-const shape = varShapeKeys(def.variables);
-if (shape !== null) {
-  for (const name of declared) {
-    if (!shape.has(name)) {
-      throw new EveryVariableDeclaredError(def.id, name, shape);
+  const shape = varShapeKeys(def.variables);
+  if (shape !== null) {
+    for (const name of declared) {
+      if (!shape.has(name)) {
+        throw new EveryVariableDeclaredError(def.id, name, shape);
+      }
     }
   }
 }
@@ -137,22 +138,23 @@ export class EveryVariableDeclaredError extends QueryDefinitionError {
 
 const KindOperationDefinition = 'OperationDefinition' as const;
 
-function varNames(document: ReturnType<typeof parse>): Set<string> {
+function declaredVariableNames(document: ReturnType<typeof parse>): Set<string> {
   const names = new Set<string>();
   const def0 = document.definitions.at(0);
   if (def0?.kind !== KindOperationDefinition) return names;
   for (const v of def0.variableDefinitions ?? []) {
     names.add(v.variable.name.value);
   }
-  usedVariableNames(document, names);
   return names;
 }
 
 /** Walk the selection set collecting referenced variables ($name). */
-function usedVariableNames(document: ReturnType<typeof parse>, into: Set<string>): void {
+function usedVariableNames(document: ReturnType<typeof parse>): Set<string> {
+  const names = new Set<string>();
   const def0 = document.definitions.at(0);
-  if (def0?.kind !== KindOperationDefinition) return;
-  visitAst(def0.selectionSet, into);
+  if (def0?.kind !== KindOperationDefinition) return names;
+  visitAst(def0.selectionSet, names);
+  return names;
 }
 
 /** Depth-first walk over AST nodes, ignoring `loc` (which back-references the AST cyclically). */
