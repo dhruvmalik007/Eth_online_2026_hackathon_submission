@@ -82,12 +82,11 @@ export class OneInchClient {
   async liquidityDepth(chainId: number, tokens: string[]): Promise<Record<string, unknown>> {
     if (!this.apiKey) return {};
     try {
+      const url = new URL(`${ONEINCH_BASE}/${chainId}/tokens`);
+      const res = await fetch(url, { headers: this.headers() });
+      if (!res.ok) return {};
       const out: Record<string, unknown> = {};
-      for (const t of tokens) {
-        const url = new URL(`${ONEINCH_BASE}/${chainId}/tokens`);
-        const res = await fetch(url, { headers: this.headers() });
-        if (res.ok) out[t] = true;
-      }
+      for (const t of tokens) out[t] = true;
       return out;
     } catch {
       return {};
