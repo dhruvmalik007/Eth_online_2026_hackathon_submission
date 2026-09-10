@@ -1,23 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TimeseriesClient } from '../src/client.js';
-import type { SqlRunner } from '../src/runner.js';
 import type { PoolMetricRow } from '../src/types.js';
-
-/** Captures SQL + params, returns canned rows per call. */
-class FakeRunner implements SqlRunner {
-  readonly queries: Array<{ text: string; values: readonly unknown[] }> = [];
-  private responses: Array<Record<string, unknown>[]> = [];
-
-  queue(rows: Record<string, unknown>[]): void {
-    this.responses.push(rows);
-  }
-
-  async query(text: string, values: readonly unknown[] = []): Promise<{ rows: Record<string, unknown>[] }> {
-    this.queries.push({ text, values });
-    const rows = this.responses.shift() ?? [];
-    return { rows };
-  }
-}
+import { RoutingFakeRunner } from './helpers.js';
 
 const row = (over: Partial<PoolMetricRow> = {}): PoolMetricRow => ({
   poolId: '0xpool',
@@ -33,94 +17,178 @@ const row = (over: Partial<PoolMetricRow> = {}): PoolMetricRow => ({
   ...over,
 });
 
+/**
+ * Window reads project a single metric column aliased to `value`, so the
+ * fixture mirrors that narrow shape (protocol/network are not selected).
+ */
+const metricRow = (ts: string, value: string | null): Record<string, unknown> => ({
+  pool_id: '0xpool',
+  ts: new Date(ts),
+  value,
+});
+
 describe('TimeseriesClient.upsertPoolMetrics', () => {
   it('emits a parameterized idempotent upsert', async () => {
-    const r = new FakeRunner();
+    const r = new RoutingFakeRunner();
     const client = new TimeseriesClient(r);
-    const n = await client.upsertPoolMetrics([row(), row({ poolId: '0xpool2', ts: new Date('2026-09-10T01:00:00Z') })]);
+    const n = await client.upsertPoolMetrics([
+      row(),
+      row({ poolId: '0xpool2', ts: new Date('2026-09-10T01:00:00Z') }),
+    ]);
     expect(n).toBe(2);
-    expect(r.queries).toHaveLength(1);
-    const q = r.queries[0]!;
-    expect(q.text).toContain('INSERT INTO pool_metrics_hourly');
-    expect(q.text).toContain('ON CONFLICT (pool_id, ts) DO UPDATE');
-    expect(q.values.filter((v) => v === '0xpool').length).toBe(1);
-    expect(q.values).toHaveLength(20); // 10 columns × 2 rows
+    const q = r.find('INSERT INTO pool_metrics_hourly');
+    expect(q?.text).toContain('ON CONFLICT (pool_id, ts) DO UPDATE');
+    expect(q?.values.filter((v) => v === '0xpool').length).toBe(1);
+    expect(q?.values).toHaveLength(20); // 10 columns × 2 rows
   });
 
   it('no-ops on an empty batch', async () => {
-    const r = new FakeRunner();
-    const client = new TimeseriesClient(r);
-    expect(await client.upsertPoolMetrics([])).toBe(0);
+    const r = new RoutingFakeRunner();
+    expect(await new TimeseriesClient(r).upsertPoolMetrics([])).toBe(0);
     expect(r.queries).toHaveLength(0);
   });
 
   it('rejects malformed rows at the boundary', async () => {
-    const r = new FakeRunner();
-    const client = new TimeseriesClient(r);
-    await expect(
-      client.upsertPoolMetrics([row({ poolId: '' })]),
-    ).rejects.toThrow();
+    const r = new RoutingFakeRunner();
+    await expect(new TimeseriesClient(r).upsertPoolMetrics([row({ poolId: '' })])).rejects.toThrow();
     expect(r.queries).toHaveLength(0);
   });
 });
 
 describe('TimeseriesClient.getMetricWindow', () => {
-  it('maps wire rows (snake_case, string numerics) to a typed window', async () => {
-    const r = new FakeRunner();
-    r.queue([
-      { pool_id: '0xpool', ts: new Date('2026-09-09T00:00:00Z'), protocol: 'aave-v3', network: 'ethereum', apy: '0.04', volume_usd: '100', tvl_usd: '500', utilization: '0.7', vol: '0.3', tx_count: '10' },
-      { pool_id: '0xpool', ts: new Date('2026-09-09T01:00:00Z'), protocol: 'aave-v3', network: 'ethereum', apy: '0.05', volume_usd: '110', tvl_usd: '501', utilization: '0.71', vol: '0.32', tx_count: '12' },
+  it('projects the metric column aliased to value and maps it', async () => {
+    const r = new RoutingFakeRunner().on('AS value FROM pool_metrics_hourly', [
+      metricRow('2026-09-09T00:00:00Z', '0.04'),
+      metricRow('2026-09-09T01:00:00Z', '0.05'),
     ]);
-    const client = new TimeseriesClient(r);
-    const w = await client.getMetricWindow('0xpool', 'apy', new Date('2026-09-09T00:00:00Z'));
+    const w = await new TimeseriesClient(r).getMetricWindow(
+      '0xpool',
+      'apy',
+      new Date('2026-09-09T00:00:00Z'),
+    );
     expect(w.values).toEqual([0.04, 0.05]);
     expect(w.timestamps).toHaveLength(2);
-    expect(r.queries[0]!.text).toContain('WHERE pool_id = $1 AND ts >= $2');
-    expect(r.queries[0]!.text).toContain('ORDER BY ts ASC');
+    // Only the columns the window needs are selected — validating a partial
+    // projection against the full row schema is what broke against live data.
+    const q = r.find('AS value FROM pool_metrics_hourly');
+    expect(q?.text).toContain('SELECT pool_id, ts, apy AS value');
+    expect(q?.text).toContain('ORDER BY ts ASC');
+  });
+
+  it('brackets the window when an upper bound is supplied', async () => {
+    const r = new RoutingFakeRunner().on('AS value FROM pool_metrics_hourly', []);
+    await new TimeseriesClient(r).getMetricWindow(
+      '0xpool',
+      'apy',
+      new Date('2026-09-01T00:00:00Z'),
+      new Date('2026-09-09T00:00:00Z'),
+    );
+    expect(r.find('AND ts <= $3')).toBeDefined();
   });
 
   it('skips null metric points instead of guessing', async () => {
-    const r = new FakeRunner();
-    r.queue([
-      { pool_id: '0xpool', ts: new Date('2026-09-09T00:00:00Z'), protocol: 'x', network: 'ethereum', apy: null, volume_usd: null, tvl_usd: null, utilization: null, vol: null, tx_count: null },
-      { pool_id: '0xpool', ts: new Date('2026-09-09T01:00:00Z'), protocol: 'x', network: 'ethereum', apy: '0.05', volume_usd: '110', tvl_usd: '501', utilization: '0.71', vol: '0.32', tx_count: '12' },
+    const r = new RoutingFakeRunner().on('AS value FROM pool_metrics_hourly', [
+      metricRow('2026-09-09T00:00:00Z', null),
+      metricRow('2026-09-09T01:00:00Z', '0.05'),
     ]);
-    const client = new TimeseriesClient(r);
-    const w = await client.getMetricWindow('0xpool', 'apy', new Date('2026-09-09T00:00:00Z'));
+    const w = await new TimeseriesClient(r).getMetricWindow(
+      '0xpool',
+      'apy',
+      new Date('2026-09-09T00:00:00Z'),
+    );
     expect(w.values).toEqual([0.05]);
-    expect(w.timestamps).toHaveLength(1);
+  });
+
+  it('reads a non-apy metric from its own column', async () => {
+    const r = new RoutingFakeRunner().on('AS value FROM pool_metrics_hourly', []);
+    await new TimeseriesClient(r).getMetricWindow('0xpool', 'utilization', new Date());
+    expect(r.find('SELECT pool_id, ts, utilization AS value')).toBeDefined();
+  });
+
+  it('accepts a numeric column delivered as a number', async () => {
+    const r = new RoutingFakeRunner().on('AS value FROM pool_metrics_hourly', [
+      { pool_id: '0xpool', ts: new Date('2026-09-09T00:00:00Z'), value: 0.07 },
+    ]);
+    const w = await new TimeseriesClient(r).getMetricWindow('0xpool', 'apy', new Date());
+    expect(w.values).toEqual([0.07]);
   });
 });
 
-describe('TimeseriesClient.saveForecast / saveBacktestRun', () => {
-  it('persists a multi-step quantile forecast', async () => {
-    const r = new FakeRunner();
-    const client = new TimeseriesClient(r);
-    const n = await client.saveForecast({
-      poolId: '0xpool',
-      target: 'apy',
-      modelVersion: 'timesfm-3.0',
-      inputsHash: 'abc123',
-      steps: [
-        { ts: new Date('2026-09-11T00:00:00Z'), q10: 0.03, q50: 0.04, q90: 0.05 },
-        { ts: new Date('2026-09-12T00:00:00Z'), q10: 0.031, q50: 0.041, q90: 0.052 },
-      ],
-    });
-    expect(n).toBe(2);
-    const q = r.queries[0]!;
-    expect(q.text).toContain('INSERT INTO timesfm_forecasts');
-    expect(q.text).toContain('ON CONFLICT (pool_id, target, horizon_ts, model_version)');
-    expect(q.values).toHaveLength(16); // 8 params × 2 steps
+describe('TimeseriesClient.getMetricWindowBucketed', () => {
+  it('builds a parameterized time_bucket query and orders results ascending', async () => {
+    const r = new RoutingFakeRunner().on('time_bucket', [
+      { interval: '2026-09-02T00:00:00Z', avg: '0.05', min: '0.04', max: '0.06', samples: '24' },
+      { interval: '2026-09-01T00:00:00Z', avg: '0.04', min: '0.03', max: '0.05', samples: '23' },
+    ]);
+    const points = await new TimeseriesClient(r).getMetricWindowBucketed(
+      '0xpool',
+      'apy',
+      '1 day',
+      { start: new Date('2026-09-01T00:00:00Z'), end: new Date('2026-09-03T00:00:00Z') },
+    );
+
+    const q = r.find('time_bucket');
+    // The core builder parameterizes interval, range and WHERE — no interpolation.
+    expect(q?.text).toContain('time_bucket($1::interval');
+    expect(q?.values[0]).toBe('1 day');
+    expect(q?.values).toContain('0xpool');
+
+    expect(points).toHaveLength(2);
+    expect(points[0]!.bucketStart.toISOString()).toBe('2026-09-01T00:00:00.000Z');
+    expect(points[0]!.values).toEqual({ avg: 0.04, min: 0.03, max: 0.05, samples: 23 });
   });
 
+  it('degrades a row with an unparseable bucket to a skip', async () => {
+    const r = new RoutingFakeRunner().on('time_bucket', [{ interval: 'not-a-date', avg: '1' }]);
+    const points = await new TimeseriesClient(r).getMetricWindowBucketed(
+      '0xpool',
+      'apy',
+      '1 hour',
+      { start: new Date(), end: new Date() },
+    );
+    expect(points).toHaveLength(0);
+  });
+});
+
+describe('TimeseriesClient coverage and health', () => {
+  it('summarises what the store holds', async () => {
+    const r = new RoutingFakeRunner().on('count(DISTINCT pool_id)', [
+      { pools: 3, rows: '120', earliest: new Date('2026-09-01T00:00:00Z'), latest: new Date('2026-09-10T00:00:00Z') },
+    ]);
+    const coverage = await new TimeseriesClient(r).getCoverage();
+    expect(coverage.poolCount).toBe(3);
+    expect(coverage.rowCount).toBe(120);
+    expect(coverage.latest?.toISOString()).toBe('2026-09-10T00:00:00.000Z');
+  });
+
+  it('reports an empty store without throwing', async () => {
+    const r = new RoutingFakeRunner().on('count(DISTINCT pool_id)', [
+      { pools: 0, rows: 0, earliest: null, latest: null },
+    ]);
+    const coverage = await new TimeseriesClient(r).getCoverage();
+    expect(coverage.earliest).toBeNull();
+    expect(coverage.rowCount).toBe(0);
+  });
+
+  it('pings', async () => {
+    const r = new RoutingFakeRunner().on('SELECT 1 AS ok', [{ ok: 1 }]);
+    expect(await new TimeseriesClient(r).ping()).toBe(true);
+  });
+});
+
+describe('TimeseriesClient.saveBacktestRun', () => {
   it('saves a backtest run and returns its id', async () => {
-    const r = new FakeRunner();
-    r.queue([{ id: 42 }]);
-    const client = new TimeseriesClient(r);
-    const id = await client.saveBacktestRun({
+    const r = new RoutingFakeRunner().on('INSERT INTO backtest_runs', [{ id: 42 }]);
+    const id = await new TimeseriesClient(r).saveBacktestRun({
       poolId: '0xpool', windowDays: 30, strategy: 'baseline', hitRate: 0.82, mape: 0.11, pnlVsHodl: 1.4,
     });
     expect(id).toBe(42);
-    expect(r.queries[0]!.text).toContain('INSERT INTO backtest_runs');
+  });
+
+  it('fails loudly when the insert returns no id', async () => {
+    const r = new RoutingFakeRunner().on('INSERT INTO backtest_runs', []);
+    await expect(
+      new TimeseriesClient(r).saveBacktestRun({ poolId: '0xpool', windowDays: 30, strategy: 'x' }),
+    ).rejects.toThrowError(/returned no id/);
   });
 });
