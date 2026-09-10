@@ -1,0 +1,47 @@
+{
+  "name": "@ethonline2026/graph-fno-indexer",
+  "version": "0.1.0",
+  "description": "Ops-grade The Graph data-indexation client for the Agentic EMS: F&O (perp + options), liquidity, FDV metrics via Subgraph Studio + gateway, MCP-assisted discovery, optional EOA/smart-account signing for on-chain interaction.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "cli": "tsx src/cli.ts",
+    "graphclient:build": "graphclient build",
+    "graphclient:serve-dev": "graphclient serve-dev",
+    "smoke:studio": "tsx src/cli.ts health --endpoint studio",
+    "dryrun:testnet": "tsx src/cli.ts dry-run --network sepolia"
+  },
+  "dependencies": {
+    "@graphprotocol/client-auto-pagination": "^2.0.0",
+    "@graphprotocol/client-block-tracking": "^2.0.0",
+    "@graphprotocol/client-cli": "^3.0.7",
+    "dotenv": "^17.2.3",
+    "graphql": "^16.12.0",
+    "graphql-request": "^7.4.0",
+    "graphql-tag": "^2.12.7",
+    "viem": "^2.56.3",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "eslint": "^9.39.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  }
+}
