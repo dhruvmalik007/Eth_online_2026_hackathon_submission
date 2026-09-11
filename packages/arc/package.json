@@ -1,0 +1,33 @@
+{
+  "name": "@ethonline2026/arc-client",
+  "version": "0.1.0",
+  "description": "Low-level Arc L1 wrapper for the Agentic EMS: CCTP V2 burn-and-mint, Arc App Kit (Send/Bridge/Swap/Unified Balance), StableFX, Agent Wallet, and ERC-8183 Agentic Commerce kernel bindings. All chain I/O for Arc lives here — LangChain tools consume this package and never touch SDKs directly.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "arc:smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@circle-fin/app-kit": "^1.14.0",
+    "viem": "^2.56.3",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
