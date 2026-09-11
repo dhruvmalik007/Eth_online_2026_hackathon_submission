@@ -71,8 +71,8 @@ export function parseMandate(mandate: string): MandateIntent {
 
   // ── chains ──────────────────────────────────────────────────────────────
   const chainMatch = text.match(/chains?\s*[:\s]*([\w\s,]+?)(?:\.|;|$|\s+(?:apr|vega|asset|hooked|size|with|and))/i);
-  if (chainMatch?.[1]) {
-    const parsed = chainMatch[1]
+  if (chainMatch) {
+    const parsed = chainMatch[1]!
       .split(/[,\s]+/)
       .map((c) => CHAIN_ALIASES[c.trim().toLowerCase()])
       .filter((c): c is string => !!c);

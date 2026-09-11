@@ -65,6 +65,12 @@ export type VaRInput = z.infer<typeof VaRInputSchema>;
 export const MertonPDInputSchema = z.object({
   poolId: AddressSchema,
   includePositions: z.boolean().default(true),
+  /**
+   * Chain slug, so the derived macro-risk parameters (risk-free rate, collateral
+   * haircut, PD load) can be applied. Omitted, the tool uses its documented
+   * defaults, which is how it behaved before a risk layer existed.
+   */
+  chain: z.string().min(1).optional(),
 });
 
 export type MertonPDInput = z.infer<typeof MertonPDInputSchema>;

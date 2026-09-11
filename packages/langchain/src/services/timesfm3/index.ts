@@ -9,6 +9,7 @@ export {
   PredictRequestSchema,
   PredictResponseSchema,
   ProtocolPredictRequestSchema,
+  ProtocolPredictResponseSchema,
   TimesFMForecastSchema,
   ProtocolForecastSchema,
   type PredictRequest,
@@ -16,8 +17,10 @@ export {
   type ProtocolPredictRequestInput,
   type PredictResponse,
   type ProtocolPredictRequest,
+  type ProtocolPredictResponse,
   type ProtocolForecast,
   type TimesFMForecast,
 } from './schemas.js';
 export { backtestForecast } from './backtest.js';
 export type { BacktestScore } from './backtest.js';
+export { perStepChangeCovariate, pastCovariatesAligned } from './covariates.js';

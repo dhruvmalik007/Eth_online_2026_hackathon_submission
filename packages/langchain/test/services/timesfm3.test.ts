@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PredictRequestSchema,
   TimesFM3Client,
   TimesFM3ValidationError,
   backtestForecast,
+  pastCovariatesAligned,
+  perStepChangeCovariate,
   type TimesFM3Http,
 } from '../../src/services/timesfm3/index.js';
 
@@ -88,6 +91,111 @@ describe('TimesFM3Client.predict', () => {
     await expect(
       client.predict({ series: [1, 1.1, 0.9, 1.05], horizon: 3 }),
     ).rejects.toThrow(/503 overloaded/);
+  });
+});
+
+describe('past-covariate alignment', () => {
+  const series = [0.04, 0.041, 0.039, 0.042, 0.0415, 0.043];
+
+  it('produces one covariate value per series point, not per change', () => {
+    const covariate = perStepChangeCovariate(series);
+    // Verified live: a covariate of length N-1 makes /predict return HTTP 500,
+    // so alignment with the series is the contract being pinned here.
+    expect(covariate).toHaveLength(series.length);
+    expect(covariate).toHaveLength(6);
+  });
+
+  it('reports no change for the first point rather than inventing one', () => {
+    expect(perStepChangeCovariate(series)[0]).toBe(0);
+  });
+
+  it('computes absolute per-step change thereafter', () => {
+    const covariate = perStepChangeCovariate(series);
+    expect(covariate[1]).toBeCloseTo(Math.abs(0.041 - 0.04), 12);
+    expect(covariate[2]).toBeCloseTo(Math.abs(0.039 - 0.041), 12);
+    expect(covariate.every((v) => v >= 0)).toBe(true);
+  });
+
+  it('handles the degenerate series shapes', () => {
+    expect(perStepChangeCovariate([])).toEqual([]);
+    expect(perStepChangeCovariate([0.04])).toEqual([0]);
+  });
+
+  it('rejects a misaligned covariate before the request is sent', () => {
+    // A short covariate must fail locally with a clear message: the service
+    // answers it with an opaque 500, which previously read as a model outage.
+    const short = series.slice(1).map((v, i) => Math.abs(v - series[i]!));
+    expect(() =>
+      PredictRequestSchema.parse({ series, horizon: 30, pastCovariates: [short] }),
+    ).toThrow(/same length as series/);
+  });
+
+  it('accepts an aligned covariate', () => {
+    const parsed = PredictRequestSchema.parse({
+      series,
+      horizon: 30,
+      pastCovariates: [perStepChangeCovariate(series)],
+    });
+    expect(parsed.pastCovariates?.[0]).toHaveLength(series.length);
+  });
+
+  it('accepts a null covariate', () => {
+    expect(PredictRequestSchema.parse({ series, horizon: 30 }).pastCovariates).toBeNull();
+  });
+
+  it('reports alignment for every row', () => {
+    expect(pastCovariatesAligned(series, [perStepChangeCovariate(series)])).toBe(true);
+    expect(pastCovariatesAligned(series, [[1, 2]])).toBe(false);
+  });
+});
+
+describe('TimesFM3Client.predictProtocol', () => {
+  /**
+   * The deployed `/predict/protocol` nests the forecast one level down
+   * (verified live 2026-09-11): `{ protocol, current_tvl, context_length,
+   * forecast: {...} }`. Parsing it with the flat schema — which `/predict`
+   * does match — fails against the real service, so this shape is pinned.
+   */
+  const LIVE_PROTOCOL_SHAPE = {
+    protocol: 'aave',
+    current_tvl: '17.237b',
+    context_length: 181,
+    forecast: LIVE_SHAPE,
+  };
+
+  it('unwraps the nested forecast payload', async () => {
+    const http = new FakeHttp(() => LIVE_PROTOCOL_SHAPE);
+    const client = new TimesFM3Client(http);
+    const result = await client.predictProtocol({ protocolSlug: 'aave', horizon: 3, metric: 'apy' });
+
+    expect(result.protocolSlug).toBe('aave');
+    expect(result.metric).toBe('apy');
+    expect(result.forecast.steps.map((s) => s.q50)).toEqual(LIVE_SHAPE.point_forecast);
+    expect(result.forecast.flags.quantileMonotonic).toBe(true);
+
+    const body = http.bodies[0]! as Record<string, unknown>;
+    expect(body['protocol_slug']).toBe('aave');
+    expect(body['metric']).toBe('apy');
+  });
+
+  it('rejects the flat shape (the shape /predict returns)', async () => {
+    // Guards against the two endpoints being conflated again: a flat body has
+    // no `forecast` key, so it must not parse.
+    const http = new FakeHttp(() => LIVE_SHAPE);
+    const client = new TimesFM3Client(http);
+    await expect(
+      client.predictProtocol({ protocolSlug: 'aave', horizon: 3, metric: 'apy' }),
+    ).rejects.toThrow();
+  });
+
+  it('keeps the guardrail checks for the nested payload', async () => {
+    const bad = structuredClone(LIVE_PROTOCOL_SHAPE);
+    bad.forecast.quantiles[0] = [1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1];
+    const http = new FakeHttp(() => bad);
+    const client = new TimesFM3Client(http);
+    await expect(
+      client.predictProtocol({ protocolSlug: 'aave', horizon: 3, metric: 'apy' }),
+    ).rejects.toThrow(TimesFM3ValidationError);
   });
 });
 

@@ -1,19 +1,31 @@
 import { z } from 'zod';
+import { pastCovariatesAligned } from './covariates.js';
 
 /**
  * Pinned contract of the deployed `timesfm3-inference` Cloud Run service
  * (verified live 2026-09-10 — see docs/timesfm3-service.md).
  */
 
-export const PredictRequestSchema = z.object({
-  series: z.array(z.number()).min(2),
-  horizon: z.number().int().positive().max(1024).default(30),
-  /** [num_cov][context_len] — features known only historically. */
-  pastCovariates: z.array(z.array(z.number())).nullable().default(null),
-  /** [num_cov][context_len + horizon] — known future signals (lookahead). */
-  futureCovariates: z.array(z.array(z.number())).nullable().default(null),
-  returnQuantiles: z.boolean().default(true),
-});
+export const PredictRequestSchema = z
+  .object({
+    series: z.array(z.number()).min(2),
+    horizon: z.number().int().positive().max(1024).default(30),
+    /** [num_cov][context_len] — features known only historically. */
+    pastCovariates: z.array(z.array(z.number())).nullable().default(null),
+    /** [num_cov][context_len + horizon] — known future signals (lookahead). */
+    futureCovariates: z.array(z.array(z.number())).nullable().default(null),
+    returnQuantiles: z.boolean().default(true),
+  })
+  .refine(
+    (req) => req.pastCovariates === null || pastCovariatesAligned(req.series, req.pastCovariates),
+    {
+      // The service answers a misaligned covariate with HTTP 500 (not 4xx), so
+      // this must fail here or it reads as an unexplained model outage.
+      message:
+        'past_covariates rows must be the same length as series (the service returns 500 otherwise)',
+      path: ['pastCovariates'],
+    },
+  );
 
 export type PredictRequest = z.infer<typeof PredictRequestSchema>;
 /** Caller-facing request shape (defaults optional). */
@@ -41,6 +53,22 @@ export const PredictResponseSchema = z.object({
 
 export type PredictResponse = z.infer<typeof PredictResponseSchema>;
 
+/**
+ * `/predict/protocol` wraps the forecast one level down (verified live):
+ * `{ protocol, current_tvl, context_length, forecast: <PredictResponse> }`.
+ * `/predict` is flat, so the two endpoints need different schemas — parsing
+ * the protocol payload against the flat schema fails on the real service.
+ */
+export const ProtocolPredictResponseSchema = z.object({
+  protocol: z.string(),
+  /** Human-readable TVL string, e.g. "17.237b". */
+  current_tvl: z.string().optional(),
+  context_length: z.number().int().positive().optional(),
+  forecast: PredictResponseSchema,
+});
+
+export type ProtocolPredictResponse = z.infer<typeof ProtocolPredictResponseSchema>;
+
 /** Validated, client-facing forecast: one quantile-triplet per step. */
 export const TimesFMForecastSchema = z.object({
   target: z.string(),
@@ -52,6 +80,12 @@ export const TimesFMForecastSchema = z.object({
         q10: z.number(),
         q50: z.number(),
         q90: z.number(),
+        /**
+         * The full nine-level quantile vector (0.1 … 0.9). Retained so the
+         * forecast ledger can store every level — pinball loss and
+         * per-quantile coverage are not computable from q10/q50/q90 alone.
+         */
+        quantiles: z.array(z.number()).length(9),
       }),
     )
     .min(1),

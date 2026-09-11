@@ -6,6 +6,7 @@ import {
   type TimesFM3Http,
   type TimesFMForecast,
 } from '../../services/timesfm3/index.js';
+import { perStepChangeCovariate } from '../../services/timesfm3/covariates.js';
 import type { TimeseriesClient, MetricWindow } from '@ethonline2026/timeseries';
 
 /**
@@ -36,8 +37,9 @@ export function createTimesFM3Tools(deps: TimesFM3ToolDeps) {
         `insufficient history for ${input.poolId}/${input.target}: ${window.values.length} points (need >= 8)`,
       );
     }
-    // Past covariate: realized per-step volatility of the same window.
-    const diffs: number[] = window.values.slice(1).map((v, i) => Math.abs(v - window.values[i]!));
+    // Past covariate: realized per-step volatility of the same window,
+    // aligned to the series length (a short covariate makes the service 500).
+    const diffs = perStepChangeCovariate(window.values);
     return client.predict({
       series: [...window.values],
       horizon: input.horizon,

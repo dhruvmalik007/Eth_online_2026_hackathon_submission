@@ -8,6 +8,58 @@ import {
   scaleSuspicious,
 } from '../../src/graph/v01/guardrails.js';
 import type { SynthesisMatrix, YieldProjection } from '../../src/graph/v01/schemas.js';
+import { ReadjustmentActionSchema } from '../../src/graph/v01/schemas.js';
+
+describe('ReadjustmentActionSchema citations', () => {
+  const base = {
+    action: 'SUPPLY_CAPITAL' as const,
+    protocol: 'aave-v3',
+    amountPercentage: 100,
+    rationale: 'band is stable',
+    parameters: {},
+  };
+
+  it('accepts the contracted array of id strings', () => {
+    const parsed = ReadjustmentActionSchema.parse({
+      ...base,
+      citations: ['proj-0xpool-apy', 'c-aave-v3-0-ltv'],
+    });
+    expect(parsed.citations).toEqual(['proj-0xpool-apy', 'c-aave-v3-0-ltv']);
+  });
+
+  it('normalizes a citation expressed as an object', () => {
+    // Observed live: the model returns [{ projectionId: 'proj-x' }]. Rejecting
+    // that would discard a genuinely grounded decision over a formatting detail.
+    const parsed = ReadjustmentActionSchema.parse({
+      ...base,
+      citations: [{ projectionId: 'proj-0xpool-apy' }, { constraintId: 'c-aave-v3-0-ltv' }],
+    });
+    expect(parsed.citations).toEqual(['proj-0xpool-apy', 'c-aave-v3-0-ltv']);
+  });
+
+  it('falls back to any string the object carries', () => {
+    const parsed = ReadjustmentActionSchema.parse({
+      ...base,
+      citations: [{ note: 'proj-0xpool-apy' }],
+    });
+    expect(parsed.citations).toEqual(['proj-0xpool-apy']);
+  });
+
+  it('still requires at least one citation', () => {
+    expect(() => ReadjustmentActionSchema.parse({ ...base, citations: [] })).toThrow();
+  });
+
+  it('still rejects a citation that carries no usable id', () => {
+    expect(() => ReadjustmentActionSchema.parse({ ...base, citations: [{}] })).toThrow();
+  });
+
+  it('preserves a non-id string so the grounding guard can still judge it', () => {
+    // The tolerance is about shape, not about weakening grounding: the value is
+    // passed through and citationsGrounded is what accepts or rejects it.
+    const parsed = ReadjustmentActionSchema.parse({ ...base, citations: ['the projection'] });
+    expect(parsed.citations).toEqual(['the projection']);
+  });
+});
 
 const step = (day: number, q10: number, q50: number, q90: number) => ({ day, q10, q50, q90 });
 

@@ -28,6 +28,7 @@
   "dependencies": {
     "@ethonline2026/arc-client": "workspace:*",
     "@ethonline2026/graph-fno-indexer": "workspace:*",
+    "@ethonline2026/risk-analysis-data-pipeline": "workspace:*",
     "@ethonline2026/timeseries": "workspace:*",
     "@graphprotocol/client-auto-pagination": "^2.0.0",
     "@graphprotocol/client-cli": "^3.0.7",

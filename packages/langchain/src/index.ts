@@ -29,6 +29,19 @@ export {
   type UniswapV4ClientOptions,
 } from './tools/uniswapv4/UniswapV4Tools.js';
 
+// ─── TimesFM-3 forecast service ───────────────────────────────────────────────
+
+export {
+  TimesFM3Client,
+  FetchTimesFM3Http,
+  TimesFM3HttpError,
+  TimesFM3ValidationError,
+  backtestForecast,
+  type TimesFM3Http,
+  type TimesFMForecast,
+  type BacktestScore,
+} from './services/timesfm3/index.js';
+
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 export { loadEnv, type Env } from './config/env.js';
@@ -103,6 +116,54 @@ export {
   type StrategyLegResult,
   type StrategyResult,
 } from './tools/fixedIncomeMath.js';
+
+// ─── TimescaleDB tools (forecast ledger, evaluation, temporal retrieval) ──────
+
+export {
+  createTimeseriesTools,
+  type TimeseriesToolDeps,
+} from './tools/timeseries/TimeseriesTools.js';
+
+// ─── Risk-profile tools (macro, governance, Black-Scholes/Merton inputs) ──────
+
+export {
+  ADJUSTMENT_READING,
+  createRiskTools,
+  type RiskToolDeps,
+} from './tools/risk/RiskProfileTools.js';
+
+// ─── V0.1 agent (5-node LangGraph cycle) ──────────────────────────────────────
+
+export { runV01, buildV01Graph, type V01Deps, type V01Input } from './graph/v01/v01Graph.js';
+export { buildV01Deps } from './graph/v01/wiring.js';
+export {
+  DEFAULT_BASE_RISK_FREE_RATE,
+  buildRiskContext,
+  riskContextId,
+  type BuildRiskContextInput,
+  type RiskContextReaders,
+} from './graph/v01/riskContext.js';
+export {
+  V01Annotation,
+  YieldProjectionSchema,
+  RetrievalEvidenceSchema,
+  CalibrationSliceSchema,
+  RiskContextSchema,
+  type V01State,
+  type YieldProjection,
+  type RetrievalEvidence,
+  type CalibrationSlice,
+  type RiskContext,
+} from './graph/v01/schemas.js';
+export {
+  assessRisk,
+  unresolvedRiskCitations,
+  validateRetrievalEvidence,
+  validateRiskContext,
+  quantilesMonotonic,
+  amountsSumTo100,
+  citationsGrounded,
+} from './graph/v01/guardrails.js';
 
 // ─── Re-exports from the-graph package ────────────────────────────────────────
 

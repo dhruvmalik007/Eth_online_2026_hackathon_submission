@@ -44,11 +44,25 @@ const envSchema = z.object({
 
   // TimesFM-3 inference service (deployed Cloud Run, GPU) + TimescaleDB store
   TIMESFM3_SERVICE_URL: z.string().url().default('https://timesfm3-inference-887606357212.us-central1.run.app'),
+  // Tiger Cloud DSN takes precedence over the discrete keys below.
+  TIMESERIES_DATABASE_URL: z.string().min(1).optional(),
   TIMESERIES_DB_HOST: z.string().default('localhost'),
   TIMESERIES_DB_PORT: z.coerce.number().default(5432),
   TIMESERIES_DB_NAME: z.string().default('agentic_ems'),
   TIMESERIES_DB_USER: z.string().default('postgres'),
   TIMESERIES_DB_PASSWORD: z.string().default(''),
+  // Tiger Cloud free tier caps connections; the runner caches one pool/process.
+  TIMESERIES_DB_MAX_CONNECTIONS: z.coerce.number().int().positive().max(20).default(5),
+  // Vertex embeddings for the temporal vector layer (retrieval + backfill).
+  VERTEX_EMBEDDING_MODEL: z.string().default('text-embedding-005'),
+
+  // Risk-analysis snapshots (L2Beat chains, governance forums, market makers).
+  // The collection worker writes them to GCS; this read path serves them. Absent
+  // means risk routes report themselves unconfigured rather than failing.
+  RISK_GCS_BUCKET: z.string().min(1).optional(),
+  RISK_GCS_PREFIX: z.string().default('risk'),
+  // Local directory alternative, so `pnpm dev` needs no cloud credentials.
+  RISK_LOCAL_DIR: z.string().optional(),
 
   // Wallet (optional)
   WALLET_MODE: z.enum(['ledger', 'private-key', 'readonly']).default('readonly'),

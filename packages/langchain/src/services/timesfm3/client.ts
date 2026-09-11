@@ -2,6 +2,7 @@ import {
   PredictRequestSchema,
   PredictResponseSchema,
   ProtocolPredictRequestSchema,
+  ProtocolPredictResponseSchema,
   TimesFMForecastSchema,
   type PredictResponse,
   type ProtocolForecast,
@@ -84,7 +85,9 @@ export class TimesFM3Client {
 
   async predictProtocol(request: ProtocolPredictRequestInput): Promise<ProtocolForecast> {
     const req = ProtocolPredictRequestSchema.parse(request);
-    const raw = PredictResponseSchema.parse(
+    // The protocol endpoint nests the forecast under `forecast`; parsing it
+    // with the flat schema would fail against the deployed service.
+    const raw = ProtocolPredictResponseSchema.parse(
       await this.http.post('/predict/protocol', {
         protocol_slug: req.protocolSlug,
         horizon: req.horizon,
@@ -92,9 +95,9 @@ export class TimesFM3Client {
       }),
     );
     return {
-      protocolSlug: req.protocolSlug,
+      protocolSlug: raw.protocol,
       metric: req.metric,
-      forecast: this.toForecast(req.metric, req, raw),
+      forecast: this.toForecast(req.metric, req, raw.forecast),
     };
   }
 
@@ -138,7 +141,7 @@ export class TimesFM3Client {
       if (Math.abs(q50 - point) > 1e-3 * Math.max(1, Math.abs(point))) {
         quantileMonotonic = false;
       }
-      return { index: step, q10, q50, q90 };
+      return { index: step, q10, q50, q90, quantiles: [...row] };
     });
 
     if (!quantileMonotonic) {

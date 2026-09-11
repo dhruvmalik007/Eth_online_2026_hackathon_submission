@@ -28,11 +28,16 @@ function fakeTsdb(): TimeseriesClient {
 }
 
 function forecastFor(steps: number): TimesFMForecast {
+  // Nine monotonic levels per step, mirroring the deployed service's
+  // quantile matrix (the ledger persists all of them).
+  const nineQuantiles = (q50: number): number[] =>
+    [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].map((level) => q50 + (level - 0.5) * 0.01);
   const mk = (i: number) => ({
     index: i,
     q10: 0.04,
     q50: 0.042,
     q90: 0.045,
+    quantiles: nineQuantiles(0.042),
   });
   return {
     target: 'series',
