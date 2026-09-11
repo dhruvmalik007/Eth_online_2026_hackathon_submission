@@ -1,0 +1,35 @@
+{
+  "name": "@ethonline2026/agentic-ems",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agentic EMS — deterministic fixed-income strategy engine across The Graph, Arc, 1inch, and Uniswap v4. ETHOnline 2026.",
+  "workspaces": [
+    "packages/*",
+    "agentic-ems"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "build:graph": "turbo run build --filter=@ethonline2026/graph-fno-indexer",
+    "build:arc": "turbo run build --filter=@ethonline2026/arc-client",
+    "build:langchain": "turbo run build --filter=@ethonline2026/langchain-agent",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "dev": "turbo run dev",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "keccak",
+      "node-hid",
+      "usb"
+    ]
+  },
+  "engines": {
+    "node": ">=22.6.0",
+    "pnpm": ">=10.0.0"
+  }
+}
