@@ -1,0 +1,31 @@
+# Build context excludes
+#
+# The build context is the **package root**, so the Dockerfile can copy both
+# `scraper/` and `roster.json`. Everything not needed to build is excluded here —
+# most importantly the local virtualenv, which is platform-specific and would
+# otherwise shadow the Linux one installed inside the image.
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Node / TypeScript (the container runs only the Python worker)
+node_modules/
+dist/
+
+# Test material: fixtures are needed by the offline suite, not by the runtime
+scraper/tests/
+test/
+
+# Local state and secrets
+.env
+logs/
+data/
+
+# Editor / OS
+.DS_Store
+*.log

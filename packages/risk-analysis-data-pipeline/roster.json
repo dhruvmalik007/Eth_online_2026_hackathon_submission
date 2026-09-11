@@ -1,0 +1,134 @@
+{
+  "version": "0.1.0",
+  "probedAt": "2026-09-11",
+  "notes": [
+    "Single source of truth for the scrape roster. Both the TypeScript read path",
+    "and the Python worker load and validate this file, so the two languages",
+    "cannot disagree about what is scraped or where it lives.",
+    "",
+    "`transport` records what the capability probe ACTUALLY found through the real",
+    "Camoufox transport (T0.3, 2026-09-11), not what was hoped for. Three",
+    "protocols are deliberately not scraped and say why: a silent omission would",
+    "look like a gap in the data rather than a decision.",
+    "",
+    "dydx was corrected during the probe: 'forums.dydx.community' is a Common",
+    "platform with no public JSON API, while 'dydx.forum' is Discourse and",
+    "returns a full topic_list (38 KB verified)."
+  ],
+  "chains": [
+    { "slug": "base", "name": "Base Chain", "l2beatPath": "base" },
+    { "slug": "arbitrum", "name": "Arbitrum One", "l2beatPath": "arbitrum" },
+    { "slug": "op-mainnet", "name": "OP Mainnet", "l2beatPath": "op-mainnet" },
+    { "slug": "mantle", "name": "Mantle", "l2beatPath": "mantle" },
+    { "slug": "starknet", "name": "Starknet", "l2beatPath": "starknet" },
+    { "slug": "linea", "name": "Linea", "l2beatPath": "linea" },
+    { "slug": "zksync-era", "name": "ZKsync Era", "l2beatPath": "zksync-era" },
+    { "slug": "scroll", "name": "Scroll", "l2beatPath": "scroll" },
+    { "slug": "unichain", "name": "Unichain", "l2beatPath": "unichain" },
+    { "slug": "ink", "name": "Ink", "l2beatPath": "ink" },
+    { "slug": "blast", "name": "Blast", "l2beatPath": "blast" },
+    { "slug": "taiko", "name": "Taiko Alethia", "l2beatPath": "taiko" }
+  ],
+  "protocols": [
+    {
+      "slug": "aave",
+      "name": "Aave",
+      "category": "lending",
+      "forumUrl": "https://governance.aave.com",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "uniswap",
+      "name": "Uniswap",
+      "category": "dex",
+      "forumUrl": "https://gov.uniswap.org",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "morpho",
+      "name": "Morpho",
+      "category": "lending",
+      "forumUrl": "https://forum.morpho.org",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "compound",
+      "name": "Compound",
+      "category": "lending",
+      "forumUrl": "https://www.comp.xyz",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "spark",
+      "name": "Spark",
+      "category": "lending",
+      "forumUrl": "https://forum.sky.money",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "gmx",
+      "name": "GMX",
+      "category": "perps",
+      "forumUrl": "https://gov.gmx.io",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "dydx",
+      "name": "dYdX",
+      "category": "perps",
+      "forumUrl": "https://dydx.forum",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "pancakeswap",
+      "name": "PancakeSwap",
+      "category": "dex",
+      "forumUrl": "https://forum.pancakeswap.finance",
+      "transport": "discourse-json",
+      "verified": true
+    },
+    {
+      "slug": "curve",
+      "name": "Curve",
+      "category": "dex",
+      "forumUrl": "https://gov.curve.fi",
+      "transport": "blocked",
+      "verified": true,
+      "note": "HTTP 403 from Cloudflare on both gov.curve.fi and gov.curve.finance, through the real Camoufox transport with retries. Not defeatable with the current browser configuration. Excluded from v0.1 rather than retried indefinitely; revisit with a warmer session or a different egress."
+    },
+    {
+      "slug": "sushi",
+      "name": "Sushi",
+      "category": "dex",
+      "forumUrl": "https://forum.sushi.com",
+      "transport": "absent",
+      "verified": true,
+      "note": "forum.sushi.com now serves a 275-byte 'COMMON is Live' splash rather than a Discourse instance; governance moved to the Common platform, which exposes no public JSON API. Excluded from v0.1."
+    },
+    {
+      "slug": "pendle",
+      "name": "Pendle",
+      "category": "yield",
+      "forumUrl": null,
+      "transport": "absent",
+      "verified": true,
+      "note": "No public governance forum resolves: forum.pendle.finance, gov.pendle.finance and forum.pendle.xyz all fail DNS. Pendle runs a PIP process, so a forum exists in some form but its host was not discoverable. Excluded from v0.1 pending a confirmed URL."
+    },
+    {
+      "slug": "hyperliquid",
+      "name": "Hyperliquid",
+      "category": "perps",
+      "forumUrl": null,
+      "transport": "absent",
+      "verified": true,
+      "note": "No Discourse forum exists. HIP governance runs through proposal windows and on-chain votes, which needs a bespoke adapter and is out of v0.1 scope."
+    }
+  ]
+}

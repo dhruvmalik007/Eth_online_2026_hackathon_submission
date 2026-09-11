@@ -1,0 +1,1468 @@
+Search
+
+Search for projects by name or address
+
+Home
+Layer 2s
+Interop
+Privacy
+Data Availability
+ZK Catalog
+Ecosystems
+About Us
+Publications
+Changelog
+Forum
+Donate
+Governance
+Native Rollups
+Tools
+Glossary
+Jobs
+Brand Kit
+FAQ
+Base Chain
+Search projects
+/
+Website
+Bridge
+Docs
+Explorer
+Repository
+Social
+Other
+Total Value Secured
+$14.57 B
+0.77%
+Past day UOPS
+135.50
+1.75%
+Stage
+STAGE 1
+Gas token
+ETH
+Type
+Optimistic Rollup
+Purpose
+Universal
+Chain ID
+8453
+
+Tokens breakdown
+
+Value secured breakdown
+
+34.0% with additional trust assumptions
+Last 24h cross-chain volume
+$147.55 M
+Last 24h cross-chain transfers
+129.86 K
+
+Interop protocols used
+
++21 more
+
+Tokens by volume
+
++1010 more
+SEQUENCER
+FAILURE
+STATE
+VALIDATION
+DATA
+AVAILABILITY
+EXIT
+WINDOW
+PROPOSER
+FAILURE
+BADGES
+ABOUT
+
+Base is an Optimistic Rollup built with the OP Stack. It offers a low-cost and builder-friendly way for anyone, anywhere, to build onchain.
+
+1
+Value Secured
+Compare
+View TVS breakdown
+USD
+ETH
+7D
+30D
+90D
+180D
+1Y
+MAX
+Canonically bridged
+Natively minted
+Externally bridged
+Try clicking legend items to toggle data
+Base Chain
+ETH & derivatives
+Stablecoins
+BTC & derivatives
+Other
+Public RWAs
+Try clicking legend items to toggle data
+Base Chain
+Select token for chart preview
+Exclude restricted RWA tokens
+Total
+Canonically Bridged
+Natively Minted
+Externally Bridged
+ETH & derivatives
+Stablecoins
+BTC & derivatives
+Other
+2
+Volume and flows
+Explore Interop
+15/26
+Chains
++10
+43/43
+Protocols
++38
+Canonical bridge only
+Base-$20.33 MEthereum-$5.85 MArbitrum One-$2.42 MRobinhood Chain+$20.93 MOP Mainnet-$7.84 MPolygon PoS+$47.69 MZKsync Era-$61.29 KAbstract-$174.07 KKatana-$128.66 KBNB Smart Chain+$17.03 MGnosis Chain-$430.89 KSolana-$49.87 MInk+$1.45 MMegaETH-$2.86 KWorld Chain+$10.89 K
+Avg value per second ≈ $8.65 K
+|
+1 particle ≈
+$100
+CHAIN STATS
+STATS
+Total volume
+$131.86 M
+Volume in
+$55.76 M
+Volume out
+$76.09 M
+Net flow
+-$20.33 M
+Total transfers
+124.24 K
+Unique tokens
+985
+Transfers in
+54.82 K
+Transfers out
+69.42 K
+Avg. transfer value
+$1.06 K
+Avg. transfer time
+5m 42s
+Connected
+14 chains
+Avg. value per second
+$1.52 K/s
+TOP ROUTES
+$35.59 M
+$28.27 M
+$12.45 M
+TOP TOKENS
+USDC
+$83.78 M
+ETH
+$34.60 M
+USDG
+$6.12 M
+TOP BRIDGES
+CCTP v2
+$45.57 M
+Relay
+$32.45 M
+Across
+$12.12 M
+Transfer size
+Under $100
+$100-$1K
+$1K-$10K
+$10K-$100K
+Over $100K
+Transfer type distribution
+Top bridges by volume
+Top tokens by volume
+Transfers
+3
+Activity
+Compare
+
+2025 Sep 11 — 2026 Sep 11
+
+30D
+90D
+180D
+1Y
+MAX
+Base Chain
+Ethereum
+Try clicking legend items to toggle data
+0 UOPS85 UOPS170 UOPS255 UOPSNov ‘25Jan ‘26Mar ‘26May ‘26Jul ‘26Sep ‘26
+Base Chain
+UOPS/TPS Ratio
+1x1.18xNov ‘25Jan ‘26Mar ‘26May ‘26Jul ‘26Sep ‘26
+UOPS
+TPS
+LOG
+LIN
+Past Day UOPS
+135.50
+1.75%
+Past Day Ops count
+11.70 M
+Max. UOPS
+244.48
+2026 Jun 05
+Past day UOPS/TPS Ratio
+1.04
+4
+Onchain costs
+Compare
+
+The section shows the operating costs that L2s pay to Ethereum.
+
+2025 Sep 11 — 2026 Sep 11
+
+1D
+7D
+30D
+90D
+180D
+1Y
+MAX
+Calldata
+Blobs
+Compute
+Overhead
+Data posted on Ethereum
+Try clicking legend items to toggle data
+$0.00$6.00 K$12.00 K$18.00 KNov ‘25Jan ‘26Mar ‘26May ‘26Jul ‘26Sep ‘26
+Base Chain
+USD
+ETH
+GAS
+Total cost
+$549.22 K
+Avg cost per L2 UOP
+$0.000141
+Avg cost per day
+$1.50 K
+Tracked transactions
+5
+Data posted
+Compare
+
+This section shows how much data the project publishes to its data-availability (DA) layer over time. The project currently posts data toEthereum.
+
+2025 Sep 11 — 2026 Sep 11
+
+1D
+7D
+30D
+90D
+180D
+1Y
+MAX
+Ethereum
+Try clicking legend items to toggle data
+0.00 B953.67 MiB1.86 GiB2.79 GiBNov ‘25Jan ‘26Mar ‘26May ‘26Jul ‘26Sep ‘26
+Base Chain
+Data posted
+534.70 GiB
+Avg size per day
+1.46 GiB
+Avg size per L2 UOP
+146.97 B
+Tracked transactions
+6
+Liveness
+
+This section shows how "live" the project's operators are by displaying how frequently they submit transactions of the selected type. It also highlights anomalies - significant deviations from their typical schedule.
+
+No ongoing anomalies detected
+
+2026 Aug 12 — Sep 11
+
+TX DATA
+STATE UPDATES
+7D
+30D
+90D
+180D
+1Y
+MAX
+Min&max submission interval
+Average interval
+0s1m 25s2m 50s4m 15s17 Aug24 Aug31 Aug07 Sep
+Base Chain
+Avg. tx data subs. interval
+47 seconds
+Avg. state updates interval
+20 minutes
+Past 30 days anomalies
+99% NORMAL UPTIME
+Tracked transactions
+Last 30 day anomalies
+
+All liveness anomalies detected for this project in the last 30 days, helping you review recent downtime and availability issues.
+
+No state updates were performed for 3h 47m (from 2026 Aug 20, 13:49 UTC until 2026 Aug 20, 17:36 UTC). These typically occur every 50m 21s on average.
+
+7
+Milestones & Incidents
+
+Base Azul: multi-proof
+
+2026 May 26th
+
+Base activates the multiproof system combining TEE attestations and SP1 ZK proofs.
+
+Learn more
+
+Base leaves the Superchain
+
+2026 Mar 4th
+
+Base decouples from Optimism Superchain governance with its own upgrade path.
+
+Learn more
+Show more
+8
+Risk summary
+Funds can be stolen if
+a contract receives a malicious code upgrade. Upgrades must be approved by 2 parties: the Base Coordinator Multisig and the Base Security Council. There is no delay on upgrades.
+9
+Risk analysis
+SEQUENCER
+FAILURE
+STATE
+VALIDATION
+DATA
+AVAILABILITY
+EXIT
+WINDOW
+PROPOSER
+FAILURE
+SEQUENCER FAILURE
+Self sequence
+
+In the event of a sequencer failure, users can force transactions to be included in the project’s chain by sending them to L1. There can be up to a 12h delay on this operation.
+
+STATE VALIDATION
+Fraud proofs (1R, ZK)
+
+Fraud proofs allow actors watching the chain to prove that the state is incorrect. Single round proofs (1R) prove the validity of a state proposal, only requiring a single transaction to resolve. A fault proof eliminates a state proposal by proving that any intermediate state transition in the proposal results in a different state root. For either, a ZK proof is used.
+
+DATA AVAILABILITY
+Onchain
+
+All of the data needed for proof construction is published on Ethereum L1.
+
+EXIT WINDOW
+None
+
+There is no window for users to exit in case of an unwanted upgrade since contracts are instantly upgradable. Upgrades need to be approved by 2 parties: the Base Coordinator Multisig and the Base Security Council.
+
+PROPOSER FAILURE
+Self propose
+
+Anyone can be a Proposer and propose new roots to the L1 bridge.
+
+10
+Stage
+Base Chain is a 
+STAGE 1
+ Optimistic Rollup.
+The project passes the walkaway test: users can exit in the presence of malicious operators even if the Security Council disappears.
+STAGE 0
+6 requirements met
+STAGE 1
+8 requirements met
+STAGE 2
+2 issues need fixing
+Learn more about Stages
+Please keep in mind that these stages do not reflect project security, this is an opinionated assessment of project maturity based on subjective criteria, created with a goal of incentivizing projects to push toward better decentralization. Each team may have taken different paths to achieve this goal.
+11
+Data availability
+All data required for proofs is published on chain
+
+All the data that is used to construct the system state is published on chain in the form of cheap blobs or calldata. This ensures that it will be available for enough time.
+
+Derivation: Batch submission - OP Mainnet specs
+BatchInbox - address
+OptimismPortal2.sol - source code, depositTransaction function
+Learn more about the DA layer here: Ethereum
+12
+State derivation
+Node software
+
+The rollup node is composed of two software components: op-node, implementing consensus related logic, and op-geth, implementing execution logic. The configuration file can be found here.
+
+Compression scheme
+
+Data batches are compressed using the zlib algorithm with best compression level.
+
+Genesis state
+
+The genesis file can be found here.
+
+Data format
+
+The format specification of Sequencer’s data batches can be found here.
+
+13
+State validation
+A diagram of the state validation
+State root proposals
+
+State roots are proposed by calling DisputeGameFactory.create with the AggregateVerifier game type, posting a bond of 0.05 ETH. Each proposal must include an initial proof (TEE attestation or ZK proof) over the range of 600 L2 blocks split into sub-ranges of 30 blocks. With a single proof, the game resolves after 5d; if both proof arms commit, the window collapses to 1d.
+
+Challenges
+
+Any party that produces a valid ZK proof of an incorrect intermediate root can call AggregateVerifier.challenge, contradicting a TEE-only proposal. The challenger’s proof is verified onchain via the SP1 verifier gateway. If the challenge stands until the resolution window closes, the original proposer’s bond is awarded to the challenger and the game resolves CHALLENGER_WINS. Soundness contradictions within a single proof arm are caught by AggregateVerifier.nullify, which permanently disables that arm’s verifier contract for all games.
+
+PROVER
+SP1 Hypercube
+TRUSTED SETUPS
+Plonk: Gnark
+	
+
+Onchain verifier
+
+SP1Verifier
+by
+	
+
+Used in
+
++14
+Projects used in
+
+Search for projects used in
+
+Program Hashes
+NAME
+	
+HASH
+	
+REPOSITORY
+	
+VERIFICATION
+	
+USED IN
+
+
+
+Aggregation program of Base AggregateVerifier
+	
+0x00a1...3836
+	
+Github
+	
+Verification steps
+	
+
+
+Range program of Base AggregateVerifier
+	
+0x5fd0...0beb
+	
+Github
+	
+Verification steps
+	
+
+
+Set builder program
+	
+0x7090...2cc9
+	
+Github
+	
+Verification steps
+	
+
+
+TEE enclave image hash of Base client
+	
+0x5855...212a
+	
+Github
+	
+Verification steps
+	
+
+
+AWS Nitro TEE attestation verifier for Base
+	
+0x2014...dc11
+	
+Github
+	
+Verification steps
+	
+14
+Upgrades & Governance
+A diagram of the upgrades and governance
+
+All contracts are upgradable by a ProxyAdmin contract controlled by a nested 2/2 Base Governance Multisig composed of the Base Coordinator Multisig and the Base Security Council. Upgrades require approval from both parties. There is no delay on upgrades. The Guardian role for the SuperchainConfig is assigned to the Base Governance Multisig, which can pause and unpause withdrawals. Base Multisig 1 serves as Incident Responder and can pause withdrawals but cannot unpause or extend pauses. Each pause automatically expires after 3 months if not extended by the Guardian. The single Sequencer actor can be modified by Base Multisig 1 via the SystemConfig contract. The Base Governance multisig can also recover dispute bonds in case of bugs that would distribute them incorrectly.
+
+State validation runs through the AggregateVerifier game type (621), which accepts either an AWS Nitro TEE attestation or an SP1 ZK proof. The TEE prover allowlist in the TEEProverRegistry is managed solely by the Base Coordinator Multisig (without Base Security Council approval), and a separate Manager EOA can register or deregister enclave signers. The ZK arm routes through a Base-owned SP1 verifier gateway; the Base Governance Multisig can add or freeze verifier routes. The Base Governance Multisig can swap the AggregateVerifier implementation, change the respected game type, blacklist individual games, or retire all in-flight games via the AnchorStateRegistry.
+
+Governance profile
+Security Council
+Composition	
+
+8/11, nested as one of two signers in the 2/2 Base Governance Multisig alongside Coinbase’s 3/6 Base Coordinator Multisig. Base counts this as 9 of 12 entities, or 75%; the Council Safe on its own is 72.7%. Members serve staggered cohort terms and are appointed against published criteria, not elected.
+
+
+Members public	
+
+Mapped (10 of 11) — Base publishes Aerodrome (JP), Moonwell (BR), Blackbird (US), ChainSafe (CA), Talent Protocol (PT) and Moshicam (US) as entities, plus Seneca (US), Juan Suarez (US), Toady Hawk (CA), Roberto Bayardo (US) and Yele Bademosi (UK) as individuals. One address is unpublished, as are the people who sign for each entity. Five of the six entities are Base-ecosystem projects and two of the individuals are former Coinbase or Base contributors.
+
+
+Charter	
+
+None — the docs page sets out selection criteria, cohort terms and member duties, but no removal procedure, quorum-loss fallback or conflict-of-interest enforcement. Coinbase’s Neutrality Principles cover transaction ordering, user assets and exit rights, and do not bind the Council.
+
+
+Can Coinbase bypass the Council?	
+
+Not for upgrades — every ProxyAdmin action needs the 2/2. Elsewhere Coinbase acts alone: the 3/12 Base Multisig 1 owns SystemConfig (sequencer, gas configuration) and is Incident Responder, and the Coordinator Multisig owns TEEProverRegistry and NitroEnclaveVerifier, so it can change the TEE prover allowlist, one of the two proof arms, without the Council.
+
+
+Who can override the Council?	
+
+Nobody — it administers itself. Seats are changed by the Council Safe calling itself, so 8 of the 11 sitting members decide who joins or leaves. There is no token, DAO or veto body. The 2/2 blocks both ways: neither side can upgrade alone. Below 8 available signers upgrades stall, and there is no liveness module handing control to a fallback.
+
+Upgrades
+Normal upgrade path	
+
+Task published in base/contract-deployments → 8/11 Security Council approval → 3/6 Coordinator Multisig approval → execution through the 2/2 Base Governance Multisig. No timelock, and no Safe carries a delay module. Beryl verifier-hash update, June 2026: Council approved 22 Jun, Coinbase 23 Jun, executed 43 minutes later.
+
+
+Emergency upgrade path	
+
+None — the normal path executes as soon as both Safes sign, so there is no lower emergency threshold. The fastest lever is a pause: the 3/12 Base Multisig 1 can pause withdrawals alone as Incident Responder, but only once per identifier, since the pause expires after 3mo 1d and it cannot pause again until the Guardian unpauses. The Guardian is the 2/2 Base Governance Multisig itself, which can also blacklist dispute games, set the respected game type and retire all in-flight games.
+
+
+Exit window	
+
+None — nothing separates the second signature from the upgrade taking effect, so users cannot withdraw ahead of an unwanted change. Tasks are published before signing and Base targets six hard forks a year, but neither is enforced onchain.
+
+Token governance
+Governance token	
+
+None — Base has no token, so no token-weighted vote enters the upgrade path. Coinbase has said it is exploring one.
+
+
+Voting venue	
+
+None — no DAO, governor contract, Snapshot space or forum vote gates an upgrade. Coordination happens in base/contract-deployments.
+
+
+Proposal rights	
+
+Coinbase only — upgrade tasks are Coinbase-authored, and no route exists for a third party to put an upgrade to the Council.
+
+
+Execution model	
+
+Two Safes sign, a facilitator executes. No permissionless execute(), and no delay for the public to act inside.
+
+Past upgrades
+
+The metrics include upgrades on the currently used proxy contracts. Historical proxy contracts and changes of such are not included.
+
+View past upgrades
+Count of upgrades
+58
+Last upgrade
+3mo 17d ago
+Avg upgrade interval
+5mo 25d
+15
+Updates
+2026 July 28, 08:08 UTC
+HIGH SEVERITY
+8
+changes
+
+Redeployed aggregate verifier with different range and aggregation prog hashes and no code changes: https://disco.l2beat.com/diff/eth:0x1bd8db5139Ba7aC9277684650c15e6E341761919/eth:0xeE303bA054c5F1E14A8EF87f1C7E285af45A1ba2. Both programs are regenreated from sources. Disabled Groth16 SP1 verifier and enabled Plonk v6.1.0 SP1 verifier. It is an already known contract, regenerated from sources.
+
+2026 July 21, 15:38 UTC
+2
+changes
+
+TEEProverRegistry: both registered enclave signers rotated.
+
+2026 July 20, 15:33 UTC
+4
+changes
+
+Base Multisig 1: one member added, two removed. Threshold 3/13 → 3/12.
+
+2026 July 15, 13:35 UTC
+2
+changes
+
+TEEProverRegistry: both registered enclave signers rotated.
+
+2026 July 14, 14:36 UTC
+2
+changes
+
+TEEProverRegistry: both registered enclave signers rotated.
+
+Previous
+1
+2
+...
+More pages
+14
+15
+Next
+16
+Operator
+Users can force any transaction
+
+Because the state of the system is based on transactions submitted on the underlying host chain and anyone can submit their transactions there it allows the users to circumvent censorship by interacting with the smart contract on the host chain directly.
+
+Sequencing Window - OP Mainnet Specs
+OptimismPortal2.sol - source code, depositTransaction function
+17
+Sequencing
+Transactions are ordered by a centralized sequencer
+
+Base uses a single centralized sequencer for fast confirmations. Users can bypass it with one Ethereum transaction to the OptimismPortal. Base nodes derive the deposited transaction from Ethereum, including it after at most one sequencing window.
+
+Centralized sequencing spec sheet
+Trusted preconfirmation	200 ms
+2 s L2 block time
+
+Trusted ordering	Dynamic priority auction
+Fee order per Flashblock
+
+Sequencer	Centralized
+5-instance Raft HA
+
+Real-time censorship resistance	No
+Forced inclusion	Automatic derivation
+1 L1 tx: portal deposit
+
+Inclusion delay	12 hours
+3,600 L1 blocks
+
+Inclusion mechanics	1 L1 Tx
+Address alias
+
+Exit delay	5 days 12 hours
+12h inclusion + 20m + 5d state
+
+Exit economics	0.05 ETH
+ZK proof required
+Censorship resistance
+
+The centralized sequencer provides no real-time censorship resistance. The Ethereum deposit path provides eventual censorship resistance, assuming the deposit is included on Ethereum.
+
+Base documentation - Flashblocks
+Base engineering - Sequencer architecture
+Base source code - Mainnet chain configuration
+Base Beryl - Reduced withdrawal delay
+OptimismPortal2 - source code
+AggregateVerifier - source code
+18
+Withdrawals
+Forced messaging
+
+If the user experiences censorship from the operator with regular L2->L1 messaging they can submit their messages directly on L1. The system is then obliged to service this request or halt all messages, including forced withdrawals from L1 and regular messages initiated on L2. Once the force operation is submitted and if the request is serviced, the operation follows the flow of a regular message.
+
+Forced withdrawal from an OP Stack blockchain
+19
+Other considerations
+EVM compatible smart contracts are supported
+
+OP stack chains are pursuing the EVM Equivalence model. No changes to smart contracts are required regardless of the language they are written in, i.e. anything deployed on L1 can be deployed on L2.
+
+Introducing EVM Equivalence
+20
+Permissions
+A dashboard to explore contracts and permissions
+Go to Disco
+Ethereum
+Actors:
+Base Governance Multisig
+0x7bB4…595c
+
+A Multisig with 2/2 threshold.
+
+Can upgrade with no delay
+OptimismMintableERC20Factory via
+TEEProverRegistry via
+L1StandardBridge via
+DisputeGameFactory via
+OptimismPortal2 via
+L1ERC721Bridge via
+DelayedWETH via
+SystemConfig via
+L1CrossDomainMessenger via
+AnchorStateRegistry via
+SuperchainConfig via
+DelayedWETH via
+Can interact with AddressManager
+set and change address mappings via
+Can interact with SuperchainConfig
+Allowed to pause withdrawals. In op stack systems with a proof system, the Guardian can also blacklist dispute games and set the respected game type (permissioned / permissionless)
+Can interact with SP1VerifierGateway
+affect the liveness and safety of the gateway - can transfer ownership, add and freeze verifier routes
+
+Participants (2):
+
+Base Coordinator Multisig
+Base Security Council
+Base Multisig 1
+0x1453…E056
+
+A Multisig with 3/12 threshold.
+
+Can interact with SystemConfig
+it can update the preconfer address, the batch submitter (Sequencer) address and the gas configuration of the system
+Can interact with SuperchainConfig
+can pause for up to 3mo 1d, but cannot unpause or extend pauses
+
+Participants (12):
+
+0x7eA5…Db04
+0xD56C…E206
+0x8faB…aE9d
+0x0c1E…5b43
+0x082C…9452
+0x1841…e937
+0x5B15…8874
+0x541a…8d1e
+0xB37B…f236
+0x644e…74dc
+0x7Ad8…488E
+0x26c7…177b
+Safe
+0x2E5b…2609
+
+A Multisig with 3/5 threshold.
+
+Can interact with TimelockController
+cancel queued transactions
+execute transactions that are ready
+manage all access control roles with 3d delay via
+propose transactions
+Can interact with RiscZeroVerifierEmergencyStop
+pause the verifier
+Can interact with RiscZeroVerifierEmergencyStop
+pause the verifier
+Can interact with RiscZeroVerifierEmergencyStop
+pause the verifier
+Can interact with RiscZeroVerifierRouter
+add/remove verifiers and the selectors they are mapped to with 3d delay via
+Can interact with RiscZeroVerifierEmergencyStop
+pause the verifier
+Can interact with RiscZeroVerifierEmergencyStop
+pause the verifier
+
+Participants (5):
+
+0x10B0…6A0E
+0x7517…BdC7
+0xbF58…73a4
+0xd5D4…9926
+0xDA8e…0A01
+Used in:
+Base Security Council
+0x20Ac…A4Dd
+
+A Multisig with 8/11 threshold. Member of Base Governance Multisig.
+
+Participants (11):
+
+0xbDE1…5594
+0x5ff5…ACC6
+0x82C8…E766
+0xa8ee…fb06
+0x1C56…2e2B
+0xA565…CdFE
+0x21C7…851F
+0xa595…CB73
+0x18e9…1b3E
+0x99DB…71D2
+0x0E8A…252f
+Security Council members - Base Docs
+Base Coordinator Multisig
+0x9855…46A1
+
+A Multisig with 3/6 threshold. Member of Base Governance Multisig.
+
+Participants (6):
+
+0xf9e3…177c
+0xB011…62F7
+0x3Dad…c18E
+0x1c87…6741
+0x3cd6…A9a1
+0x6CD3…De50
+EOA 1
+0x5050…76C9
+Can interact with SystemConfig
+Allowed to commit transactions from the current layer to the host chain
+EOA 3
+0xF616…d412
+Can interact with RiscZeroVerifierEmergencyStop
+pause the verifier
+Used in:
+Base Chain
+Actors:
+Base Governance Multisig - L2 Alias
+0x8cC5…6a6d
+Can upgrade with no delay
+L2CrossDomainMessenger via
+L2StandardBridge via
+SequencerFeeVault via
+OptimismMintableERC20Factory via
+L1BlockNumber via
+L2ERC721Bridge via
+L1Block via
+L2ToL1MessagePasser via
+OptimismMintableERC721Factory via
+ProxyAdmin via
+BaseFeeVault via
+L1FeeVault via
+SchemaRegistry via
+EAS via
+EOA 2
+0xa966…57B2
+Can upgrade with no delay
+FeeDisburser
+21
+Smart contracts
+A dashboard to explore contracts and permissions
+Go to Disco
+A diagram of the smart contract architecture
+Ethereum
+RiscZeroGroth16Verifier
+0x20ff…8E97
+
+Verifier contract for RISC Zero Groth16 proofs (version 2.0.0-rc.3).
+
+Implementation used in:
+RiscZeroGroth16Verifier
+0x2a09…a84D
+
+Verifier contract for RISC Zero Groth16 proofs (version 3.0.0).
+
+Implementation used in:
+DisputeGameFactory
+0x43ed…B40e
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+The dispute game factory allows the creation of dispute games, used to propose state roots and eventually challenge them. This variant exposes per-type reads only; the legacy array views (gameImpls[], initBonds[]) were removed in the new implementation.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+OptimismPortal2
+ESCROW
+0x4904…E97e
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+The OptimismPortal contract is the main entry point to deposit funds from L1 to L2. It also allows to prove and finalize withdrawals. It specifies which game type can be used for withdrawals, which currently is the AggregateVerifier.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+The following tokens are included in the value secured calculation:
+Can be upgraded by:
+Base Governance Multisig with no delay
+RiscZeroGroth16Verifier
+0x54aC…B9bF
+
+Verifier contract for RISC Zero Groth16 proofs (version 2.0.3).
+
+Implementation used in:
+SystemConfig
+0x73a7…4072
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Contains configuration parameters such as the Sequencer address, gas limit on this chain and the unsafe block signer address.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+batcherHash: EOA 1
+owner: Base Multisig 1
+Can be upgraded by:
+Base Governance Multisig with no delay
+RiscZeroGroth16Verifier
+0xafB3…9df9
+
+Verifier contract for RISC Zero Groth16 proofs (version 2.2.0).
+
+Implementation used in:
+SuperchainConfig
+0xb535…EE6c
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Base’s own SuperchainConfig, used to manage pause states for the Base chain. The guardian and incident responder roles are immutable and set at construction time. The guardian can pause, unpause, and extend pauses, while the incident responder can only pause. Each pause automatically expires after 3 months.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+guardian: Base Governance Multisig
+incident_responder: Base Multisig 1
+Can be upgraded by:
+Base Governance Multisig with no delay
+RiscZeroGroth16Verifier
+0xf70a…E93C
+
+Verifier contract for RISC Zero Groth16 proofs. This older implementation exposes control-root and selector constants but does not expose a VERSION getter.
+
+Implementation used in:
+L1StandardBridge
+ESCROW
+0x3154…2C35
+Implementation (Upgradable)
+Admin
+
+The main entry point to deposit ERC20 tokens from host chain to this chain.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+
+All supported tokens in this escrow are included in the value secured calculation.
+
+Can be upgraded by:
+Base Governance Multisig with no delay
+Implementation used in:
+L1ERC721Bridge
+0x608d…1E53
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Used to bridge ERC-721 tokens from host chain to this chain.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+Implementation used in:
+L1CrossDomainMessenger
+0x866E…0Afa
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Sends messages from host chain to this chain, and relays messages back onto host chain. In the event that a message sent from host chain to this chain is rejected for exceeding this chain’s epoch gas limit, it can be resubmitted via this contract’s replay function.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+Implementation used in:
+HistoryStorage
+0x0000…2935
+
+EIP-2935 system contract storing the last 8191 L1 blockhashes. Bytecode is canonical to the EIP, deployed at the same address across networks.
+
+Source Code
+ProxyAdmin
+0x0475…059E
+Roles:
+owner: Base Governance Multisig
+OptimismMintableERC20Factory
+0x05cc…1D84
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+A helper contract that generates OptimismMintableERC20 contracts on the network it’s deployed to. OptimismMintableERC20 is a standard extension of the base ERC20 token contract designed to allow the L1StandardBridge contracts to mint and burn tokens. This makes it possible to use an OptimismMintableERC20 as this chain’s representation of a token on the host chain, or vice-versa.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+Implementation used in:
+TimelockController
+0x0b14…b711
+
+A timelock with access control. The current minimum delay is 3d.
+
+Roles:
+canceller: Safe
+defaultAdmin: TimelockController; ultimately Safe
+executor: Safe
+proposer: Safe
+Implementation used in:
+TEEProverRegistry
+0x1af2…A5aA
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Registry of authorized TEE enclave signers and proposer addresses used by the TEEVerifier. Owner can add or remove allowlisted proposers via setProposer (onlyOwner) and set the AggregateVerifier game type lookup. Owner and Manager can register or deregister enclave signers via registerSigner / deregisterSigner. Registration requires a Risc0 ZK proof of a valid AWS Nitro attestation document verified by the NITRO_VERIFIER.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+RiscZeroVerifierEmergencyStop
+4 instances
+0x1efD…D698
+0x68dC…40E3
+0x9F99…e696
+0xDa8f…B2b1
+
+A verifier wrapper for the RiscZeroGroth16Verifier that allows pausing (emergency stop) the verifier by its owner.
+
+Roles:
+owner: Safe
+Implementation used in:
+PreimageOracle
+0x1fb8…aDD3
+
+The PreimageOracle contract is used to load the required data from L1 for a dispute game.
+
+Implementation used in:
+TEEVerifier
+0x1FbA…2228
+
+Stateless verifier that validates AggregateVerifier TEE proofs by recovering an ECDSA signature over the journal and checking the recovered signer against TEEProverRegistry. Enforces PCR0 match by comparing the signer’s registered image hash to the AggregateVerifier’s TEE_IMAGE_HASH. Can be permanently nullified by a successful AggregateVerifier.nullify call.
+
+RiscZeroVerifierEmergencyStop
+0x44c2…33e7
+
+A verifier wrapper for the RiscZeroGroth16Verifier that allows pausing (emergency stop) the verifier by its owner.
+
+Roles:
+owner: EOA 3
+Implementation used in:
+RiscZeroSetVerifier
+0x5005…EB85
+
+Set verifier contract for RISC Zero proofs (version 0.9.0). It allows verifying a whole set of proofs identified with a Merkle root at once, afterwards each individual proof could be efficiently verified just by checking Merkle inclusion against the verified root.
+
+Implementation used in:
+PermissionedDisputeGame
+0x58bf…266A
+
+Same as FaultDisputeGame, but only two permissioned addresses are designated as proposer and challenger.
+
+Implementation used in:
+MIPS
+0x6463…B908
+
+The MIPS contract is used to execute the final step of the dispute game which objectively determines the winner of the dispute.
+
+Implementation used in:
+DelayedWETH
+0x64AE…Fd4D
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Contract designed to hold the bonded ETH for each game. It is designed as a wrapper around WETH to allow an owner to function as a backstop if a game would incorrectly distribute funds.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+Implementation used in:
+FaultDisputeGame
+0x6dDB…7499
+
+Logic of the dispute game. When a state root is proposed, a dispute game contract is deployed. Challengers can use such contracts to challenge the proposed state root.
+
+Implementation used in:
+Escrow
+0x7F31…9Ef3
+
+Simple escrow that accepts tokens and allows to configure permissioned addresses that can access the tokens.
+
+NitroEnclaveVerifier
+0x7F3a…F6fb
+
+ZK-based verifier of AWS Nitro Enclave attestation documents. Used by TEEProverRegistry to validate new enclave signer registrations against the AWS Nitro PKI.
+
+RiscZeroVerifierEmergencyStop
+0x844D…F782
+
+A verifier wrapper for the RiscZeroSetVerifier that allows pausing (emergency stop) the verifier by its owner.
+
+Roles:
+owner: Safe
+Implementation used in:
+RiscZeroVerifierRouter
+0x8EaB…D319
+
+A router proxy that routes to verifiers based on selectors. The mapping can be changed by a permissioned owner (TimelockController).
+
+Roles:
+owner: TimelockController; ultimately Safe
+Implementation used in:
+AnchorStateRegistry
+0x909f…4E72
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Contains the latest confirmed state root that can be used as a starting point in a dispute game. This variant stores respectedGameType, retirementTimestamp, and disputeGameFinalityDelaySeconds locally and drops the legacy *FromGame fields, since the AggregateVerifier model does not expose vm()/weth()/absolutePrestate() on its game implementation.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+wstETHEscrow
+ESCROW
+0x9de4…1e72
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Escrow for custom external tokens that use the canonical bridge for messaging but are governed externally.
+
+The following tokens are included in the value secured calculation:
+SkyLink Bridge
+0xA587…352A
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Custom bridge for USDS and sUSDS managed by Sky governance.
+
+ZkVerifier
+0xB88D…9B75
+
+Thin router that forwards SP1 ZK proof verification from the AggregateVerifier game to the SP1 verifier gateway. Can be permanently nullified by a successful AggregateVerifier.nullify call.
+
+SP1Verifier
+0xc3c6…AF2A
+
+Verifier contract for SP1 proofs (v6.1.0).
+
+Implementation used in:
+DelayedWETH
+0xd0D0…EF71
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Contract designed to hold the bonded ETH for each game. It is designed as a wrapper around WETH to allow an owner to function as a backstop if a game would incorrectly distribute funds.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig
+Can be upgraded by:
+Base Governance Multisig with no delay
+SP1VerifierGateway
+0xdc32…C106
+
+This contract is the router for zk proof verification. It stores the mapping between identifiers and the address of onchain verifier contracts, routing each identifier to the corresponding verifier contract.
+
+Roles:
+owner: Base Governance Multisig
+AggregateVerifier
+0xeE30…1ba2
+
+Game type implementation that combines a TEE attestation arm and a ZK proof arm. A single un-nullified proof of either type can resolve a game (PROOF_THRESHOLD = 1). When both arms commit, the finalization window collapses from SLOW_FINALIZATION_DELAY (5d) to FAST_FINALIZATION_DELAY (1d).
+
+Base Chain
+FeeDisburser
+0x09C7…CcBA
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Contract used to disburse funds from system FeeVault contracts, shares revenue with Optimism and bridges the rest of funds to L1.
+
+Roles:
+admin: EOA 2
+Can be upgraded by:
+EOA 2 with no delay
+L2CrossDomainMessenger
+0x4200…0007
+Implementation (Upgradable)
+Admin
+
+The L2CrossDomainMessenger (L2xDM) contract sends messages from L2 to L1, and relays messages from L1 onto L2 with a system tx. In the event that a message sent from L2 to L1 is rejected for exceeding the L1 gas limit, it can be resubmitted via this contract’s replay function.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+L2StandardBridge
+0x4200…0010
+Implementation (Upgradable)
+Admin
+
+The L2StandardBridge contract is the main entry point to deposit or withdraw ERC20 tokens from L2 to L1. This contract can store any token.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+SequencerFeeVault
+0x4200…0011
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Collects the sequencer fees, which are withdrawable to the FeesCollector on L1.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+OptimismMintableERC20Factory
+0x4200…0012
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Factory contract to create bridge compliant ERC20 IOU token representations of bridged L1 ERC20 tokens.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+L1BlockNumber
+0x4200…0013
+Implementation (Upgradable)
+Admin
+
+Simple contract that returns the latest L1 block number.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+L2ERC721Bridge
+0x4200…0014
+Implementation (Upgradable)
+Admin
+
+The L2ERC721Bridge contract is the main entry point to deposit or withdraw ERC721 tokens from L2 to L1. This contract can store any token.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+L1Block
+0x4200…0015
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Simple contract that returns information about the latest L1 block, which is derived permissionlessly from the L1 chain.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+L2ToL1MessagePasser
+0x4200…0016
+Implementation (Upgradable)
+Admin
+
+Contract used internally by the L2CrossDomainMessenger to send messages to L1, including withdrawals. It can also be used directly as a low-level interface.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+OptimismMintableERC721Factory
+0x4200…0017
+Implementation (Upgradable)
+Admin
+
+Factory contract to create bridge compliant ERC721 IOU token representations of bridged L1 ERC721 tokens.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+ProxyAdmin
+0x4200…0018
+Implementation (Upgradable)
+Admin
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+owner: Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+BaseFeeVault
+0x4200…0019
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Collects EIP-1559 base fees, which are withdrawable to the FeesCollector on L1.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+L1FeeVault
+0x4200…001A
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Collects the L1 portion of the L2 transaction fees, which are withdrawable to the FeesCollector on L1.
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+SchemaRegistry
+0x4200…0020
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Contracts to register schemas for the Ethereum Attestation Service (EAS).
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+EAS
+0x4200…0021
+Implementation (Upgradable)
+Admin
+View past upgrades
+
+Contract containing the main logic for the Ethereum Attestation Service (EAS).
+
+Roles:
+admin: ProxyAdmin; ultimately Base Governance Multisig - L2 Alias
+Can be upgraded by:
+Base Governance Multisig - L2 Alias with no delay
+
+The current deployment carries some associated risks:
+
+Funds can be stolen if a contract receives a malicious code upgrade. Upgrades must be approved by 2 parties: the Base Coordinator Multisig and the Base Security Council. There is no delay on upgrades.
+
+Program Hashes
+NAME
+	
+HASH
+	
+REPOSITORY
+	
+VERIFICATION
+	
+USED IN
+
+
+
+Aggregation program of Base AggregateVerifier
+	
+0x00a1...3836
+	
+Github
+	
+Verification steps
+	
+
+
+Range program of Base AggregateVerifier
+	
+0x5fd0...0beb
+	
+Github
+	
+Verification steps
+	
+
+
+Set builder program
+	
+0x7090...2cc9
+	
+Github
+	
+Verification steps
+	
+
+
+TEE enclave image hash of Base client
+	
+0x5855...212a
+	
+Github
+	
+Verification steps
+	
+
+
+AWS Nitro TEE attestation verifier for Base
+	
+0x2014...dc11
+	
+Github
+	
+Verification steps
+	
+Base Chain
+Summary
+1
+Value Secured
+2
+Volume and flows
+3
+Activity
+4
+Onchain costs
+5
+Data posted
+6
+Liveness
+7
+Milestones & Incidents
+8
+Risk summary
+9
+Risk analysis
+10
+Stage
+11
+Data availability
+12
+State derivation
+13
+State validation
+14
+Upgrades & Governance
+15
+Updates
+16
+Operator
+17
+Sequencing
+18
+Withdrawals
+19
+Other considerations
+20
+Permissions
+21
+Smart contracts
+
+Made with 💗 by the L2BEAT team
+
+Terms of Service
+
+Copyright 2026 L2BEAT
+
+17 Aug

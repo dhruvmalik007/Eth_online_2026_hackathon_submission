@@ -1,0 +1,423 @@
+Navigate to DeFi Dashboard
+Home
+Metrics
+Tools
+Chains
+Yields
+Stablecoins
+RWA
+MiCA
+Tokens
+Equities
+Pre-IPO
+Market Makers
+Universal Token Rating
+Support
+API & MCP
+DEX Aggregator
+Investor Relations
+DefiLlama Research
+
+PREMIUM
+Try free
+
+Pricing
+Mobile App
+New
+LlamaAI
+Downloads
+Custom Dashboards
+Sheets
+LlamaFeed
+Old Menu
+More
+About Us
+Sign In / Subscribe
+/
+Open Search
+⌘K
+Try LlamaAI
+Market Makers
+Performance Index
+Click to browse & search
+Performance Index
+Depth
+Volume
+Spread
+KPI Adherence
+Documentation
+Forgd Market Maker Performance Index Leaderboard
+Last 30-day
+
+Data-driven Market Maker rankings derived from 500+ engagements, evaluating historical execution, reliability, and ecosystem integration.
+
+Conduct a Market Maker RFQ
+1
+Flowdesk
+11 active engagements
+Composite Score
+9.40
+Median Engagements FDV
+$48.83M
+Avg 2.00% Depth
+$296.53K
+Rank: 10
+Avg Spread
+0.31%
+Rank: 9
+Avg Volume
+$1.78M
+Rank: 1
+2
+GSR
+15 active engagements
+Composite Score
+9.30
+Median Engagements FDV
+$121.59M
+Avg 2.00% Depth
+$545.29K
+Rank: 3
+Avg Spread
+0.01%
+Rank: 1
+Avg Volume
+$442.04K
+Rank: 5
+3
+Ampersan
+4 active engagements
+Composite Score
+9.10
+Median Engagements FDV
+$745.38M
+Avg 2.00% Depth
+$461.43K
+Rank: 5
+Avg Spread
+0.15%
+Rank: 4
+Avg Volume
+$229.67K
+Rank: 10
+Top Avg. (+/-) 2.00% Depth (30D)
+Auros Global
+$1.01M
+Highest Volume (Maker & Taker) (30D)
+Flowdesk
+$1.78M
+Top Bid-Ask Spread (30D)
+GSR
+0.01%
+Top KPI Adherence — Combined Uptime (30D)
+JPEG Trading
+100%
+Ranking
+About this Leaderboard
+Refine
+#
+↓
+	
+Market Maker
+	
+Grade
+?
+	
+Composite Score
+?
+	
+Trading KPIs
+?
+	
+Trust
+?
+	
+Coverage & Capabilities
+?
+	
+Uptime
+?
+	
+Integration Level
+i
+
+1	
+Flowdesk
+	AA	9.40	10.00	8.50	8.75	9.30	
+Full
+Details
+
+2	
+GSR
+	AA	9.30	9.50	8.75	9.50	7.90	
+Full
+Details
+
+3	
+Ampersan
+	AA	9.10	9.60	7.50	8.50	9.50	
+Full
+Details
+
+4	
+Auros Global
+	AA	9.10	8.90	9.00	9.50	8.10	
+Full
+Details
+
+5	
+Selini Capital
+	AA	9.10	9.00	8.50	9.00	9.00	
+Full
+Details
+
+6	
+Keyrock
+	AA	9.00	9.00	8.75	9.50	7.40	
+Full
+Details
+
+7	
+Tophash Digital
+	AA	9.00	9.30	7.50	9.25	8.60	
+Full
+Details
+
+8	
+Amber Group
+	A	8.90	8.10	9.80	9.70	7.60	
+Full
+Details
+
+9	
+G-20 Group
+	A	8.70	8.60	7.50	9.60	8.30	
+Full
+Details
+
+10	
+Gravity Team
+	A	8.60	8.80	7.50	7.25	10.00	
+Full
+Details
+
+11	
+JPEG Trading
+	A	8.60	9.50	6.00	8.00	8.80	
+Full
+Details
+
+12	
+Cicada
+	BBB	8.00	7.40	7.50	8.00	8.80	
+Full
+Details
+
+13	
+CyantArb
+	BBB	7.80	7.10	7.25	8.50	6.90	
+Full
+Details
+
+14	
+Presto Labs
+	BBB	7.60	6.40	7.75	8.50	6.70	
+Full
+Details
+
+15	
+LO:TECH
+	BBB	7.50	6.90	7.00	7.50	7.10	
+Full
+Details
+
+16	
+Arrakis Finance
+	BBB	7.40	6.20	8.00	8.00	6.20	
+Full
+Details
+
+17	
+Prycto
+	BB	7.10	6.70	6.00	7.50	6.40	
+Full
+Details
+
+18	
+CKS Systems
+	BB	6.70	6.00	6.00	6.50	6.00	
+Full
+Details
+
+19	
+Efficient Frontier
+	BB	6.70	5.70	7.75	7.00	5.70	
+Full
+Details
+
+20	
+Elk Crypto
+	BB	6.50	5.50	6.00	7.00	5.50	
+Full
+Details
+
+21	
+Kairon Labs
+	BB	6.40	5.20	6.00	7.50	5.20	
+Full
+Details
+
+22	
+XBTO
+	BB	6.30	5.00	6.00	7.50	5.00	
+Full
+Details
+
+23	
+Manifold Trading
+	CCC	<5.00	N/A	7.50	8.00	N/A	
+Partial
+Details
+
+24	
+EasyMM
+	CCC	<5.00	N/A	7.50	7.50	N/A	
+None
+Details
+
+25	
+Enflux
+	CCC	<5.00	N/A	7.50	7.50	N/A	
+None
+Details
+
+26	
+Astrum Liquidity
+	CCC	<5.00	N/A	7.50	7.00	N/A	
+None
+Details
+
+27	
+Caladan
+	CCC	<5.00	N/A	7.50	8.50	N/A	
+None
+Details
+
+28	
+Reform DAO
+	CCC	<5.00	N/A	6.00	7.50	N/A	
+Partial
+Details
+
+29	
+Peanut.Trade
+	CCC	<5.00	N/A	5.00	8.00	N/A	
+None
+Details
+
+30	
+AlphaTheta
+	CCC	<5.00	N/A	7.50	7.00	N/A	
+None
+Details
+
+31	
+DWF Labs
+	CCC	<5.00	N/A	7.50	7.00	N/A	
+None
+Details
+
+32	
+Galaxy
+	CCC	<5.00	N/A	5.00	8.50	N/A	
+Partial
+Details
+
+33	
+STS Digital
+	CCC	<5.00	N/A	5.00	7.50	N/A	
+Partial
+Details
+
+34	
+Pulsar
+	CCC	<5.00	N/A	5.00	7.50	N/A	
+Partial
+Details
+
+35	
+Alber Blanc
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+36	
+Algoz
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+37	
+Bitmaker
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+38	
+Bluesky Capital
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+39	
+CoinAlpha
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+40	
+Dark Forest
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+41	
+Kaiko Labs
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+42	
+Koda Finance
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+43	
+Kronos Research
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+
+44	
+Oracles
+	CCC	<5.00	N/A	7.50	5.00	N/A	
+None
+Details
+Definitions
+Grade
+A simplified letter rating that reflects a market maker’s overall standing on the leaderboard. Grades are derived from the composite score and are designed to make performance easier to interpret without relying solely on individual numerical scores. Grades are measured AAA (highest) to CCC (lowest).
+Composite Score
+The weighted overall score used to rank market makers across the leaderboard. It reflects performance across trading KPIs, trust, coverage and capabilities, uptime, and integration level.
+Trading KPIs
+Measures historical execution quality across 500+ tracked engagements. This includes liquidity depth, trading volume, spread performance, and adherence to agreed-upon trading obligations.
+Trust
+Reflects Forgd's confidence in a market maker's observed performance. This is based on the number of tracked engagements and whether Forgd has identified potential trading abnormalities.
+Coverage & Capabilities
+Evaluates the breadth of a market maker's exchange coverage, ecosystem reach, and broader service offering. This includes centralized and decentralized exchange connectivity, as well as services beyond standard liquidity provision.
+Uptime
+Measures a market maker's consistency in meeting contractual obligations across tracked engagements. This typically includes maintaining required depth, spreads, and availability across supported venues.
+Integration Level
+Reflects the degree of connectivity between the market maker and Forgd's data systems. Higher integration levels provide greater visibility into tracked engagements, RFQ participation, and ongoing performance.
+
+Data provided by Forgd. The content on this page is for informational purposes only and should not be construed as financial or legal advice.

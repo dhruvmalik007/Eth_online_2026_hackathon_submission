@@ -1,0 +1,115 @@
+[project]
+name = "risk-pipeline"
+version = "0.1.0"
+description = "Camoufox-driven ETL worker for the Agentic EMS macro and governance risk profile."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "camoufox[geoip]>=0.4.11",
+    "playwright>=1.49",
+    "pydantic>=2.9",
+    "httpx>=0.28",
+    "lxml>=6.0",
+    "google-cloud-storage>=2.19",
+    "structlog>=24.4",
+]
+
+[project.scripts]
+risk-pipeline = "risk_pipeline.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "mypy>=1.13",
+    "ruff>=0.9",
+    "types-lxml>=2024.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+include = ["risk_pipeline*"]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+# ─── Type checking: strict, no exceptions ────────────────────────────────────
+#
+# `strict = true` turns on disallow_untyped_defs, warn_return_any,
+# no_implicit_optional and the rest of the family, so an un-annotated function
+# is a build failure rather than a silent hole. This mirrors the TypeScript
+# side's `strict` + `noExplicitAny` posture: types are a gate, not a preference.
+[tool.mypy]
+python_version = "3.12"
+files = ["risk_pipeline", "tests"]
+strict = true
+warn_unreachable = true
+warn_unused_ignores = true
+show_error_codes = true
+pretty = true
+no_implicit_reexport = true
+
+[[tool.mypy.overrides]]
+module = "camoufox.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# The SDK ships no type stubs. The writer accesses it through the structural
+# GcsClientLike protocol instead, so only the import itself needs silencing.
+module = "google.cloud.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "browserforge.*"
+ignore_missing_imports = true
+
+# ─── Lint + format ───────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "RUF", # ruff-specific
+    "D",   # pydocstyle — documentation is a gate, not a nicety (§10.4)
+    "ANN", # flake8-annotations — enforce the typing standard
+]
+ignore = [
+    "D203",   # conflicts with D211 (we use no blank line before a class docstring)
+    "D213",   # conflicts with D212 (we put the summary on the first line)
+    "D107",   # a dataclass __init__ is documented by its class docstring's Args section
+    "TID252", # relative imports are intentional inside one cohesive package
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert on shapes and use fixtures; full annotation adds noise, not safety.
+"tests/**" = ["ANN", "D", "RUF001"]
+# The CLI entry point is a thin adapter over the library.
+"risk_pipeline/__main__.py" = ["D"]
+# Scripts print progress and mirror the probe's reporting style.
+"scripts/**" = ["D", "T201"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"
+markers = [
+    "live: touches real network endpoints (opt-in via RISK_E2E=1)",
+]
