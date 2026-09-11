@@ -1,0 +1,31 @@
+{
+  "name": "@ethonline2026/indexer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Serverless agent API for the Agentic EMS: a Vercel-hosted surface over the v0.1 LangGraph cycle, the TimesFM-3 forecast ledger, SQL-computed performance evaluation and temporal vector retrieval.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint api test scripts",
+    "test": "vitest run",
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod",
+    "verify:live": "tsx scripts/verify-live.ts"
+  },
+  "dependencies": {
+    "@ethonline2026/langchain-agent": "workspace:*",
+    "@ethonline2026/risk-analysis-data-pipeline": "workspace:*",
+    "@ethonline2026/timeseries": "workspace:*",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "eslint": "^9.39.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  }
+}
