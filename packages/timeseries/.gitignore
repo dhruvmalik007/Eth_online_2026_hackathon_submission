@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+
+# Local-only: real Tiger Cloud credentials — never commit
+timescale-tigerdata-creds.md

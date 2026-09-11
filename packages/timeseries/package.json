@@ -1,0 +1,41 @@
+{
+  "name": "@ethonline2026/timeseries",
+  "version": "0.1.0",
+  "description": "TimescaleDB time-series store for the Agentic EMS: pool-metric hypertables, TimesFM forecast persistence, and backtest run logs — typed clients over parameterized SQL.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test scripts",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "migrate": "tsx scripts/migrate.ts",
+    "verify:live": "tsx scripts/verify-live.ts",
+    "backfill:embeddings": "tsx scripts/backfill-embeddings.ts"
+  },
+  "dependencies": {
+    "@timescaledb/core": "^0.0.1",
+    "google-auth-library": "^11.0.2",
+    "pg": "^8.16.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "@types/pg": "^8.15.0",
+    "eslint": "^9.39.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,421 @@
+Navigate to DeFi Dashboard
+Home
+Metrics
+Tools
+Chains
+Yields
+Stablecoins
+RWA
+MiCA
+Tokens
+Equities
+Pre-IPO
+Market Makers
+Universal Token Rating
+Support
+API & MCP
+DEX Aggregator
+Investor Relations
+DefiLlama Research
+
+PREMIUM
+Try free
+
+Pricing
+Mobile App
+New
+LlamaAI
+Downloads
+Custom Dashboards
+Sheets
+LlamaFeed
+Old Menu
+More
+About Us
+Sign In / Subscribe
+/
+Open Search
+⌘K
+Try LlamaAI
+Market Makers
+Spread
+Click to browse & search
+Performance Index
+Depth
+Volume
+Spread
+KPI Adherence
+Documentation
+Spread Leaderboard
+Last 30-day
+
+See how Market Makers rank based on Spread KPIs such as the avg. top-of-book spread as well as their adherence to contractual obligations.
+
+Documentation
+Rank
+Show as Value
+Show as Percentile
+Show as Rank
+Refine
+#
+↓
+	
+Market Maker
+	
+Bid-Ask Spread
+	
+Uptime %
+
+1	
+GSR
+	
+0.01%
+	
+100%
+Details
+
+2	
+Gravity Team
+	
+0.067%
+	
+100%
+Details
+
+3	
+Tophash Digital
+	
+0.097%
+	
+90.44%
+Details
+
+4	
+Ampersan
+	
+0.15%
+	
+84.82%
+Details
+
+5	
+G-20 Group
+	
+0.16%
+	
+82.33%
+Details
+
+6	
+Flowdesk
+	
+0.31%
+	
+96.36%
+Details
+
+7	
+JPEG Trading
+	
+0.54%
+	
+100%
+Details
+
+8	
+Keyrock
+	
+0.21%
+	
+84.48%
+Details
+
+9	
+Selini Capital
+	
+1.27%
+	
+95.12%
+Details
+
+10	
+Amber Group
+	
+0.25%
+	
+55.83%
+Details
+
+11	
+Auros Global
+	
+0.23%
+	
+90%
+Details
+
+12	
+Cicada
+	
+0.69%
+	
+53.85%
+Details
+
+13	
+LO:TECH
+	
+5.68%
+	
+33.33%
+Details
+
+14	
+Presto Labs
+	
+1.46%
+	
+N/A
+Details
+
+15	
+CyantArb
+	
+N/A
+	
+N/A
+Details
+
+16	
+Prycto
+	
+12.84%
+	
+N/A
+Details
+
+17	
+Alber Blanc
+	
+N/A
+	
+N/A
+Details
+
+18	
+Algoz
+	
+N/A
+	
+N/A
+Details
+
+19	
+AlphaTheta
+	
+N/A
+	
+N/A
+Details
+
+20	
+Arrakis Finance
+	
+N/A
+	
+N/A
+Details
+
+21	
+Astrum Liquidity
+	
+N/A
+	
+N/A
+Details
+
+22	
+Bitmaker
+	
+N/A
+	
+N/A
+Details
+
+23	
+Bluesky Capital
+	
+N/A
+	
+N/A
+Details
+
+24	
+Caladan
+	
+N/A
+	
+N/A
+Details
+
+25	
+CKS Systems
+	
+N/A
+	
+N/A
+Details
+
+26	
+CoinAlpha
+	
+N/A
+	
+N/A
+Details
+
+27	
+Dark Forest
+	
+N/A
+	
+N/A
+Details
+
+28	
+DWF Labs
+	
+N/A
+	
+N/A
+Details
+
+29	
+EasyMM
+	
+N/A
+	
+N/A
+Details
+
+30	
+Efficient Frontier
+	
+N/A
+	
+N/A
+Details
+
+31	
+Elk Crypto
+	
+N/A
+	
+N/A
+Details
+
+32	
+Enflux
+	
+N/A
+	
+N/A
+Details
+
+33	
+Galaxy
+	
+N/A
+	
+N/A
+Details
+
+34	
+Kaiko Labs
+	
+N/A
+	
+N/A
+Details
+
+35	
+Kairon Labs
+	
+N/A
+	
+N/A
+Details
+
+36	
+Koda Finance
+	
+N/A
+	
+N/A
+Details
+
+37	
+Kronos Research
+	
+N/A
+	
+N/A
+Details
+
+38	
+Manifold Trading
+	
+N/A
+	
+N/A
+Details
+
+39	
+Oracles
+	
+N/A
+	
+N/A
+Details
+
+40	
+Peanut.Trade
+	
+N/A
+	
+N/A
+Details
+
+41	
+Pulsar
+	
+N/A
+	
+N/A
+Details
+
+42	
+Reform DAO
+	
+N/A
+	
+N/A
+Details
+
+43	
+STS Digital
+	
+N/A
+	
+N/A
+Details
+
+44	
+XBTO
+	
+N/A
+	
+N/A
+Details
+
+Data provided by Forgd. The content on this page is for informational purposes only and should not be construed as financial or legal advice.

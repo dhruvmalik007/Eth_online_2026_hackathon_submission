@@ -1,0 +1,468 @@
+Search
+
+Search for projects by name or address
+
+Home
+Layer 2s
+Summary
+Risk Analysis
+Overview
+State Validation
+Data Availability
+Sequencing
+Value Secured
+Activity
+Liveness
+Costs
+Archived
+Compare
+Interop
+Privacy
+Data Availability
+ZK Catalog
+Ecosystems
+About Us
+Publications
+Changelog
+Forum
+Donate
+Governance
+Native Rollups
+Tools
+Glossary
+Jobs
+Brand Kit
+FAQ
+Risk Analysis
+Search
+/
+Filters
+F
+Rollups
+22
+Validiums & Optimiums
+6
+Others
+76
+
+Rollups are L2s that periodically post state commitments to Ethereum. These commitments are validated by either Validity Proofs or are accepted optimistically and can be challenged via Fraud Proof mechanism within a certain fraud proof window. Additionally L2 data is also posted to Ethereum, hence there are no additional trust assumptions introduced.
+
+Columns
+#
+	
+	
+NAME
+	
+STATE
+VALIDATION
+	
+DATA
+AVAILABILITY
+	
+EXIT
+WINDOW
+	
+SEQUENCER
+FAILURE
+	
+PROPOSER
+FAILURE
+
+
+
+1
+	
+	
+Base Chain
+	
+Fraud proofs (1R, ZK)
+5d challenge period
+	
+Onchain
+	
+None
+	
+Self sequence
+12h delay
+	
+Self propose
+
+
+2
+	
+	
+Arbitrum One
+	
+Fraud proofs (INT)
+6d 8h challenge period
++ 2d execution delay
+	
+Onchain
+	
+Emergency: None
+Regular: 10d
+	
+Self sequence
+1d delay
+	
+Self propose
+
+
+3
+	
+	
+OP Mainnet
+	
+Fraud proofs (INT)
+3d 12h challenge period
++ 3d 12h execution delay
+	
+Onchain
+	
+None
+	
+Self sequence
+12h delay
+	
+Self propose
+
+
+4
+	
+	
+Mantle
+	
+Validity proofs (ST, SN)
+12h execution delay
+	
+Onchain
+	
+None
+	
+Self sequence
+12h delay
+	
+Cannot withdraw
+
+
+5
+	
+	
+Lighter
+	
+Validity proofs (SN)
+No execution delay
+	
+Onchain (SD)
+	
+None
+	
+Force via L1
+	
+Use escape hatch
+
+
+6
+	
+	
+Starknet
+	
+Validity proofs (ST)
+No execution delay
+	
+Onchain (SD)
+	
+Emergency: None
+Regular: 7d
+	
+Log via L1
+	
+Security Council minority
+
+
+7
+	
+	
+Linea
+	
+Validity proofs (SN)
+No execution delay
+	
+Onchain
+	
+None
+	
+No mechanism
+	
+Cannot withdraw
+
+
+8
+	
+	
+Ink
+	
+Fraud proofs (INT)
+3d 12h challenge period
++ 3d 12h execution delay
+	
+Onchain
+	
+None
+	
+Self sequence
+12h delay
+	
+Self propose
+
+
+9
+	
+	
+ZKsync Era
+	
+Validity proofs (ST, SN)
+3h execution delay
+	
+Onchain (SD)
+	
+Emergency: None
+Regular: 4d 3h
+	
+Enqueue via L1
+	
+Replace proposer
+
+
+10
+	
+	
+Morph
+	
+Fraud proofs (1R, ZK)
+2d challenge period
+	
+Onchain
+	
+None
+	
+Force via L1
+	
+Self propose
+
+
+11
+	
+	
+Unichain
+	
+Fraud proofs (INT)
+3d 12h challenge period
++ 3d 12h execution delay
+	
+Onchain
+	
+None
+	
+Self sequence
+12h delay
+	
+Self propose
+
+
+12
+	
+	
+Katana
+	
+Validity proofs (ST, SN)
+No execution delay
+	
+Onchain
+	
+None
+	
+Self sequence
+12h delay
+	
+Cannot withdraw
+
+
+13
+	
+	
+BOB
+	
+Fraud proofs (1R, ZK)
+3d challenge period
++ 1d execution delay
+	
+Onchain
+	
+None
+	
+Self sequence
+12h delay
+	
+Self propose
+
+
+14
+	
+	
+Abstract
+	
+Validity proofs (ST, SN)
+3h execution delay
+	
+Onchain (SD)
+	
+Emergency: None
+Regular: 4d 3h
+	
+Enqueue via L1
+	
+Replace proposer
+
+
+15
+	
+	
+Scroll
+	
+Validity proofs (ST, SN)
+No execution delay
+	
+Onchain
+	
+None
+	
+Self sequence
+	
+Self propose
+
+
+16
+	
+	
+ADI Chain
+	
+Validity proofs (ST, SN)
+No execution delay
+	
+Onchain (SD)
+	
+Emergency: None
+Regular: 3d
+	
+Enqueue via L1
+	
+Cannot withdraw
+
+
+17
+	
+	
+Taiko Alethia
+	
+Validity proofs
+No execution delay
+	
+Onchain
+	
+None
+	
+Enqueue via L1
+	
+Cannot withdraw
+
+
+18
+	
+	
+Facet
+	
+Fraud proofs (1R, ZK)
+7d challenge period
+	
+Onchain
+	
+∞
+	
+Self sequence
+	
+Self propose
+
+
+19
+	
+	
+INTMAX
+	
+Validity proofs (SN)
+No execution delay
+	
+Self custodied
+	
+None
+	
+Self sequence
+	
+Self propose
+
+
+20
+	
+	
+Honeypot v2
+	
+Fraud proofs (INT)
+7d 1h challenge period
+	
+Onchain
+	
+Not applicable
+	
+Self sequence
+	
+Self propose
+
+
+21
+	
+	
+Aztec
+	
+Validity proofs (SN)
+No execution delay
+	
+Onchain (SD)
+	
+∞
+	
+Decentralized Sequencer Set
+	
+Self Propose
+
+
+22
+	
+	
+Ethscriptions
+	
+Fraud proofs (1R, ZK)
+7d challenge period
+	
+Onchain
+	
+∞
+	
+Self sequence
+	
+Self propose
+
+Made with 💗 by the L2BEAT team
+
+Terms of Service
+
+Copyright 2026 L2BEAT

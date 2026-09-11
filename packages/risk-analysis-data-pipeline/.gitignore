@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+
+# Local-only: Tiger Cloud connection string — never commit
+timescale-tigerdata-creds.md
+
+# Run artifacts from verify:local — auditable locally, never committed
+logs/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/

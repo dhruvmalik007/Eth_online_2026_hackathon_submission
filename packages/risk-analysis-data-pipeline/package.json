@@ -1,0 +1,41 @@
+{
+  "name": "@ethonline2026/risk-analysis-data-pipeline",
+  "version": "0.1.0",
+  "description": "Macro and governance risk ETL for the Agentic EMS: scrapes chain risk (L2Beat), protocol governance (Discourse) and market-maker liquidity (DefiLlama), derives Black-Scholes/Merton parameters deterministically, and persists both a current snapshot (GCS) and temporal history (TimescaleDB) for TimesFM-3 forecast covariates.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test scripts",
+    "test": "vitest run",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "clean": "rm -rf dist",
+    "probe:capability": "uv run --project scraper python -m risk_pipeline.probe",
+    "verify:local": "tsx scripts/verify-local.ts",
+    "verify:temporal": "tsx scripts/verify-temporal.ts"
+  },
+  "dependencies": {
+    "@ethonline2026/timeseries": "workspace:*",
+    "@google-cloud/storage": "^7.16.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-jsdoc": "^61.1.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  }
+}

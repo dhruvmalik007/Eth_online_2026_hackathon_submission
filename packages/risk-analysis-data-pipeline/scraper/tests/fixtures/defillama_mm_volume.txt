@@ -1,0 +1,733 @@
+Navigate to DeFi Dashboard
+Home
+Metrics
+Tools
+Chains
+Yields
+Stablecoins
+RWA
+MiCA
+Tokens
+Equities
+Pre-IPO
+Market Makers
+Universal Token Rating
+Support
+API & MCP
+DEX Aggregator
+Investor Relations
+DefiLlama Research
+
+PREMIUM
+Try free
+
+Pricing
+Mobile App
+New
+LlamaAI
+Downloads
+Custom Dashboards
+Sheets
+LlamaFeed
+Old Menu
+More
+About Us
+Sign In / Subscribe
+/
+Open Search
+⌘K
+Try LlamaAI
+Market Makers
+Volume
+Click to browse & search
+Performance Index
+Depth
+Volume
+Spread
+KPI Adherence
+Documentation
+Volume Leaderboard
+Last 30-day
+
+See how Market Makers rank based on Volume KPIs such as the avg. daily fill volume (maker & taker) as well as percentage of market share
+
+Documentation
+Rank
+Show as Value
+Show as Percentile
+Show as Rank
+Refine
+#
+↓
+	
+Market Maker
+	
+Avg. Maker
+	
+Avg. Taker
+	
+Avg. Maker & Taker
+	
+Volume Loan Utilization
+
+1	
+Keyrock
+	
+$1.04M
+16.06% of Market
+	
+$59.89K
+1.98% of Market
+	
+$1.1M
+9.02% of Market
+	
+41.08%
+Details
+
+2	
+Flowdesk
+	
+$1.76M
+8.26% of Market
+	
+$24.44K
+0.048% of Market
+	
+$1.78M
+4.15% of Market
+	
+109.24%
+Details
+
+3	
+Tophash Digital
+	
+$638.67K
+5.81% of Market
+	
+$1.17K
+0.042% of Market
+	
+$639.84K
+2.92% of Market
+	
+71.79%
+Details
+
+4	
+G-20 Group
+	
+$486.15K
+4.76% of Market
+	
+$54.44K
+0.33% of Market
+	
+$540.59K
+2.54% of Market
+	
+48.58%
+Details
+
+5	
+GSR
+	
+$422.97K
+4.02% of Market
+	
+$19.07K
+0.022% of Market
+	
+$442.04K
+2.02% of Market
+	
+63.31%
+Details
+
+6	
+Amber Group
+	
+$276.13K
+3.37% of Market
+	
+$51.16K
+0.55% of Market
+	
+$327.28K
+1.96% of Market
+	
+44.99%
+Details
+
+7	
+Cicada
+	
+$186.4K
+3.1% of Market
+	
+$87.95K
+2.15% of Market
+	
+$274.35K
+2.62% of Market
+	
+57.04%
+Details
+
+8	
+JPEG Trading
+	
+$367.13K
+2.48% of Market
+	
+$0
+0% of Market
+	
+$367.13K
+1.24% of Market
+	
+53.24%
+Details
+
+9	
+Selini Capital
+	
+$193.49K
+0.66% of Market
+	
+$1.86K
+0.01% of Market
+	
+$195.34K
+0.34% of Market
+	
+14.92%
+Details
+
+10	
+LO:TECH
+	
+$9.78K
+10.46% of Market
+	
+$18.05
+0.0056% of Market
+	
+$9.8K
+5.23% of Market
+	
+6.53%
+Details
+
+11	
+Ampersan
+	
+$223.37K
+0.66% of Market
+	
+$6.31K
+0.015% of Market
+	
+$229.67K
+0.34% of Market
+	
+21%
+Details
+
+12	
+Gravity Team
+	
+$19.37K
+2.54% of Market
+	
+$7.74K
+0.029% of Market
+	
+$27.11K
+1.28% of Market
+	
+10.84%
+Details
+
+13	
+Auros Global
+	
+$153.2K
+3.08% of Market
+	
+$149.61K
+0.71% of Market
+	
+$302.81K
+1.9% of Market
+	
+36.21%
+Details
+
+14	
+Prycto
+	
+$6.72K
+1.48% of Market
+	
+$140.69
+0.012% of Market
+	
+$6.86K
+0.75% of Market
+	
+33.85%
+Details
+
+15	
+CyantArb
+	
+$0
+0% of Market
+	
+$0
+0% of Market
+	
+$0
+0% of Market
+	
+0%
+Details
+
+16	
+Presto Labs
+	
+$0
+0% of Market
+	
+$205.87K
+0.69% of Market
+	
+$205.87K
+0.35% of Market
+	
+N/A
+Details
+
+17	
+Alber Blanc
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+18	
+Algoz
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+19	
+AlphaTheta
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+20	
+Arrakis Finance
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+21	
+Astrum Liquidity
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+22	
+Bitmaker
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+23	
+Bluesky Capital
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+24	
+Caladan
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+25	
+CKS Systems
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+26	
+CoinAlpha
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+27	
+Dark Forest
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+28	
+DWF Labs
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+29	
+EasyMM
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+30	
+Efficient Frontier
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+31	
+Elk Crypto
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+32	
+Enflux
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+33	
+Galaxy
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+34	
+Kaiko Labs
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+35	
+Kairon Labs
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+36	
+Koda Finance
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+37	
+Kronos Research
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+38	
+Manifold Trading
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+39	
+Oracles
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+40	
+Peanut.Trade
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+41	
+Pulsar
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+42	
+Reform DAO
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+43	
+STS Digital
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+44	
+XBTO
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+N/A
+	
+N/A
+Details
+
+Data provided by Forgd. The content on this page is for informational purposes only and should not be construed as financial or legal advice.

@@ -37,6 +37,9 @@ function parseArgs(argv: string[]): { command: string; args: Args } {
         args[key] = next;
         i++;
       }
+    } else if (args._ === undefined) {
+      // first positional argument (e.g. the file for `query`)
+      args._ = tok;
     }
   }
   return { command, args };
@@ -72,7 +75,7 @@ async function cmdHealth(): Promise<void> {
 
 async function cmdQuery(args: Args): Promise<void> {
   const { readFileSync } = await import('node:fs');
-  const file = args._[0];
+  const file = typeof args._ === 'string' ? args._ : undefined;
   if (!file) throw new Error('usage: graph-fno query <file.graphql> [--vars \'{"k":"v"}\']');
   const reg = registry();
   const client = await reg.firstHealthy();

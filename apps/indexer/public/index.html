@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agentic EMS // Indexer</title>
+<meta name="description" content="Ask the desk: grounded fixed-income analysis over TimesFM-3 forecasts, on-chain pool metrics and the agent's own decision history." />
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div>
+      <div class="brand">AGENTIC EMS <span class="accent">//</span> INDEXER</div>
+      <div class="brand-sub">TimesFM-3 · Gemini on Vertex · TimescaleDB · The Graph</div>
+    </div>
+    <div class="status" id="status" aria-live="polite">
+      <span class="pill" data-state="warn" data-key="db"><i class="dot"></i>timescaledb</span>
+      <span class="pill" data-state="warn" data-key="timesfm3"><i class="dot"></i>timesfm3</span>
+      <span class="pill" data-state="warn" data-key="vector"><i class="dot"></i>vector</span>
+      <span class="pill" data-state="warn" data-key="retrieval"><i class="dot"></i>retrieval</span>
+    </div>
+  </header>
+
+  <form class="command" id="command" autocomplete="off">
+    <div class="command-row">
+      <label class="sr-only" for="query">Ask the desk</label>
+      <input id="query" name="query" placeholder="ask the desk — e.g. is the USDC/USDT pool's yield stable enough to supply into for 30 days?"
+             value="Is the yield on the pool stable enough to supply capital for 30 days?" />
+      <button type="submit" class="primary" id="run">Run</button>
+    </div>
+    <div class="controls">
+      <div class="field">
+        <label for="poolIds">pools</label>
+        <input id="poolIds" name="poolIds"
+               value="0x0fb0e40cec3bb23e13abc585958a93c796fbea56955e19a23727a716a0423239"
+               placeholder="comma-separated pool ids" />
+      </div>
+      <div class="field">
+        <label for="horizon">horizon (d)</label>
+        <input id="horizon" name="horizon" type="number" min="1" max="365" value="30" />
+      </div>
+      <label class="toggle"><input type="checkbox" id="deep" /> deep agent</label>
+      <label class="toggle"><input type="checkbox" id="dry" /> dry (no model spend)</label>
+      <button type="button" id="refreshHealth">Refresh health</button>
+    </div>
+  </form>
+
+  <div class="grid">
+    <!-- left: what the agent did, node by node -->
+    <section class="panel" aria-labelledby="activity-title">
+      <div class="panel-head">
+        <span class="panel-title" id="activity-title">Agent activity</span>
+        <span class="panel-meta" id="activity-meta">idle</span>
+      </div>
+      <div class="panel-body tight">
+        <ul class="activity" id="activity">
+          <li data-state="empty"><span class="tick">·</span><span class="detail">No run yet. Ask a question to watch the five-node cycle execute.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- right: the answer and its evidence -->
+    <div>
+      <section class="panel" aria-labelledby="answer-title">
+        <div class="panel-head">
+          <span class="panel-title" id="answer-title">Synthesis</span>
+          <span class="panel-meta" id="answer-meta">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="stat-row" id="headline"></div>
+          <div class="answer" id="answer">
+            <div class="state">
+              <strong>Nothing on the desk yet</strong>
+              Submit a query to run the cycle.
+              <div class="hint">Every figure returned is traceable to a stored row or a SQL view.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="forecast-title">
+        <div class="panel-head">
+          <span class="panel-title" id="forecast-title">Quantile forecast (q10–q50–q90)</span>
+          <span class="panel-meta" id="forecast-meta">—</span>
+        </div>
+        <div class="panel-body">
+          <div id="chart-host">
+            <div class="state"><strong>No forecast</strong>Run a query or fetch a forecast for a pool.</div>
+          </div>
+          <div class="legend" id="chart-legend" hidden>
+            <span><i class="swatch amber"></i>median (q50)</span>
+            <span><i class="swatch band"></i>q10–q90 band</span>
+            <span><i class="swatch" style="background:var(--tk-graph-soft);height:2px;border-top:1px dashed var(--tk-graph-soft)"></i>realized</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="decisions-title">
+        <div class="panel-head">
+          <span class="panel-title" id="decisions-title">Readjustment decisions</span>
+          <span class="panel-meta" id="decisions-meta">—</span>
+        </div>
+        <div class="panel-body tight" id="decisions-host">
+          <div class="state">No decisions yet.</div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="evidence-title">
+        <div class="panel-head">
+          <span class="panel-title" id="evidence-title">Evidence &amp; reliability</span>
+          <span class="panel-meta" id="evidence-meta">—</span>
+        </div>
+        <div class="panel-body tight" id="evidence-host">
+          <div class="state">
+            <strong>No retrieved context</strong>
+            Evidence appears when the temporal vector layer is configured.
+          </div>
+        </div>
+      </section>
+
+      <details class="raw" id="raw-block">
+        <summary>Raw response</summary>
+        <pre id="raw">—</pre>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+# Graph Client composition config for type-safe GraphQL query generation.
+# Sources are resolved at BUILD time by `graphclient build` -> .graphclient/ runtime artifact.
+# Env interpolation: {env.VAR} at runtime, ${VAR} at build time.
+#
+# Two tiers:
+#  - studio: your OWN deployed testnet subgraphs (Subgraph Studio dev URLs, 3k queries/day)
+#  - network: decentralized-network curated deployments via gateway.thegraph.com (needs GATEWAY_API_KEY)
+#
+# Endpoints can be overridden without code changes via env (see .env.example).
+
+sources:
+  # ---------------------------------------------------------------- studio tier
+  - name: emsPerpSepolia
+    handler:
+      graphql:
+        endpoint: {env.STUDIO_PERP_SEPOLIA_ENDPOINT}
+        operationHeaders:
+          Authorization: Bearer {env.GATEWAY_API_KEY}
+    transforms:
+      - autoPagination:
+          validateSchema: false
+
+  # --------------------------------------------------------------- network tier
+  - name: messariUniV3
+    handler:
+      graphql:
+        endpoint: https://gateway.thegraph.com/api/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV
+        operationHeaders:
+          Authorization: Bearer {env.GATEWAY_API_KEY}
+    transforms:
+      - autoPagination:
+          validateSchema: false
+
+documents:
+  - ./src/graphql/**/*.graphql

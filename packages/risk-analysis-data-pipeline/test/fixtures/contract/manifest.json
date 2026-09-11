@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-09-11T00:00:00Z",
+  "cadenceHours": 6,
+  "sources": {
+    "l2beat": {
+      "state": "fresh",
+      "fetchedAt": "2026-09-11T00:00:00Z",
+      "latencyMs": 1234.5,
+      "records": 12,
+      "contentHash": "abc123",
+      "error": null
+    },
+    "discourse": {
+      "state": "failed",
+      "fetchedAt": null,
+      "latencyMs": 45.0,
+      "records": 0,
+      "contentHash": null,
+      "error": "[curve] HTTP 403"
+    }
+  },
+  "temporal": {
+    "chainRiskHistory": 12,
+    "protocolGovernanceHistory": 8,
+    "marketMakerMetrics": 22,
+    "embeddings": 42
+  },
+  "notes": [
+    "curve is blocked by Cloudflare; excluded from v0.1"
+  ]
+}

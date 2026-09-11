@@ -1,0 +1,4 @@
+packages:
+  - 'packages/*'
+  - 'agentic-ems'
+  - 'apps/indexer'
