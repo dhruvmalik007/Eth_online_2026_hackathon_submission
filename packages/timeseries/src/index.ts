@@ -38,6 +38,8 @@ export {
   assertVectorLayer,
   splitStatements,
   embeddingIndexStatements,
+  embeddingKindCheckStatements,
+  EMBEDDING_KIND_CONSTRAINT,
   DEFAULT_DECISION_HORIZON,
   type MigrateOptions,
   type MigrationReport,
@@ -47,6 +49,10 @@ export {
 // ─── Metric store ─────────────────────────────────────────────────────────────
 
 export { TimeseriesClient, type StoreCoverage } from './client.js';
+
+// ─── Risk history ─────────────────────────────────────────────────────────────
+
+export { RiskHistoryRepository, type RiskHistoryWriteResult } from './riskHistory.js';
 
 // ─── Ledgers ──────────────────────────────────────────────────────────────────
 
@@ -152,6 +158,23 @@ export {
   // backtests
   BacktestRunSchema,
   type BacktestRun,
+  // risk-data history
+  ChainRiskHistoryRowSchema,
+  ProtocolGovernanceHistoryRowSchema,
+  MarketMakerMetricsRowSchema,
+  SecurityIncidentRowSchema,
+  IncidentSubjectKindSchema,
+  IncidentSeveritySchema,
+  INCIDENT_SUBJECT_KINDS,
+  INCIDENT_SEVERITIES,
+  RISK_HISTORY_TABLES,
+  type ChainRiskHistoryRow,
+  type ProtocolGovernanceHistoryRow,
+  type MarketMakerMetricsRow,
+  type SecurityIncidentRow,
+  type IncidentSubjectKind,
+  type IncidentSeverity,
+  type RiskHistoryTable,
 } from './types.js';
 
 // ─── Wire coercion helpers (shared by adapters) ───────────────────────────────

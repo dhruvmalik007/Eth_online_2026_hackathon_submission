@@ -18,6 +18,16 @@ function plainServer(): RoutingFakeRunner {
     .on('to_regclass', [{ reg: null }]);
 }
 
+/** A server that also provides pgvectorscale (the StreamingDiskANN index). */
+function vectorscaleServer(): RoutingFakeRunner {
+  return new RoutingFakeRunner()
+    .on('FROM pg_extension', [
+      { extname: 'vector', extversion: '0.8.6' },
+      { extname: 'vectorscale', extversion: '0.9.0' },
+    ])
+    .on('to_regclass', [{ reg: 'ts_embeddings' }]);
+}
+
 const chunk = serializeMetricWindow({
   poolId: '0xpool',
   metric: 'apy',
@@ -175,6 +185,42 @@ describe('VectorRepository.searchTemporal', () => {
     const q = r.find('FROM ts_embeddings');
     expect(q?.values[1]).toBeNull();
     expect(q?.values[4]).toBeNull();
+  });
+
+  it('casts the query vector with its dimension on both sides of the comparison', async () => {
+    // The explicit `::vector(768)` cast is what lets the planner match the
+    // expression to the ANN index's operator class; an unqualified literal can
+    // fall back to a sequential scan.
+    const r = vectorServer().on('FROM ts_embeddings', [hit()]);
+    await new VectorRepository(r, new FakeEmbeddingService()).searchTemporal({ query: 'q' });
+    const text = r.find('FROM ts_embeddings')?.text ?? '';
+    expect(text).toContain('1 - (embedding <=> $1::vector(768)) AS score');
+    expect(text).toContain('ORDER BY embedding <=> $1::vector(768)');
+  });
+
+  it('raises hnsw recall with SET LOCAL before the search when vectorscale is absent', async () => {
+    const r = vectorServer().on('FROM ts_embeddings', [hit()]);
+    await new VectorRepository(r, new FakeEmbeddingService()).searchTemporal({ query: 'q' });
+
+    const sets = r.statements.filter((s) => s.startsWith('SET LOCAL'));
+    expect(sets).toEqual([
+      'SET LOCAL hnsw.ef_search = 100',
+      'SET LOCAL hnsw.iterative_scan = relaxed_order',
+    ]);
+    // SET LOCAL only applies within a transaction, so it must precede the SELECT.
+    const indexOfSet = r.statements.findIndex((s) => s.startsWith('SET LOCAL'));
+    const indexOfSelect = r.statements.findIndex((s) => s.includes('FROM ts_embeddings'));
+    expect(indexOfSet).toBeLessThan(indexOfSelect);
+  });
+
+  it('uses the diskann recall knob when vectorscale is installed', async () => {
+    const r = vectorscaleServer().on('FROM ts_embeddings', [hit()]);
+    await new VectorRepository(r, new FakeEmbeddingService()).searchTemporal({ query: 'q' });
+
+    expect(r.statements).toContain('SET LOCAL diskann.query_search_list_size = 200');
+    // The hnsw namespace only exists once pgvector's library is loaded, so a
+    // stray hnsw setting here would fail at runtime on a vectorscale server.
+    expect(r.statements.some((s) => s.includes('hnsw.'))).toBe(false);
   });
 });
 

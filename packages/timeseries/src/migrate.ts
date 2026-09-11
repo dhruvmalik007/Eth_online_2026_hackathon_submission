@@ -1,6 +1,7 @@
 import { TimescaleDB } from '@timescaledb/core';
 import type { SqlRunner } from './runner.js';
 import {
+  EMBEDDING_KINDS,
   PROBED_EXTENSIONS,
   VectorUnavailableError,
   type CapabilityReport,
@@ -84,6 +85,42 @@ const HYPERTABLES: readonly HypertableSpec[] = [
     orderBy: 'ts_start DESC',
     compress: false,
   },
+  // ── Risk-data pipeline history ────────────────────────────────────────────
+  // These four carry the temporal risk record: how a chain's decentralisation,
+  // a protocol's governance, a market maker's depth, and the security-incident
+  // record evolve. They exist because the *current* snapshot (in GCS) answers
+  // "what is true now", while a forecast covariate needs "what was true then".
+  //
+  // All four keep compression: they are append-only analytics series scanned by
+  // time, with no ANN index that compression would invalidate.
+  {
+    table: 'chain_risk_history',
+    timeColumn: 'ts',
+    segmentBy: 'chain_slug',
+    orderBy: 'ts DESC',
+    compress: true,
+  },
+  {
+    table: 'protocol_governance_history',
+    timeColumn: 'observed_at',
+    segmentBy: 'protocol_slug',
+    orderBy: 'observed_at DESC',
+    compress: true,
+  },
+  {
+    table: 'market_maker_metrics',
+    timeColumn: 'ts',
+    segmentBy: 'market_maker',
+    orderBy: 'ts DESC',
+    compress: true,
+  },
+  {
+    table: 'security_incidents',
+    timeColumn: 'occurred_at',
+    segmentBy: 'subject',
+    orderBy: 'occurred_at DESC',
+    compress: true,
+  },
 ];
 
 const TABLE_DDL: readonly { readonly name: string; readonly sql: string }[] = [
@@ -153,7 +190,7 @@ const TABLE_DDL: readonly { readonly name: string; readonly sql: string }[] = [
   {
     name: 'backtest_runs',
     sql: `CREATE TABLE IF NOT EXISTS backtest_runs (
-  id           bigserial   PRIMARY KEY,
+  id           bigint      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   pool_id      text        NOT NULL,
   window_days  integer     NOT NULL,
   strategy     text        NOT NULL,
@@ -175,7 +212,113 @@ const TABLE_DDL: readonly { readonly name: string; readonly sql: string }[] = [
   vectorscale_enabled boolean     NOT NULL
 )`,
   },
+  // ── Risk-data pipeline history ──────────────────────────────────────────────
+  // These hold the temporal risk record contributed by
+  // `@ethonline2026/risk-analysis-data-pipeline`. The current snapshot lives in
+  // GCS; these tables hold its history, which is what a forecast covariate needs.
+  //
+  // Every table keeps a `raw` jsonb column beside the parsed columns, so a parser
+  // or classifier change can always be audited against what the upstream
+  // actually published at that instant — the same retain-the-source rule the
+  // scraper applies to its snapshots.
+  {
+    name: 'chain_risk_history',
+    sql: `CREATE TABLE IF NOT EXISTS chain_risk_history (
+  ts                      timestamptz NOT NULL,
+  chain_slug              text        NOT NULL,
+  stage                   text        NOT NULL,
+  state_validation        text        NOT NULL,
+  data_availability       text        NOT NULL,
+  exit_window             text        NOT NULL,
+  sequencer_failure       text        NOT NULL,
+  proposer_failure        text        NOT NULL,
+  challenge_period_days   numeric,
+  exit_window_days        numeric,
+  sequencer_delay_hours   numeric,
+  value_secured_usd       numeric,
+  composite_score         numeric     NOT NULL,
+  raw                     jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (chain_slug, ts),
+  CONSTRAINT chain_risk_history_composite_check
+    CHECK (composite_score >= 0 AND composite_score <= 1)
+)`,
+  },
+  {
+    name: 'protocol_governance_history',
+    sql: `CREATE TABLE IF NOT EXISTS protocol_governance_history (
+  observed_at        timestamptz NOT NULL,
+  protocol_slug      text        NOT NULL,
+  proposal_count     integer     NOT NULL,
+  open_count         integer     NOT NULL,
+  recent_count       integer     NOT NULL,
+  risk_proposal_count integer    NOT NULL,
+  activity_score     numeric     NOT NULL,
+  participation_score numeric    NOT NULL,
+  risk_activity_score numeric    NOT NULL,
+  composite_score    numeric     NOT NULL,
+  raw                jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (protocol_slug, observed_at),
+  CONSTRAINT protocol_governance_history_composite_check
+    CHECK (composite_score >= 0 AND composite_score <= 1)
+)`,
+  },
+  {
+    name: 'market_maker_metrics',
+    sql: `CREATE TABLE IF NOT EXISTS market_maker_metrics (
+  ts                  timestamptz NOT NULL,
+  market_maker        text        NOT NULL,
+  grade               text        NOT NULL,
+  composite_score     numeric     NOT NULL,
+  rank                integer,
+  depth_usd           numeric,
+  spread_pct          numeric,
+  volume_usd          numeric,
+  trading_kpis        numeric,
+  trust               numeric,
+  coverage_capabilities numeric,
+  uptime              numeric,
+  integration_level   numeric,
+  active_engagements  integer,
+  fdv_usd             numeric,
+  raw                 jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (market_maker, ts)
+)`,
+  },
+  {
+    name: 'security_incidents',
+    sql: `CREATE TABLE IF NOT EXISTS security_incidents (
+  occurred_at     timestamptz NOT NULL,
+  incident_id     text        NOT NULL,
+  subject         text        NOT NULL,
+  subject_kind    text        NOT NULL,
+  incident_kind   text        NOT NULL,
+  severity        text        NOT NULL,
+  amount_usd      numeric,
+  summary         text        NOT NULL,
+  source_url      text,
+  raw             jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (subject, occurred_at),
+  CONSTRAINT security_incidents_subject_kind_check
+    CHECK (subject_kind IN ('chain', 'protocol', 'market_maker')),
+  CONSTRAINT security_incidents_severity_check
+    CHECK (severity IN ('low', 'medium', 'high', 'critical'))
+)`,
+  },
 ];
+
+/**
+ * Build the `kind IN (...)` list for the embeddings CHECK constraint.
+ *
+ * Derived from {@link EMBEDDING_KINDS} rather than hand-written, so widening the
+ * enum cannot leave the constraint rejecting a kind the application considers
+ * valid. That mismatch is exactly the bug this avoids: the enum lives in
+ * `types.ts` and the constraint in SQL, and without a single source they drift.
+ *
+ * @returns The quoted, comma-separated kind list.
+ */
+function embeddingKindSqlList(): string {
+  return EMBEDDING_KINDS.map((kind) => `'${kind}'`).join(', ');
+}
 
 /**
  * `ts_embeddings` is created only when pgvector is present, so its DDL lives
@@ -195,11 +338,47 @@ const EMBEDDINGS_DDL = `CREATE TABLE IF NOT EXISTS ts_embeddings (
   created_at   timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (id, ts_start),
   CONSTRAINT ts_embeddings_kind_check CHECK (
-    kind IN ('metric_window', 'forecast_run', 'decision', 'performance_slice')
+    kind IN (${embeddingKindSqlList()})
   )
 )`;
 
-/** Indexes on the embeddings hypertable; ANN flavour depends on capabilities. */
+/** The constraint name the kind CHECK is created under. */
+export const EMBEDDING_KIND_CONSTRAINT = 'ts_embeddings_kind_check';
+
+/**
+ * Statements that widen the embeddings kind constraint on an existing table.
+ *
+ * `CREATE TABLE IF NOT EXISTS` does not alter an existing table, so a database
+ * migrated before a new kind was added keeps the *old* constraint and rejects the
+ * new kind at insert time. Postgres has no `ALTER ... ADD OR REPLACE CHECK`, so
+ * the constraint is dropped and re-added — the one non-idempotent-looking step in
+ * an otherwise idempotent migration, and the reason it is isolated here with a
+ * test pinning the generated SQL.
+ *
+ * Dropping and re-adding in one transaction means a concurrent insert either sees
+ * the old constraint entirely or the new one, never a table with no constraint.
+ *
+ * @returns The two statements, in order.
+ */
+export function embeddingKindCheckStatements(): readonly string[] {
+  return [
+    `ALTER TABLE ts_embeddings DROP CONSTRAINT IF EXISTS ${EMBEDDING_KIND_CONSTRAINT}`,
+    `ALTER TABLE ts_embeddings ADD CONSTRAINT ${EMBEDDING_KIND_CONSTRAINT} ` +
+      `CHECK (kind IN (${embeddingKindSqlList()}))`,
+  ];
+}
+
+/**
+ * Indexes on the embeddings hypertable; ANN flavour depends on capabilities.
+ *
+ * Both flavours index the full-precision `vector(768)` column rather than
+ * `halfvec(768)`. That is a deliberate trade against index size: the vector
+ * operator classes are not interchangeable, and pgvectorscale's StreamingDiskANN
+ * — which supports label-based filtered search, the access pattern every query
+ * here uses — exposes only `vector_*_ops`. `halfvec_cosine_ops` exists for hnsw
+ * alone, so choosing it would forfeit diskann entirely. The discriminator is a
+ * live capability probe, not a version guess.
+ */
 export function embeddingIndexStatements(hasVectorscale: boolean): readonly string[] {
   const ann = hasVectorscale
     ? `CREATE INDEX IF NOT EXISTS ts_embeddings_diskann_idx
@@ -465,6 +644,13 @@ export async function migrate(
       await run('CREATE EXTENSION IF NOT EXISTS vectorscale');
     }
     await run(EMBEDDINGS_DDL);
+    // `CREATE TABLE IF NOT EXISTS` does not touch an existing table, so a store
+    // migrated before a new embedding kind existed still carries the old CHECK
+    // and would reject the new kind. Rewrite the constraint so the enum in
+    // `types.ts` and the database agree.
+    for (const statement of embeddingKindCheckStatements()) {
+      await run(statement);
+    }
     for (const statement of embeddingIndexStatements(canVectorscale)) {
       await run(statement);
     }

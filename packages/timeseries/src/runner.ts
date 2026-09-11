@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { Pool, type PoolConfig } from 'pg';
+import { Pool, type PoolClient, type PoolConfig } from 'pg';
 import { z } from 'zod';
 
 /**
@@ -10,6 +10,15 @@ import { z } from 'zod';
  */
 export interface SqlRunner {
   query(text: string, values?: readonly unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
+  /**
+   * Run `fn` against one dedicated connection inside a transaction.
+   *
+   * Required for `SET LOCAL`: such a setting is scoped to a transaction on a
+   * single connection, so issuing it through the pooled `query` above would
+   * apply it to an arbitrary (possibly different) connection. The vector
+   * layer uses this to raise ANN recall for the duration of one search.
+   */
+  transaction<T>(fn: (tx: SqlRunner) => Promise<T>): Promise<T>;
 }
 
 export class TimeseriesRunnerError extends Error {
@@ -334,8 +343,7 @@ export class PgSqlRunner implements SqlRunner {
       const result = await this.pool.query(text, values as unknown[]);
       return { rows: result.rows as Record<string, unknown>[] };
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new TimeseriesRunnerError(`TimescaleDB query failed: ${message}`, err);
+      throw new TimeseriesRunnerError(`TimescaleDB query failed: ${describeDriverError(err)}`, err);
     }
   }
 
@@ -348,4 +356,95 @@ export class PgSqlRunner implements SqlRunner {
     registry.delete(key);
     await pool.end();
   }
+
+  async transaction<T>(fn: (tx: SqlRunner) => Promise<T>): Promise<T> {
+    const client = await this.connectOrThrow();
+    try {
+      await client.query('BEGIN');
+      const scoped: SqlRunner = {
+        query: async (text, values = []) => {
+          const result = await client.query(text, values as unknown[]);
+          return { rows: result.rows as Record<string, unknown>[] };
+        },
+        // Nested transactions would need savepoints to stay correct. The
+        // vector layer never nests, so fail loudly rather than silently
+        // running the inner block outside a transaction.
+        transaction: () => Promise.reject(
+          new TimeseriesRunnerError('nested transactions are not supported', null),
+        ),
+      };
+      const out = await fn(scoped);
+      await client.query('COMMIT');
+      return out;
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Acquire a pooled client, naming the failure when the host is unreachable.
+   *
+   * Separated from `transaction` so the acquisition failure is distinguishable
+   * from a failure *inside* the transaction: the first is a connectivity problem,
+   * the second is the caller's own work failing, and conflating them sends an
+   * operator looking in the wrong place.
+   *
+   * @returns A client checked out from the shared pool.
+   * @throws {TimeseriesRunnerError} When no connection could be established.
+   */
+  private async connectOrThrow(): Promise<PoolClient> {
+    try {
+      return await this.pool.connect();
+    } catch (err) {
+      throw new TimeseriesRunnerError(
+        `TimescaleDB connection failed: ${describeDriverError(err)}`,
+        err,
+      );
+    }
+  }
+}
+
+/**
+ * Render a driver error so the message is never empty.
+ *
+ * Node reports a failed multi-address connection as an `AggregateError` whose
+ * `message` is the empty string, so the obvious `err.message` produces
+ * "TimescaleDB query failed: " — a message carrying no information at all, which
+ * is exactly what a wrong host or a refused connection looks like. This walks the
+ * aggregate's inner errors and falls back to the error's `code`, so the failure
+ * names itself instead of sending someone to inspect a query that was never run.
+ *
+ * @param err - The error thrown by the driver.
+ * @returns A non-empty description.
+ */
+function describeDriverError(err: unknown): string {
+  if (err instanceof AggregateError) {
+    const inner = err.errors.map(describeDriverError).filter((message) => message.length > 0);
+    if (inner.length > 0) return inner.join('; ');
+    return errorCode(err) ?? 'AggregateError with no detail';
+  }
+  if (err instanceof Error) {
+    if (err.message.length > 0) return err.message;
+    return errorCode(err) ?? err.name;
+  }
+  const rendered = String(err);
+  return rendered.length > 0 ? rendered : 'unknown error';
+}
+
+/**
+ * Read the driver's `code` without a cast.
+ *
+ * A pg connection failure carries `ECONNREFUSED`/`ENOTFOUND` on a `code`
+ * property that `Error` does not declare, so the property is read through a
+ * narrowing check rather than asserted.
+ *
+ * @param err - The error to inspect.
+ * @returns The code when it is a non-empty string.
+ */
+function errorCode(err: object): string | null {
+  const code: unknown = Reflect.get(err, 'code');
+  return typeof code === 'string' && code.length > 0 ? code : null;
 }

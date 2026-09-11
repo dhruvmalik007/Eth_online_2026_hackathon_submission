@@ -56,6 +56,15 @@ export class RoutingFakeRunner implements SqlRunner {
     return { rows: this.fallback };
   }
 
+  /**
+   * The fake has no connections to scope, so the callback runs against this
+   * same instance — statements inside a transaction are still recorded and
+   * therefore remain assertable via `statements`.
+   */
+  async transaction<T>(fn: (tx: SqlRunner) => Promise<T>): Promise<T> {
+    return fn(this);
+  }
+
   /** Every statement sent, in order — for migration assertions. */
   get statements(): readonly string[] {
     return this.queries.map((q) => q.text);

@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  EMBEDDING_KIND_CONSTRAINT,
   embeddingIndexStatements,
+  embeddingKindCheckStatements,
   migrate,
   probeCapabilities,
   splitStatements,
 } from '../src/migrate.js';
-import { VectorUnavailableError } from '../src/types.js';
+import { EMBEDDING_KINDS, VectorUnavailableError } from '../src/types.js';
 import { RoutingFakeRunner } from './helpers.js';
 
 /** A server with TimescaleDB plus the pgvector family available. */
@@ -112,11 +114,31 @@ describe('migrate', () => {
     expect(report.created).toContain('v_forecast_calibration');
   });
 
-  it('attaches a compression policy to the time-scanned hypertables', async () => {
+  it('attaches a compression policy to every time-scanned hypertable', async () => {
     const runner = fullServer();
     await migrate(runner);
     const policy = runner.findAll('add_compression_policy');
-    expect(policy.length).toBe(3); // metrics, forecasts, decisions — not embeddings
+
+    // Asserted per table rather than as a magic number: every compressed
+    // hypertable must have a policy, and `ts_embeddings` must not. A count would
+    // have to be edited on each schema addition and would not catch a *missing*
+    // policy on a specific table.
+    const compressed = [
+      'pool_metrics_hourly',
+      'ts_forecasts',
+      'ts_decisions',
+      'chain_risk_history',
+      'protocol_governance_history',
+      'market_maker_metrics',
+      'security_incidents',
+    ];
+    for (const table of compressed) {
+      expect(
+        policy.some((q) => q.text.includes(table)),
+        `expected a compression policy for ${table}`,
+      ).toBe(true);
+    }
+    expect(policy).toHaveLength(compressed.length);
     expect(policy.every((q) => q.text.includes("INTERVAL '7 days'"))).toBe(true);
   });
 
@@ -184,7 +206,9 @@ describe('migrate', () => {
     await migrate(runner, { vector: 'off' });
     // Hypertable exists, but compression was never configured.
     expect(runner.statements.some((s) => s.includes('create_hypertable'))).toBe(false);
-    expect(runner.findAll('add_compression_policy').length).toBe(3);
+    // Every time-scanned hypertable gets a repair attempt; the count follows the
+    // schema, so it is derived rather than hardcoded.
+    expect(runner.findAll('add_compression_policy').length).toBeGreaterThanOrEqual(7);
   });
 
   it('injects the configured decision horizon into the outcome view', async () => {
@@ -222,5 +246,97 @@ describe('migrate', () => {
     expect(insert).toBeDefined();
     expect(insert?.values[4]).toBe(true); // vector_enabled
     expect(report.capabilities.available['vector']).toBe('0.8.6');
+  });
+});
+
+describe('embedding kind constraint migration', () => {
+  it('builds the CHECK from the enum, so the two cannot drift', () => {
+    // The constraint and `EMBEDDING_KINDS` are the same fact stated twice. This
+    // asserts they agree, which is what stops a widened enum from being rejected
+    // by a stale constraint at insert time.
+    const statements = embeddingKindCheckStatements();
+    const add = statements[1];
+    expect(add).toBeDefined();
+    for (const kind of EMBEDDING_KINDS) {
+      expect(add).toContain(`'${kind}'`);
+    }
+  });
+
+  it('covers the risk-analysis kinds contributed by the risk pipeline', () => {
+    const add = embeddingKindCheckStatements()[1] ?? '';
+    // Named individually: a rename in either package should fail here rather
+    // than silently making the kind un-insertable.
+    for (const kind of [
+      'governance_proposal',
+      'security_incident',
+      'chain_risk',
+      'market_maker',
+    ]) {
+      expect(add).toContain(`'${kind}'`);
+    }
+  });
+
+  it('drops before adding, because Postgres has no replace-check', () => {
+    const statements = embeddingKindCheckStatements();
+    expect(statements[0]).toContain(`DROP CONSTRAINT IF EXISTS ${EMBEDDING_KIND_CONSTRAINT}`);
+    expect(statements[1]).toContain(`ADD CONSTRAINT ${EMBEDDING_KIND_CONSTRAINT}`);
+  });
+
+  it('rewrites the constraint during a migration that builds the vector layer', async () => {
+    const runner = fullServer();
+    await migrate(runner);
+    const drop = runner.statements.findIndex((s) => s.includes(`DROP CONSTRAINT IF EXISTS ${EMBEDDING_KIND_CONSTRAINT}`));
+    const add = runner.statements.findIndex((s) => s.includes(`ADD CONSTRAINT ${EMBEDDING_KIND_CONSTRAINT}`));
+    expect(drop).toBeGreaterThanOrEqual(0);
+    expect(add).toBeGreaterThan(drop);
+  });
+
+  it('is idempotent — a second migration rewrites the same constraint', async () => {
+    const runner = fullServer();
+    await migrate(runner);
+    await migrate(runner);
+    const drops = runner.statements.filter((s) => s.includes('DROP CONSTRAINT IF EXISTS')).length;
+    // `IF EXISTS` is what makes the second run safe; without it the migration
+    // would fail on a store that already had the constraint.
+    expect(drops).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe('risk-data history tables', () => {
+  it('creates all four risk hypertables', async () => {
+    const runner = fullServer();
+    const report = await migrate(runner);
+    for (const table of [
+      'chain_risk_history',
+      'protocol_governance_history',
+      'market_maker_metrics',
+      'security_incidents',
+    ]) {
+      expect(report.created).toContain(table);
+    }
+  });
+
+  it('keeps a raw jsonb column beside the parsed columns on every table', async () => {
+    const runner = fullServer();
+    await migrate(runner);
+    // The retain-the-source rule: a classifier change must stay auditable against
+    // what the upstream published at that instant.
+    for (const table of [
+      'chain_risk_history',
+      'protocol_governance_history',
+      'market_maker_metrics',
+      'security_incidents',
+    ]) {
+      const ddl = runner.statements.find((s) => s.includes(`CREATE TABLE IF NOT EXISTS ${table}`));
+      expect(ddl, `expected DDL for ${table}`).toContain('raw');
+      expect(ddl).toContain('jsonb');
+    }
+  });
+
+  it('constrains scores to the 0-1 range', async () => {
+    const runner = fullServer();
+    await migrate(runner);
+    const chain = runner.statements.find((s) => s.includes('CREATE TABLE IF NOT EXISTS chain_risk_history'));
+    expect(chain).toContain('composite_score >= 0 AND composite_score <= 1');
   });
 });

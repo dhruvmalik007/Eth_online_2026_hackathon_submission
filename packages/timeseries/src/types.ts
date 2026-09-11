@@ -269,13 +269,138 @@ export type CalibrationSummary = z.infer<typeof CalibrationSummarySchema>;
 
 // ── Temporal vector layer ───────────────────────────────────────────────────
 
+/**
+ * What kind of real-world object an embedding chunk was serialized from.
+ *
+ * The first four are the pool-metric families the forecast pipeline produces. The
+ * last four are contributed by the risk-data pipeline: governance proposals,
+ * security incidents, chain risk profiles and market-maker profiles. Widening
+ * this list requires a migration, because `ts_embeddings.kind` carries a CHECK
+ * constraint — `embeddingKindCheckStatements` rewrites it.
+ */
 export const EMBEDDING_KINDS = [
-  'metric_window', 'forecast_run', 'decision', 'performance_slice',
+  'metric_window',
+  'forecast_run',
+  'decision',
+  'performance_slice',
+  'governance_proposal',
+  'security_incident',
+  'chain_risk',
+  'market_maker',
 ] as const;
 export const EmbeddingKindSchema = z.enum(EMBEDDING_KINDS);
 export type EmbeddingKind = z.infer<typeof EmbeddingKindSchema>;
 
 export const EMBEDDING_DIMENSION = 768;
+
+// ── Risk-data history ────────────────────────────────────────────────────────
+//
+// Temporal rows contributed by `@ethonline2026/risk-analysis-data-pipeline`. The
+// *current* risk snapshot lives in GCS; these shapes carry its history, which is
+// what a TimesFM-3 covariate needs.
+//
+// Each carries `raw` alongside the parsed columns, applying the same
+// retain-the-source rule the scraper uses: a classifier change stays auditable
+// against what the upstream published at that instant.
+
+/** A point on a chain's risk profile timeline. */
+export const ChainRiskHistoryRowSchema = z.object({
+  /** Observation instant. */
+  ts: z.date(),
+  chainSlug: z.string().min(1),
+  stage: z.string().min(1),
+  stateValidation: z.string().min(1),
+  dataAvailability: z.string().min(1),
+  exitWindow: z.string().min(1),
+  sequencerFailure: z.string().min(1),
+  proposerFailure: z.string().min(1),
+  challengePeriodDays: z.number().nullable(),
+  exitWindowDays: z.number().nullable(),
+  sequencerDelayHours: z.number().nullable(),
+  valueSecuredUsd: z.number().nullable(),
+  compositeScore: z.number().min(0).max(1),
+  /** Verbatim dimension strings, for audit. */
+  raw: z.record(z.string(), z.json()),
+});
+export type ChainRiskHistoryRow = z.infer<typeof ChainRiskHistoryRowSchema>;
+
+/** A point on a protocol's governance timeline. */
+export const ProtocolGovernanceHistoryRowSchema = z.object({
+  observedAt: z.date(),
+  protocolSlug: z.string().min(1),
+  proposalCount: z.number().int().nonnegative(),
+  openCount: z.number().int().nonnegative(),
+  recentCount: z.number().int().nonnegative(),
+  riskProposalCount: z.number().int().nonnegative(),
+  activityScore: z.number().min(0).max(1),
+  participationScore: z.number().min(0).max(1),
+  riskActivityScore: z.number().min(0).max(1),
+  compositeScore: z.number().min(0).max(1),
+  raw: z.record(z.string(), z.json()),
+});
+export type ProtocolGovernanceHistoryRow = z.infer<typeof ProtocolGovernanceHistoryRowSchema>;
+
+/** A point on a market maker's metrics timeline. */
+export const MarketMakerMetricsRowSchema = z.object({
+  ts: z.date(),
+  marketMaker: z.string().min(1),
+  grade: z.string().min(1),
+  compositeScore: z.number(),
+  rank: z.number().int().nullable(),
+  depthUsd: z.number().nullable(),
+  spreadPct: z.number().nullable(),
+  volumeUsd: z.number().nullable(),
+  tradingKpis: z.number().nullable(),
+  trust: z.number().nullable(),
+  coverageCapabilities: z.number().nullable(),
+  uptime: z.number().nullable(),
+  integrationLevel: z.number().nullable(),
+  activeEngagements: z.number().int().nullable(),
+  fdvUsd: z.number().nullable(),
+  raw: z.record(z.string(), z.json()),
+});
+export type MarketMakerMetricsRow = z.infer<typeof MarketMakerMetricsRowSchema>;
+
+/** Which kind of entity an incident concerns. */
+export const INCIDENT_SUBJECT_KINDS = ['chain', 'protocol', 'market_maker'] as const;
+export const IncidentSubjectKindSchema = z.enum(INCIDENT_SUBJECT_KINDS);
+export type IncidentSubjectKind = z.infer<typeof IncidentSubjectKindSchema>;
+
+/** How severe an incident was judged to be. */
+export const INCIDENT_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+export const IncidentSeveritySchema = z.enum(INCIDENT_SEVERITIES);
+export type IncidentSeverity = z.infer<typeof IncidentSeveritySchema>;
+
+/**
+ * A security incident on a chain, protocol or market maker.
+ *
+ * Modelled and storable now, but **no collector populates it yet**: the incident
+ * feed is an open question in the plan (whether to scrape DeFiLlama's hacks
+ * endpoint or take it out of v0.1 scope). The table exists so the schema is
+ * complete and a collector can be added without a migration.
+ */
+export const SecurityIncidentRowSchema = z.object({
+  occurredAt: z.date(),
+  incidentId: z.string().min(1),
+  subject: z.string().min(1),
+  subjectKind: IncidentSubjectKindSchema,
+  incidentKind: z.string().min(1),
+  severity: IncidentSeveritySchema,
+  amountUsd: z.number().nullable(),
+  summary: z.string().min(1),
+  sourceUrl: z.string().nullable(),
+  raw: z.record(z.string(), z.json()),
+});
+export type SecurityIncidentRow = z.infer<typeof SecurityIncidentRowSchema>;
+
+/** The four risk history table names, for manifest/verification reporting. */
+export const RISK_HISTORY_TABLES = [
+  'chain_risk_history',
+  'protocol_governance_history',
+  'market_maker_metrics',
+  'security_incidents',
+] as const;
+export type RiskHistoryTable = (typeof RISK_HISTORY_TABLES)[number];
 
 /** A row of `ts_embeddings` — a citation-tagged chunk of *real* data. */
 export const EmbeddingRowSchema = z.object({

@@ -4,8 +4,10 @@ import type { EmbeddingService } from './embeddings.js';
 import type { SqlRunner } from './runner.js';
 import { hashChunk, type SerializedChunk } from './serializer.js';
 import {
+  EMBEDDING_DIMENSION,
   EmbeddingKindSchema,
   VectorUnavailableError,
+  type CapabilityReport,
   type EmbeddingKind,
   type RetrievalHit,
 } from './types.js';
@@ -34,12 +36,42 @@ const OVERFETCH = 5;
 const MAX_K = 50;
 
 /**
+ * Recall budget for one search, applied with `SET LOCAL` inside the search
+ * transaction. Both indexes post-filter, so a selective pool/time predicate can
+ * otherwise return fewer rows than requested; a larger candidate list is the
+ * documented mitigation.
+ *
+ * `diskann.query_search_list_size` is pgvectorscale's knob; `hnsw.ef_search`
+ * plus `relaxed_order` iterative scan is pgvector's. Which pair applies is read
+ * from the live capability report, never assumed — setting the wrong one would
+ * fail, because the GUC's namespace only exists once its library is loaded.
+ */
+const DISKANN_SEARCH_LIST_SIZE = 200;
+const HNSW_EF_SEARCH = 100;
+
+function recallStatements(capabilities: CapabilityReport): readonly string[] {
+  return capabilities.vectorscaleEnabled
+    ? [`SET LOCAL diskann.query_search_list_size = ${DISKANN_SEARCH_LIST_SIZE}`]
+    : [
+        `SET LOCAL hnsw.ef_search = ${HNSW_EF_SEARCH}`,
+        `SET LOCAL hnsw.iterative_scan = relaxed_order`,
+      ];
+}
+
+/**
  * Time-series vector store over `ts_embeddings`.
  *
  * TimescaleDB is Postgres, so the temporal-vector pattern is a `vector` column
  * plus a time column: an ANN index serves similarity while btree/pool filters
  * bound the window. The table is deliberately uncompressed because ANN indexes
  * are not maintained across compressed chunks.
+ *
+ * The column is full-precision `vector`, not `halfvec`, even though `halfvec`
+ * halves index size. On this stack pgvectorscale's StreamingDiskANN — the index
+ * that supports label-based *filtered* search, which is what every query here
+ * needs — accepts only `vector_*_ops`; `halfvec_cosine_ops` exists for hnsw
+ * alone. Since our predicates always filter by pool and time, filtered-search
+ * quality is worth more than the storage saving.
  */
 export class VectorRepository {
   constructor(
@@ -48,8 +80,8 @@ export class VectorRepository {
   ) {}
 
   /** Fail with a typed error (not a SQL error) when the layer is absent. */
-  async assertAvailable(): Promise<void> {
-    await assertVectorLayer(this.runner);
+  async assertAvailable(): Promise<CapabilityReport> {
+    return assertVectorLayer(this.runner);
   }
 
   /**
@@ -87,7 +119,7 @@ export class VectorRepository {
         this.embeddings.model,
         hashChunk(chunk),
       );
-      return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}::text[], $${b + 7}, $${b + 8}::vector, $${b + 9}, $${b + 10})`;
+      return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}::text[], $${b + 7}, $${b + 8}::vector(${EMBEDDING_DIMENSION}), $${b + 9}, $${b + 10})`;
     });
 
     const res = await this.runner.query(
@@ -108,7 +140,7 @@ export class VectorRepository {
    * never widen its own evidence window, then results are re-ranked by score.
    */
   async searchTemporal(input: TemporalSearchInput): Promise<readonly RetrievalHit[]> {
-    await this.assertAvailable();
+    const capabilities = await this.assertAvailable();
 
     const k = Math.min(Math.max(input.k ?? DEFAULT_K, 1), MAX_K);
     const [queryVector] = await this.embeddings.embed([input.query], { task: 'query' });
@@ -117,25 +149,32 @@ export class VectorRepository {
     }
 
     const kinds = input.kinds === undefined ? null : [...input.kinds];
-    const res = await this.runner.query(
-      `SELECT id, pool_id, kind, ts_start, ts_end, source_ids, content,
-              1 - (embedding <=> $1::vector) AS score
-       FROM ts_embeddings
-       WHERE ($2::text IS NULL OR pool_id = $2)
-         AND ($3::timestamptz IS NULL OR ts_end >= $3)
-         AND ($4::timestamptz IS NULL OR ts_start <= $4)
-         AND ($5::text[] IS NULL OR kind = ANY($5::text[]))
-       ORDER BY embedding <=> $1::vector
-       LIMIT $6`,
-      [
-        `[${queryVector.join(',')}]`,
-        input.poolId ?? null,
-        input.from ?? null,
-        input.to ?? null,
-        kinds,
-        k * OVERFETCH,
-      ],
-    );
+    // The recall settings and the search must share one connection, so both run
+    // inside the same transaction (`SET LOCAL` is transaction-scoped).
+    const res = await this.runner.transaction(async (tx) => {
+      for (const statement of recallStatements(capabilities)) {
+        await tx.query(statement);
+      }
+      return tx.query(
+        `SELECT id, pool_id, kind, ts_start, ts_end, source_ids, content,
+                1 - (embedding <=> $1::vector(${EMBEDDING_DIMENSION})) AS score
+         FROM ts_embeddings
+         WHERE ($2::text IS NULL OR pool_id = $2)
+           AND ($3::timestamptz IS NULL OR ts_end >= $3)
+           AND ($4::timestamptz IS NULL OR ts_start <= $4)
+           AND ($5::text[] IS NULL OR kind = ANY($5::text[]))
+         ORDER BY embedding <=> $1::vector(${EMBEDDING_DIMENSION})
+         LIMIT $6`,
+        [
+          `[${queryVector.join(',')}]`,
+          input.poolId ?? null,
+          input.from ?? null,
+          input.to ?? null,
+          kinds,
+          k * OVERFETCH,
+        ],
+      );
+    });
 
     const hits: RetrievalHit[] = [];
     for (const row of res.rows) {
