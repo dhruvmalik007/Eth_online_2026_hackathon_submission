@@ -1,0 +1,39 @@
+{
+  "name": "@ethonline2026/custody",
+  "version": "0.1.0",
+  "description": "Custody middleware for the Agentic EMS: Ledger Agent Stack trust layer between LangChain agents and the trader's Safe smart account. Policy gate → scoped agent attestation → Safe proposal → Ledger device confirmation → audit log. Agents propose; the Ledger device approves.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "cli": "tsx src/cli.ts",
+    "smoke:dry": "tsx scripts/smoke-dry.ts",
+    "demo": "tsx src/cli.ts demo"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-app-eth": "^6.42.0",
+    "@ledgerhq/hw-transport-node-hid-singleton": "^6.35.0",
+    "@safe-global/api-kit": "^2.5.11",
+    "@safe-global/protocol-kit": "^6.1.2",
+    "dotenv": "^17.4.2",
+    "viem": "^2.56.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
