@@ -12,6 +12,7 @@ import {
 import type { TimesFM3Client, TimesFMForecast } from '../../services/timesfm3/index.js';
 import type { RiskProfileReader } from '@ethonline2026/risk-analysis-data-pipeline';
 import { perStepChangeCovariate } from '../../services/timesfm3/covariates.js';
+import { invokeConfig, type AgentInvokeOptions } from '../../streaming.js';
 import { loadProtocolRules } from './corpus.js';
 import { assessRisk, validateRetrievalEvidence } from './guardrails.js';
 import { buildRiskContext } from './riskContext.js';
@@ -473,26 +474,30 @@ export function buildV01Graph(deps: V01Deps) {
 export async function runV01(
   deps: V01Deps,
   input: V01Input,
+  options: AgentInvokeOptions = {},
 ): Promise<V01State> {
   const parsed = IngestInputSchema.parse(input);
   const graph = buildV01Graph(deps);
-  const finalState = await graph.invoke({
-    mandate: parsed.mandate,
-    chain: parsed.chain ?? null,
-    sectors: parsed.protocols,
-    poolIds: parsed.poolIds,
-    rawProtocolRules: [],
-    protocolConstraints: [],
-    yieldProjections: [],
-    forecastRunId: null,
-    evidence: [],
-    calibration: null,
-    riskProfile: null,
-    synthesisRuns: 0,
-    readjustmentDecisions: [],
-    riskAssessment: { replanNeeded: false, reasons: [], suspiciousProjections: [] },
-    replanCount: 0,
-    audit: [],
-  });
+  const finalState = await graph.invoke(
+    {
+      mandate: parsed.mandate,
+      chain: parsed.chain ?? null,
+      sectors: parsed.protocols,
+      poolIds: parsed.poolIds,
+      rawProtocolRules: [],
+      protocolConstraints: [],
+      yieldProjections: [],
+      forecastRunId: null,
+      evidence: [],
+      calibration: null,
+      riskProfile: null,
+      synthesisRuns: 0,
+      readjustmentDecisions: [],
+      riskAssessment: { replanNeeded: false, reasons: [], suspiciousProjections: [] },
+      replanCount: 0,
+      audit: [],
+    },
+    invokeConfig(options),
+  );
   return finalState as V01State;
 }

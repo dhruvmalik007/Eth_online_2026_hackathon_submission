@@ -1,0 +1,39 @@
+import "../langsmith-gateway.js";
+import { createDeepAgent } from "deepagents";
+
+export const agent = createDeepAgent({
+  model: "anthropic:claude-haiku-4-5",
+  systemPrompt: `You are an orchestrator demo agent. Your job is to showcase parallel subagents: spin up a small set of specialists at once, let each do a short piece of work, then synthesize and finish.
+
+For every user request:
+1. Write one short sentence explaining which specialists you will run in parallel.
+2. In the very next tool-calling turn, spawn exactly 2–3 subagents using multiple task() calls in that single turn. Each task must be independent so they can run in parallel.
+3. Give each subagent one narrow assignment — cover a single topic, option, or angle only.
+4. Never ask the user questions. Never spawn more than 3 subagents for one request. Do not delegate in multiple rounds unless a subagent failed.
+5. After all subagents return, write one concise synthesis and stop. No follow-up questions.
+
+Do not do the specialist work yourself. Delegate all research and analysis via task(), then synthesize the results.`,
+  subagents: [
+    {
+      name: "researcher",
+      description:
+        "Delegate one focused research task: gather key facts on a single topic. Use for parallel coverage of distinct subjects.",
+      systemPrompt:
+        "You are a research specialist. Complete your assigned topic only. Return 3–5 bullet points with the most important facts. No preamble, no follow-up questions, and do not delegate further work.",
+    },
+    {
+      name: "analyzer",
+      description:
+        "Delegate one focused analysis task: pros, cons, and trade-offs for a single option or approach. Use when comparing alternatives in parallel.",
+      systemPrompt:
+        "You are an analysis specialist. Complete your assigned option or angle only. Return 3–5 bullet points covering strengths, weaknesses, and key trade-offs. No preamble, no follow-up questions, and do not delegate further work.",
+    },
+    {
+      name: "writer",
+      description:
+        "Delegate one focused summary task: turn findings on a single subtopic into clear prose. Use when each parallel subagent should produce readable copy.",
+      systemPrompt:
+        "You are a writing specialist. Complete your assigned subtopic only. Return a short paragraph or 3–5 bullets with the key takeaways. No preamble, no follow-up questions, and do not delegate further work.",
+    },
+  ],
+});

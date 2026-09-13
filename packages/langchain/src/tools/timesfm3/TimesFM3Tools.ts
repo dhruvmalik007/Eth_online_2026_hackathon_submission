@@ -7,6 +7,11 @@ import {
   type TimesFMForecast,
 } from '../../services/timesfm3/index.js';
 import { perStepChangeCovariate } from '../../services/timesfm3/covariates.js';
+import {
+  buildForecastProvenance,
+  describeProvenance,
+  type ForecastProvenance,
+} from '../../services/timesfm3/provenance.js';
 import type { TimeseriesClient, MetricWindow } from '@ethonline2026/timeseries';
 
 /**
@@ -48,6 +53,45 @@ export function createTimesFM3Tools(deps: TimesFM3ToolDeps) {
     });
   }
 
+  /**
+   * `forecastPool` plus the record of what it was run on.
+   *
+   * The window is read once and handed to both, so the digest provably describes
+   * the same series the model saw — reading it again to hash it would allow the
+   * two to diverge, which is precisely the failure provenance exists to catch.
+   */
+  async function forecastPoolWithProvenance(input: {
+    poolId: string;
+    horizon: number;
+    target: MetricWindow['metric'];
+    windowDays: number;
+  }): Promise<{ forecast: TimesFMForecast; provenance: ForecastProvenance }> {
+    const since = new Date(Date.now() - input.windowDays * 86_400_000);
+    const window = await deps.tsdb.getMetricWindow(input.poolId, input.target, since);
+    if (window.values.length < 8) {
+      throw new Error(
+        `insufficient history for ${input.poolId}/${input.target}: ${window.values.length} points (need >= 8)`,
+      );
+    }
+    const diffs = perStepChangeCovariate(window.values);
+    const forecast = await client.predict({
+      series: [...window.values],
+      horizon: input.horizon,
+      pastCovariates: [diffs],
+      returnQuantiles: true,
+    });
+    return {
+      forecast,
+      provenance: buildForecastProvenance({
+        poolId: input.poolId,
+        target: input.target,
+        windowDays: input.windowDays,
+        window,
+        forecast,
+      }),
+    };
+  }
+
   const timesfm3ForecastTool = tool(
     async (input: unknown) => {
       const { poolId, horizon = 30, target = 'apy', windowDays = 90 } = input as {
@@ -58,7 +102,7 @@ export function createTimesFM3Tools(deps: TimesFM3ToolDeps) {
       };
       if (!poolId) return JSON.stringify({ error: 'poolId is required' });
       try {
-        const forecast = await forecastPool({
+        const { forecast, provenance } = await forecastPoolWithProvenance({
           poolId,
           horizon,
           target: (target as MetricWindow['metric']) ?? 'apy',
@@ -73,7 +117,10 @@ export function createTimesFM3Tools(deps: TimesFM3ToolDeps) {
             latencyMs: forecast.latencyMs,
             flags: forecast.flags,
             steps: forecast.steps,
-            provenance: { model: forecast.model, inputsHash: `${poolId}:${target}:${windowDays}d` },
+            // The window the forecast was actually run on, so every q10/q50/q90 above can be
+            // traced back to its input series and independently re-run.
+            provenance,
+            provenanceSummary: describeProvenance(provenance),
           },
           null,
           2,

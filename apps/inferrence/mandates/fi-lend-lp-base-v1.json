@@ -1,0 +1,65 @@
+{
+  "id": "fi-lend-lp-base-v1",
+  "name": "Fixed income: USDC lending + stablecoin LP, Base",
+  "version": 1,
+  "thesis": "Hold USDC yield through two uncorrelated legs so the blended rate survives one of them compressing. Both legs are single-chain and stablecoin-only, which keeps the execution path free of bridging and of price exposure to the volatile asset \u2014 the point of a fixed-income mandate is that the return does not depend on the direction of a risky asset.",
+  "chain": "Base",
+  "settlementChain": "sepolia",
+  "horizonDays": 30,
+  "notionalUsd": 10000,
+  "riskBudget": {
+    "maxDrawdownPct": 2,
+    "volCapBps": 300,
+    "minLiquidityUsd": 100000
+  },
+  "legs": [
+    {
+      "id": "leg-1",
+      "kind": "lend",
+      "protocol": "aave-v3",
+      "weightPct": 65,
+      "minApyBps": 180,
+      "intent": "Supply 65,000 USDC to Aave v3 on Base",
+      "poolSelector": {
+        "project": "aave-v3",
+        "chain": "Base",
+        "symbols": [
+          "USDC"
+        ],
+        "exposure": "single",
+        "stablecoin": true,
+        "minTvlUsd": 5000000
+      }
+    },
+    {
+      "id": "leg-2",
+      "kind": "lp",
+      "protocol": "uniswap-v4",
+      "weightPct": 35,
+      "minApyBps": 120,
+      "intent": "Provide 35,000 USDC to the deepest USDC/USDT pool on Uniswap v4, Base",
+      "poolSelector": {
+        "project": "uniswap-v4",
+        "chain": "Base",
+        "symbols": [
+          "USDC",
+          "USDT"
+        ],
+        "exposure": "multi",
+        "stablecoin": true,
+        "minTvlUsd": 100000
+      }
+    }
+  ],
+  "approval": {
+    "mode": "batch",
+    "required": true,
+    "maxSpendUsd": 100000
+  },
+  "forecast": {
+    "metric": "apy",
+    "horizonSteps": 30,
+    "covariate": "protocol-tvl"
+  },
+  "notes": "Floors are set from the pools that actually exist, not from a target. The deepest USDC/USDT uniswap-v4 pool on Base carried ~$135k TVL when this was written, so the LP leg floors at $100k and the notional is $10k: at 35% the LP position is ~$3.5k, a small fraction of that pool. A larger mandate needs a deeper venue \u2014 the constraint is pool depth, not the mandate. The lending leg clears its floor by two orders of magnitude (Aave v3 USDC on Base, ~$24.7M)."
+}

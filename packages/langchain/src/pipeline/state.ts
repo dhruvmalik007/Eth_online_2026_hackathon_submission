@@ -14,7 +14,16 @@ import type { StrategyResult } from "../tools/fixedIncomeMath.js";
 
 export type ExecutionMode = "dry" | "live";
 
-export type LegKind = "arc-bridge" | "oneinch-swap" | "v4-mint";
+export type LegKind =
+  | "arc-bridge"
+  | "oneinch-swap"
+  | "v4-mint"
+  // The Aqua / SwapVM flight. `aqua-swap` is one leg with two steps — a SwapVM take
+  // that converts the volatile leg into a stablecoin, then an ERC-4626 deposit — so it
+  // stays a single leg and the steps are visible in the step trace rather than here.
+  | "aqua-swap"
+  | "aqua-ship"
+  | "vault-deposit";
 
 export interface MandateIntent {
   sizeUsd: number;

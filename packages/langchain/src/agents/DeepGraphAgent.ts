@@ -23,6 +23,12 @@ import { v4FixedIncomeStrategyTool } from '../tools/V4FixedIncomeStrategyTool.js
 import { createMathTools } from '../tools/mathTools.js';
 import { createAcpTools } from '../tools/erc8183/AcpTools.js';
 import { createArcSettlementTools } from '../tools/arc/ArcSettlementTools.js';
+import { createAquaTools } from '../tools/aqua/AquaTools.js';
+import { createChainRiskReportTool } from '../tools/risk/ChainRiskReportTool.js';
+import { createRiskTools } from '../tools/risk/RiskProfileTools.js';
+import { chainRiskReaderFrom } from '../tools/risk/riskProfileAdapter.js';
+import type { RiskProfileReader } from '@ethonline2026/risk-analysis-data-pipeline';
+import { invokeConfig, type AgentInvokeOptions } from '../streaming.js';
 import { loadEnv } from '../config/env.js';
 
 /**
@@ -55,6 +61,19 @@ export interface DeepGraphAgentConfig {
   readonly disableV4?: boolean;
   /** Skip multi-category DeFi tools (lending, DEX, prediction markets, fixed income) */
   readonly disableMultiCategory?: boolean;
+  /**
+   * The chain risk report's source.
+   *
+   * Omitted means the tool reports `risk_snapshots_unavailable` rather than producing a report — an
+   * absent reading is not a clean one, and the whole point of the tool is that an operator can see
+   * what a chain's risk actually is before committing to it.
+   */
+  readonly risk?: {
+    /** The published chain-risk snapshots. Omitted means both risk tools report an unconfigured store. */
+    readonly reader?: RiskProfileReader;
+    /** Which agent the report is attributed to, so a verdict has an owner. */
+    readonly inferredBy?: string;
+  };
 }
 
 export class DeepGraphAgent {
@@ -500,7 +519,7 @@ Return structured, validated JSON responses.`;
    * (undefined.message / 429 / 500 / overloaded) rotates to the NEXT MODEL,
    * not just the same one. The per-attempt agent is cached per model.
    */
-  async invoke(query: string, retries = 2): Promise<unknown> {
+  async invoke(query: string, retries = 2, options: AgentInvokeOptions = {}): Promise<unknown> {
     if (!this.agent) {
       await this.initialize();
     }
@@ -528,9 +547,12 @@ Return structured, validated JSON responses.`;
       const label = modelName ?? 'primary';
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-          const invoked = agent.invoke({
-            messages: [{ role: 'user' as const, content: query }],
-          });
+          const invoked = agent.invoke(
+            {
+              messages: [{ role: 'user' as const, content: query }],
+            },
+            invokeConfig(options),
+          );
           const timeout = new Promise<never>((_, reject) =>
             setTimeout(
               () => reject(new Error(`model timeout after ${ATTEMPT_TIMEOUT_MS}ms`)),
@@ -589,6 +611,18 @@ Return structured, validated JSON responses.`;
    * Create multi-category DeFi tools (lending, DEX, prediction markets, fixed income).
    */
   private createMultiCategoryTools() {
+    // Built by conditional spread because `exactOptionalPropertyTypes` distinguishes an absent key
+    // from one set to `undefined`, and the factory's deps are declared with optional keys.
+    const reader = this.config.risk?.reader;
+    const riskDeps = {
+      ...(reader === undefined ? {} : { reader }),
+      ...(this.config.risk?.inferredBy === undefined ? {} : { inferredBy: this.config.risk.inferredBy }),
+    };
+    const reportDeps = {
+      ...(reader === undefined ? {} : { reader: chainRiskReaderFrom(reader) }),
+      ...(this.config.risk?.inferredBy === undefined ? {} : { inferredBy: this.config.risk.inferredBy }),
+    };
+
     return [
       ...createLendingTools(),
       ...createDexTools(),
@@ -598,6 +632,15 @@ Return structured, validated JSON responses.`;
       ...createMathTools(),
       ...createArcSettlementTools(),
       ...createAcpTools(),
+      // Aqua/SwapVM and the chain risk report. Registering the Aqua tools costs no network access —
+      // they reason about a proposal rather than reading one — and the risk tool reports an
+      // unconfigured store rather than degrading into a false all-clear.
+      ...Object.values(createAquaTools()),
+      // `createRiskTools` was exported but never registered anywhere — dead code until now. The agent
+      // could not read a chain's profile at all, which is the one tool a strategy needs before
+      // choosing where to sit.
+      ...Object.values(createRiskTools(riskDeps)),
+      createChainRiskReportTool(reportDeps).riskReportTool,
     ];
   }
 }

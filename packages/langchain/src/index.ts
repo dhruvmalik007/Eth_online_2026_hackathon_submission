@@ -10,6 +10,7 @@
 // ─── Agents ───────────────────────────────────────────────────────────────────
 
 export { DeepGraphAgent, type DeepGraphAgentConfig } from './agents/DeepGraphAgent.js';
+export { invokeConfig, type AgentInvokeOptions } from './streaming.js';
 export { LangGraphAgent, type LangGraphAgentConfig } from './agents/LangGraphAgent.js';
 
 // ─── Uniswap v4 ───────────────────────────────────────────────────────────────
@@ -123,6 +124,13 @@ export {
   createTimeseriesTools,
   type TimeseriesToolDeps,
 } from './tools/timeseries/TimeseriesTools.js';
+
+// ─── TimesFM-3 forecasting tools (self-hosted service; serialised + cached) ───
+
+export {
+  createTimesFM3Tools,
+  type TimesFM3ToolDeps,
+} from './tools/timesfm3/TimesFM3Tools.js';
 
 // ─── Risk-profile tools (macro, governance, Black-Scholes/Merton inputs) ──────
 
@@ -249,3 +257,26 @@ export type {
   V4Position,
   Redemption,
 } from '@ethonline2026/graph-fno-indexer';
+export {
+  createChainRiskReportTool,
+  type ChainRiskReader,
+  type ChainRiskReportDeps,
+} from "./tools/risk/ChainRiskReportTool.js";
+export {
+  DEFAULT_RISK_FREE_RATE,
+  LEVEL_THRESHOLDS,
+  RISK_FACTOR_IDS,
+  RISK_LEVELS,
+  RiskReportSchema,
+  buildFactors,
+  buildRiskReport,
+  deriveLevel,
+  explainFactor,
+  type ChainRiskInput,
+  type RiskFactor,
+  type RiskFactorId,
+  type RiskLevel,
+  type RiskMetric,
+  type RiskReport,
+} from "./tools/risk/riskReport.js";
+export { createAquaTools } from "./tools/aqua/AquaTools.js";

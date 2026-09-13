@@ -1,0 +1,127 @@
+# Build + push the inferrence image, then deploy it to Cloud Run as a **gen1**
+# service.
+#
+#   gcloud builds submit --config apps/inferrence/cloudbuild.yaml \
+#     --substitutions=_IMAGE=us-central1-docker.pkg.dev/$PROJECT/inferrence/inferrence:$SHORT_SHA
+#
+# ## Why this runs a build config rather than `gcloud run deploy --source .`
+#
+# `--source .` requires the Dockerfile at the **root of the source directory** and
+# offers no `--dockerfile` flag. This app's Dockerfile lives at
+# `apps/inferrence/Dockerfile` and the build context must be the repo root (pnpm
+# needs every workspace manifest), so the image is built here with an explicit
+# context and deployed by image reference.
+#
+# ## gen1, deliberately
+#
+# gen1 has the faster cold start. The consequence is that Cloud Run **sandboxes
+# are unavailable in-process** — they require gen2 — so this service points at a
+# separate gen2 sandbox-runner rather than hosting untrusted work itself.
+
+substitutions:
+  _IMAGE: us-central1-docker.pkg.dev/PROJECT/inferrence/inferrence:latest
+  # A STABLE tag for the layer cache. Using the release tag as the cache source
+  # silently defeats caching: each release tag does not exist yet, so `docker
+  # pull` brings down nothing and every build is cold.
+  _CACHE_IMAGE: us-central1-docker.pkg.dev/PROJECT/inferrence/inferrence:cache
+  _REGION: us-central1
+  _SERVICE: inferrence
+  # In-memory state is per-instance, so the preview revision is pinned to one.
+  _MAX_INSTANCES: "1"
+  _SERVICE_ACCOUNT: inferrence-run@PROJECT.iam.gserviceaccount.com
+
+steps:
+  # Cloud Build starts each build with an empty layer cache, so `--cache-from`
+  # is only useful if the previous image's layers are pulled first. Without this
+  # step the Dockerfile's layer ordering buys nothing and every build reinstalls
+  # the whole pnpm workspace.
+  - id: pull-cache
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if docker pull ${_CACHE_IMAGE}; then
+          echo "Reusing layers from ${_CACHE_IMAGE}"
+        else
+          echo "No cache image yet — this is a cold build."
+        fi
+    allowFailure: true
+
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --cache-from=${_CACHE_IMAGE}
+      - --file=apps/inferrence/Dockerfile
+      - --tag=${_IMAGE}
+      - --tag=${_CACHE_IMAGE}
+      - .
+
+  # Fail the build if any .env file reached the image. The repo has real
+  # credentials in `packages/*/.env`, and the Dockerfile copies `packages/` for
+  # the workspace manifests — so this is the guard that keeps them out.
+  - id: assert-no-secrets
+    name: ${_IMAGE}
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        found=$(find / -name '.env*' -not -path '*/node_modules/*' 2>/dev/null | head -5)
+        if [ -n "$found" ]; then
+          echo "FAIL: .env files found in the image:"; echo "$found"; exit 1
+        fi
+        echo "OK: no .env files in the image."
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    # Block style, not `[push, ${_IMAGE}]`: a substitution inside a YAML flow
+    # sequence fails to parse ("expected ',' or ']', but got '{'").
+    args:
+      - push
+      - ${_IMAGE}
+
+  # The stable cache tag is pushed separately. Deriving it from ${_IMAGE} rather
+  # than hardcoding the repository: a literal `PROJECT` placeholder in the path
+  # fails with "repository name must be lowercase".
+  - id: push-cache
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_CACHE_IMAGE}
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_IMAGE}
+      - --region=${_REGION}
+      - --platform=managed
+      - --no-allow-unauthenticated
+      - --execution-environment=gen1
+      - --service-account=${_SERVICE_ACCOUNT}
+      - --min-instances=0
+      - --max-instances=${_MAX_INSTANCES}
+      - --concurrency=8
+      - --cpu=2
+      - --memory=2Gi
+      - --timeout=900
+      - --cpu-throttling
+      # Config is declared here rather than applied out-of-band, because
+      # `--set-env-vars` REPLACES the whole env: anything set by a later
+      # `services update` would silently vanish on the next deploy.
+      - >-
+        --set-env-vars=INFERENCE_MODE=dry,INFERENCE_PERSISTENCE=memory,AGENT_IMPL=mock,SANDBOX_PROVIDER=local,LOG_LEVEL=info,INFERENCE_MAX_CONCURRENT_RUNS=4,GOOGLE_CLOUD_PROJECT=ultimate3dreconstructionstack,ETHEREUM_SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com,LANGSMITH_TRACING=true,LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com,LANGSMITH_PROJECT=agentic-ems-inferrence,LANGSMITH_WORKSPACE_ID=b3e0597d-3571-4d2d-be46-148b69aa9176,LANGSMITH_ORG_ID=d7bf734a-8342-4ca1-afd4-0f9cc469b322,CUSTODY_SIGNER=privy,CUSTODY_SAFE_CHAIN=sepolia,CUSTODY_SAFE_OWNERS=0x4E739DA1405CBF48f98084975786C835DB73E63A,CUSTODY_SAFE_THRESHOLD=1,PRIVY_APP_ID=cmtx97qgx008q0ck04fad145i,PRIVY_WALLET_ID=tqlslk0mvxvfvwgcunk43ba0,PRIVY_WALLET_ADDRESS=0x4E739DA1405CBF48f98084975786C835DB73E63A
+      # Secrets by reference. The Privy pair is what makes the signing path real;
+      # the LangSmith key is what makes the traces land.
+      - >-
+        --set-secrets=LANGSMITH_API_KEY=inferrence-langsmith-key:latest,PRIVY_APP_SECRET=inferrence-privy-app-secret:latest,PRIVY_AUTHORIZATION_PRIVATE_KEY=inferrence-privy-auth-key:latest
+
+images:
+  - ${_IMAGE}
+
+options:
+  logging: CLOUD_LOGGING_ONLY
