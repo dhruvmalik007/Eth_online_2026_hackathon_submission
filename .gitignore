@@ -269,3 +269,7 @@ archive
 packages/*/contracts/out/
 packages/*/contracts/cache/
 packages/*/contracts/broadcast/
+
+# Scratch data dumps — regenerable, not part of the deliverable
+data/*.batch.jsonl
+data/higgsfield_trigger_text.txt
