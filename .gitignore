@@ -24,6 +24,10 @@ lib64/
 # descends into it.
 !packages/*/src/lib/
 !packages/*/src/lib/**
+# Same for app-level source: apps/agentic-ems/lib is application code, not a
+# build directory, and was being hidden by the same `lib/` rule.
+!apps/*/lib/
+!apps/*/lib/**
 parts/
 sdist/
 var/
