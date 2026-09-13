@@ -27,10 +27,13 @@ from pydantic import BaseModel
 from .browser import CamoufoxFetcher, FetchSettings, PageFetcher
 from .errors import RiskPipelineError
 from .manifest import build_manifest
+from .models import IncidentFeed, Provenance, SecurityIncident, SourceState
 from .publish import MANIFEST_KEY, GcsWriter, LocalDirWriter, SnapshotWriter, snapshot_key
 from .sources.base import Source, SourceOutcome
 from .sources.defillama_mm import MarketMakerSource
 from .sources.discourse import DiscourseSource
+from .sources.incidents import SCHEMA_VERSION as INCIDENT_SCHEMA_VERSION
+from .sources.incidents import IncidentSource
 from .sources.l2beat import L2BeatSource
 
 __all__ = ["main", "run_sweep"]
@@ -39,7 +42,7 @@ __all__ = ["main", "run_sweep"]
 DEFAULT_CADENCE_HOURS = 6.0
 
 #: Source identifiers accepted by ``--sources``.
-SOURCE_IDS = ("l2beat", "discourse", "market-makers")
+SOURCE_IDS = ("l2beat", "discourse", "market-makers", "incidents")
 
 
 def _build_sources(selected: set[str]) -> list[Source[BaseModel]]:
@@ -61,6 +64,8 @@ def _build_sources(selected: set[str]) -> list[Source[BaseModel]]:
         sources.append(DiscourseSource())  # type: ignore[arg-type]
     if "market-makers" in selected:
         sources.append(MarketMakerSource())  # type: ignore[arg-type]
+    if "incidents" in selected:
+        sources.append(IncidentSource())  # type: ignore[arg-type]
     return sources
 
 
@@ -110,11 +115,22 @@ def _write_records(
     Returns:
         The number of documents written.
     """
+    kind = _kind_for(outcome.source_id)
+    if kind is None:
+        return 0
+
+    # Incidents publish one feed per *subject*, not one document per record. The
+    # subject is the unit a risk reader asks about, and a file per incident would
+    # scatter single-record documents through the store with no way to read a
+    # protocol's incident history in one fetch -- the same reason the chain and
+    # protocol families publish per slug rather than per fact.
+    if outcome.source_id == "incidents":
+        return _write_incident_feeds(writer, outcome, log=log)
+
     written = 0
     for record in outcome.records:
-        kind = _kind_for(outcome.source_id)
         slug = getattr(record, "slug", None)
-        if kind is None or not isinstance(slug, str):
+        if not isinstance(slug, str):
             log("warn", outcome.source_id, "skipping a record with no slug")
             continue
         # `model_dump_json(by_alias=True)` is what produces the camelCase the
@@ -123,6 +139,56 @@ def _write_records(
         writer.write(snapshot_key(kind, slug), body)
         written += 1
     return written
+
+
+def _write_incident_feeds(
+    writer: SnapshotWriter,
+    outcome: SourceOutcome[BaseModel],
+    *,
+    log: _Logger,
+) -> int:
+    """Group incident records by subject and write one feed document per subject.
+
+    Args:
+        writer: The snapshot writer.
+        outcome: The incident source's outcome.
+        log: The logging callable.
+
+    Returns:
+        The number of feed documents written.
+    """
+    grouped: dict[str, list[SecurityIncident]] = {}
+    for record in outcome.records:
+        if isinstance(record, SecurityIncident):
+            grouped.setdefault(record.subject, []).append(record)
+
+    if not grouped:
+        # A sweep that attributed nothing is worth surfacing: on the live feed it
+        # means the subject index matched no incident at all, which is a
+        # different situation from "the feed had no incidents".
+        log("warn", outcome.source_id, "no incidents attributed to a roster subject")
+        return 0
+
+    for subject in sorted(grouped):
+        incidents = sorted(grouped[subject], key=lambda r: r.occurred_at, reverse=True)
+        feed = IncidentFeed(
+            schema_version=INCIDENT_SCHEMA_VERSION,
+            subject=subject,
+            subject_kind=incidents[0].subject_kind,
+            incidents=incidents,
+            provenance=Provenance(
+                source=outcome.source_id,
+                source_url=outcome.provenance.source_url,
+                fetched_at=outcome.provenance.fetched_at,
+                state=SourceState.FRESH,
+            ),
+        )
+        writer.write(
+            snapshot_key("incidents", subject),
+            feed.model_dump_json(by_alias=True),
+        )
+
+    return len(grouped)
 
 
 def _kind_for(source_id: str) -> str | None:
@@ -138,6 +204,7 @@ def _kind_for(source_id: str) -> str | None:
         "l2beat": "chains",
         "discourse": "protocols",
         "market-makers": "market-makers",
+        "incidents": "incidents",
     }.get(source_id)
 
 
