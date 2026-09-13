@@ -7,8 +7,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 const RPC = process.env.ARC_TESTNET_RPC_URL ?? "https://rpc.testnet.arc.network";
 const USDC = (process.env.ARC_TESTNET_USDC ?? "0x3600000000000000000000000000000000000000") as `0x${string}`;
-const pk = (process.env.ARC_PRIVATE_KEY ??
-  "0xae4de1d4d157ad553df529a397b54280edf4e839acd97cae6340570e082d85d2") as `0x${string}`;
+const pk = (process.env.ARC_PRIVATE_KEY) as `0x${string}`;
 
 async function main() {
   const account = privateKeyToAccount(pk);
