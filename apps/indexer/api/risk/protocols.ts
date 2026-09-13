@@ -1,7 +1,13 @@
 import { handleRiskProtocols } from '../_lib/handlers.js';
 import { getRuntime } from '../_lib/runtime.js';
+import { sendWebResponse, toWebRequest } from '../_lib/vercel.js';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
 /** GET /api/risk/protocols — governance profiles, with forum provenance. */
-export default async function handler(): Promise<Response> {
-  return handleRiskProtocols(getRuntime());
+// Vercel passes Node's `(request, response)`; `_lib/vercel.ts` owns that translation.
+export default async function handler(
+  _request: IncomingMessage,
+  response: ServerResponse,
+): Promise<void> {
+  await sendWebResponse(response, await handleRiskProtocols(getRuntime()));
 }
