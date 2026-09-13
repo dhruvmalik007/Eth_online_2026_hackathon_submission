@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@ethonline2026/fork-execution^...",
+  "outputDirectory": "public",
+  "functions": {
+    "api/*.ts": { "maxDuration": 60, "memory": 1024 }
+  }
+}
