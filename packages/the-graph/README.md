@@ -57,6 +57,67 @@ export it from `src/queries/index.ts` + root `index.ts`, and consume it through
 `FnoDataExtractor`). The LangChain package's legacy inline-SDL layer was removed
 in this migration — the archived originals live in `archive/langchain-graphql-legacy/`.
 
+## Messari standardized subgraphs (added 2026-09-13)
+
+Five fixed-income categories: **lending, dex, perpetual, prediction, liquid-staking**.
+Four are served by Messari's standardized subgraphs; prediction markets are not a
+Messari schema, so they come from Polymarket's own deployment.
+
+`src/registry/messari-deployments.json` is generated, not hand-written — 197
+deployments across 46 protocols, from Messari's `deployment/deployment.json`:
+
+```bash
+pnpm registry:messari     # regenerate
+pnpm probe:messari        # live gate; --write records the verdict, --limit 12 for a quick run
+```
+
+Only deployments with a `services.decentralized-network.query-id` are kept. Messari's
+`hosted-service` entries died with The Graph hosted-service shutdown, so a hosted-only
+entry is a dead endpoint — `morpho-blue` is a well-known protocol that is absent for
+exactly that reason.
+
+### Resolving any of the 197 endpoints
+
+```ts
+import { loadEnv, SubgraphRegistry, messariProtocolFinancials } from '@ethonline2026/graph-fno-indexer';
+
+const registry = SubgraphRegistry.fromEnv(loadEnv());
+
+// Curated endpoint by name, curated protocol, or a Messari deployment — in that order.
+const client = registry.clientFor({ protocol: 'lido', network: 'ethereum' });
+const { financialsDailySnapshots } = await client.executeTemplate(
+  messariProtocolFinancials,
+  { first: 30 },
+  { timeoutMs: 20_000 },
+);
+```
+
+A protocol deployed on several chains **with no `network` given** is refused as
+ambiguous rather than resolved to the first match, because silently picking a chain
+would mean a yield number computed against a chain the caller never named.
+
+### Two things to know before relying on a registry entry
+
+**Presence is not liveness.** Probing on 2026-09-13 found **88 of 204 endpoints dead**
+(`subgraph not found: no allocations`, or indexers returning no attestation). The
+verdict for every endpoint is recorded in `src/registry/messari-liveness.json`; run
+`pnpm probe:messari --write` to refresh it.
+
+**Messari's `schema` label records intent, not reality, and the standard is versioned.**
+Both were established by probing, not assumed:
+
+- `uniswap-v3` is labelled `dex-amm` and exposes Uniswap's *native* entities — no
+  `protocols` field at all.
+- `aave-v3` is Messari-shaped but an **older revision**: its `Protocol` is
+  `{ id, pools }`, with no `name`, no TVL, and no `FinancialsDailySnapshot` entity. No
+  query in `src/queries/messari/` runs against it. The curated `aaveV3Ethereum` endpoint
+  is in the same position — it serves the package's older `reserves` queries instead.
+
+So a query in `src/queries/messari/` is valid only where `messariProbe` resolves. That
+gate selects the same `Protocol` fields as `messariProtocols` on purpose: a minimal
+`id`-only check answers "does this subgraph respond" and gets "will the core queries
+run" wrong, which is the distinction that matters.
+
 ## Setup
 
 ```bash
