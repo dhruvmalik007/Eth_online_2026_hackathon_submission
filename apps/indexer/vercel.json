@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@ethonline2026/indexer^...",
+  "buildCommand": "cd ../.. && node apps/indexer/scripts/patch-vendored-esm.mjs && pnpm turbo run build --filter=@ethonline2026/indexer^...",
   "outputDirectory": "public",
   "functions": {
     "api/agent.ts": { "maxDuration": 60, "memory": 1024 },
