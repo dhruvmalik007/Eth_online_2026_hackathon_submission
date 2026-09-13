@@ -22,6 +22,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { HTTPMethods } from "fastify";
 import { buildApp } from "../src/app.js";
 import { HeaderAuthenticator } from "../src/http.js";
+import { createAuthenticator } from "../src/privyAuth.js";
 import { createRuntime } from "../src/runtime.js";
 
 type App = ReturnType<typeof buildApp>;
@@ -30,9 +31,14 @@ let instance: App | null = null;
 
 function app(): App {
   if (instance === null) {
-    // `buildApp` calls `assertDeployable`, so a live-mode deployment on the development
+    const runtime = createRuntime();
+    // Privy verification when its credentials are present; the development header authenticator
+    // otherwise. `buildApp` calls `assertDeployable`, so a live-mode deployment on the development
     // authenticator fails here — at boot, not on the first request that can sign.
-    instance = buildApp({ runtime: createRuntime(), authenticator: new HeaderAuthenticator() });
+    instance = buildApp({
+      runtime,
+      authenticator: createAuthenticator(runtime.env, () => new HeaderAuthenticator()),
+    });
   }
   return instance;
 }

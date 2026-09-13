@@ -24,6 +24,7 @@ import { NO_RISK_REPORTS, type RiskReportSource } from "./risk.js";
 import { createVenueRegistry, type VenueRegistry } from "./venues.js";
 import { loadExecutionEnv, type ExecutionEnv } from "./env.js";
 import type { EvmSigner } from "./evmSigner.js";
+import { bindSigner } from "./signerBinding.js";
 import { SubscriptionHub } from "./ws.js";
 
 /** Everything a route handler may reach. No handler imports an adapter directly. */
@@ -140,6 +141,16 @@ export function createRuntime(overrides: RuntimeOverrides = {}): ExecutionRuntim
   // complete configuration, not a boot failure.
   const aqua = overrides.aqua ?? createAquaSurface(env);
 
+  /**
+   * The signer, if this deployment was given a key.
+   *
+   * An override wins (tests inject fakes); otherwise the key comes from configuration. Still no
+   * default *key* — a signer that appears without being asked for is a key nobody chose to load —
+   * but a key that was asked for now binds here rather than only at the container entrypoint, so the
+   * Vercel function and the container cannot disagree about whether signing is available.
+   */
+  const signer = overrides.signer ?? bindSigner(env)?.signer;
+
   const events =
     overrides.events ??
     new ExecutionEventBuffer(history, {
@@ -171,7 +182,7 @@ export function createRuntime(overrides: RuntimeOverrides = {}): ExecutionRuntim
     // Conditional spread because `exactOptionalPropertyTypes` distinguishes an absent key from a
     // key set to undefined.
     ...(aqua === undefined ? {} : { aqua }),
-    ...(overrides.signer === undefined ? {} : { signer: overrides.signer }),
+    ...(signer === undefined ? {} : { signer }),
   };
 }
 

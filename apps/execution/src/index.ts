@@ -36,4 +36,14 @@ export {
   toErrorResponse,
 } from "./http.js";
 export type { Authenticator, ErrorCode } from "./http.js";
+
+// ─── Authentication ───────────────────────────────────────────────────────────
+
+export { PrivyAuthenticator, createAuthenticator } from "./privyAuth.js";
+export type { PrivyAuthenticatorOptions, AuthenticatorEnv } from "./privyAuth.js";
+
+// ─── Signing ──────────────────────────────────────────────────────────────────
+
+export { bindSigner, signerChainByName, DEFAULT_SIGNER_CHAIN } from "./signerBinding.js";
+export type { BoundSigner, SignerEnv } from "./signerBinding.js";
 export { createAquaSurface, type AquaSurface } from "./aqua.js";

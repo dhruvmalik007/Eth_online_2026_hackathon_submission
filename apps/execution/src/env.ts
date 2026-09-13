@@ -86,6 +86,37 @@ export const ExecutionEnvSchema = z.object({
    * in `apps/agentic-ems`; this is only where it lands.
    */
   APPROVAL_MAX_SPEND_USD: z.coerce.number().positive().default(250_000),
+
+  /**
+   * Privy credentials for access-token verification.
+   *
+   * Optional as a *pair*: both set selects the Privy authenticator, neither keeps the development
+   * one. Setting exactly one is refused at boot rather than downgraded — see `createAuthenticator`.
+   */
+  PRIVY_APP_ID: z.string().min(1).optional(),
+  PRIVY_APP_SECRET: z.string().min(1).optional(),
+  /** Optional: the dashboard's verification key, which removes a Privy round-trip from cold start. */
+  PRIVY_VERIFICATION_KEY: z.string().min(1).optional(),
+
+  /**
+   * The key the service signs and broadcasts with.
+   *
+   * Absent by default: `createRuntime` binds a signer only when one is asked for, so a deployment
+   * that can move funds is a decision on the record. Set this and the two routes that need a signer
+   * stop answering 503. Read here and passed to `bindSigner`; never a literal in source.
+   */
+  EXECUTION_SIGNER_PRIVATE_KEY: z.string().min(1).optional(),
+  /**
+   * The backup payer, used only when the primary is absent.
+   *
+   * Exists so a demonstration can proceed from a second funded testnet wallet. It is deliberately
+   * not consulted when the primary is present-but-malformed — that is a configuration error to fix,
+   * and swapping keys silently would hide it.
+   */
+  EXECUTION_FALLBACK_SIGNER_PRIVATE_KEY: z.string().min(1).optional(),
+  /** Which chain the signer binds to. Defaults to where the demonstration wallet is funded. */
+  EXECUTION_SIGNER_CHAIN: z.string().min(1).default("base-sepolia"),
+  EXECUTION_SIGNER_RPC_URL: z.string().min(1).optional(),
 });
 
 export type ExecutionEnv = z.infer<typeof ExecutionEnvSchema>;

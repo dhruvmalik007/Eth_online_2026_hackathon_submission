@@ -18,12 +18,15 @@
  */
 import Fastify, { type FastifyInstance, type FastifyRequest } from "fastify";
 import { randomUUID } from "node:crypto";
+
+/** The shape `uuid` columns accept — used where a caller-supplied id may not be one. */
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 import { CHAIN_KEYS } from "@ethonline2026/oneinch-aqua";
 import { IntentLegSchema, type IntentLeg } from "@ethonline2026/execution-domain";
 import { UnsignedTransactionSchema } from "@ethonline2026/order-execution-layer/port";
 import { assessApproval, resolveLimits, type ApprovalRequest } from "./approval.js";
 import { describeRisk, type RiskNotice } from "./risk.js";
-import { ExecutionReadModel, type SessionRow } from "@ethonline2026/timeseries";
+import { ExecutionReadModel, type ExecutionStepRow, type SessionRow } from "@ethonline2026/timeseries";
 import type { ExecutionRuntime } from "./runtime.js";
 import {
   HttpError,
@@ -72,6 +75,18 @@ export function buildApp(options: AppOptions): FastifyInstance {
       mode: runtime.env.EXECUTION_MODE,
       database,
       degraded,
+      /**
+       * Whether this deployment can sign, and with which address.
+       *
+       * The address — never the key. Without this the only way to ask "is signing wired?" is the two
+       * routes that need it, and those authenticate first, so an unauthenticated caller cannot tell
+       * a missing signer from a rejected token. That ambiguity is worth removing: it is the
+       * difference between a configuration mistake and a working deployment.
+       */
+      signer:
+        runtime.signer === undefined
+          ? { configured: false }
+          : { configured: true, address: await runtime.signer.getAddress() },
     });
   });
 
@@ -567,6 +582,28 @@ export function buildApp(options: AppOptions): FastifyInstance {
     const approvedBy = optionalString(input, "approvedBy") ?? userId;
     const sentBy = await signer.getAddress();
     const submitted: { index: number; transactionHash: string }[] = [];
+    const steps: ExecutionStepRow[] = [];
+
+    /**
+     * A call may declare itself a leg of a cross-chain route.
+     *
+     * Optional, because most calls are not: a settlement on one chain is a transaction, and labelling
+     * it a bridge would invent a destination that does not exist. When it *is* supplied, the panel can
+     * show the pair an operator actually cares about — left the source chain, arrived on the
+     * destination — rather than only the half it can see.
+     *
+     * `guid` is deliberately **not** fabricated from the provider. The read model turns a guid into a
+     * LayerZero scan link, so filling it with a LI.FI reference would build a URL that resolves to
+     * nothing: a link that looks like proof and is not. It is recorded only when the caller supplies a
+     * genuine LayerZero message id.
+     */
+    const crossChainRaw = input["crossChain"];
+    const crossChain =
+      typeof crossChainRaw === "object" && crossChainRaw !== null
+        ? (crossChainRaw as Record<string, unknown>)
+        : undefined;
+    const isBridge = crossChain !== undefined;
+    const guid = crossChain === undefined ? undefined : optionalString(crossChain, "guid");
 
     for (const [index, call] of calls.entries()) {
       // Validated by the same schema the adapters *produce* calls with, so a caller cannot hand over
@@ -591,9 +628,164 @@ export function buildApp(options: AppOptions): FastifyInstance {
         ...(tx.value === "0" ? {} : { value: BigInt(tx.value) }),
       });
       submitted.push({ index, transactionHash: handle.transactionHash });
+      steps.push({
+        stepId: randomUUID(),
+        intentId: id,
+        userId,
+        seq: index,
+        kind: isBridge ? "bridge" : "transfer",
+        label: isBridge ? `Bridge ${index + 1} of ${calls.length}` : `Broadcast ${index + 1} of ${calls.length}`,
+        status: "submitted",
+        chainId: tx.chainId,
+        txHash: handle.transactionHash,
+        nonce: null,
+        gasUsed: null,
+        // For a bridge the source hash is the broadcast itself — that is the half this service can
+        // observe. The destination hash arrives later, from the provider, via `/confirm`.
+        srcTxHash: isBridge ? handle.transactionHash : null,
+        dstTxHash: null,
+        guid: guid ?? null,
+        error: null,
+      });
     }
 
-    return reply.send({ intentId: id, sentBy, approvedBy, submitted });
+    /**
+     * Recorded as events, not as steps.
+     *
+     * `exec_steps` references `exec_intents`, which references `exec_runs`, which references a
+     * strategy — and no route in this service creates any of those rows. Writing a step therefore
+     * fails for every intent a caller can actually name, which is what turned a successful broadcast
+     * into a 500 the first time this ran. `exec_events` carries no foreign keys, so it is the one
+     * table a broadcast can be recorded in today; the read model unions both.
+     *
+     * Never at the cost of reporting a broadcast that happened as a failure: the transactions are on
+     * chain and cannot be recalled, so a write error must not become the caller's answer.
+     */
+    let recorded = true;
+    try {
+      await runtime.history.recordEvents(
+        steps.map((step) => ({
+          eventId: randomUUID(),
+          at: new Date(),
+          userId,
+          runId: null,
+          // `intent_id` is a uuid column, and the route accepts any string for `:id`. A readable id
+          // like `live-1234` cannot be stored, so it is recorded as absent rather than making the
+          // whole write fail — the broadcast is the fact worth keeping, not the label a caller chose.
+          intentId: UUID_PATTERN.test(id) ? id : null,
+          stepId: step.stepId,
+          type: "step.broadcast",
+          payload: {
+            txHash: step.txHash,
+            chainId: step.chainId,
+            label: step.label,
+            index: step.seq,
+            sentBy,
+            // Carried so `/bridges` can show a cross-chain pair without a second lookup.
+            ...(isBridge ? { srcTxHash: step.srcTxHash, kind: "bridge" } : {}),
+            ...(guid === undefined ? {} : { guid }),
+          },
+        })),
+      );
+    } catch (error) {
+      recorded = false;
+      request.log.error({ err: error, intentId: id }, "broadcast succeeded but the events were not recorded");
+    }
+
+    return reply.send({ intentId: id, sentBy, approvedBy, submitted, recorded });
+  });
+
+
+  /**
+   * Confirm the far side of a cross-chain leg.
+   *
+   * A bridge is two transactions, and this service only ever broadcasts one of them: the source. The
+   * destination is mined by the provider's relayer, on another chain, minutes later. Without this the
+   * desk can show that a bridge *left* but never that it *arrived*, which is the half a trader is
+   * actually waiting on.
+   *
+   * The provider is asked, not the caller. A route that accepted a hash someone handed it would let a
+   * caller assert any destination it liked, and the panel would render it with the same authority as a
+   * verified one — so the reference is re-read from LI.FI and the destination hash is taken from that
+   * response. When the provider has not seen it yet the route says so, and says which state it is in,
+   * rather than recording a pending transaction as delivered.
+   */
+  app.post("/intents/:id/confirm", async (request, reply) => {
+    const userId = await authenticator.authenticate(request);
+    const { id } = request.params as { id: string };
+    const input = body(request);
+    const txHash = requireString(input, "txHash");
+    // A chain id is a number, and a caller sending `137` is not making a mistake — requiring a
+    // string here rejected every well-formed call and surfaced as an empty provider response, which
+    // blamed LI.FI for a validation bug on this side.
+    const fromChainId = Number(input["fromChainId"]);
+    const toChainId = Number(input["toChainId"]);
+    if (!Number.isInteger(fromChainId) || !Number.isInteger(toChainId)) {
+      throw new HttpError("BAD_REQUEST", "`fromChainId` and `toChainId` must be integers.", {
+        field: "fromChainId",
+      });
+    }
+    const url = new URL("https://li.quest/v1/status");
+    url.searchParams.set("txHash", txHash);
+    url.searchParams.set("fromChain", String(fromChainId));
+    url.searchParams.set("toChain", String(toChainId));
+    const apiKey = process.env["LIFI_API_KEY"];
+    if (apiKey !== undefined && apiKey.length > 0) url.searchParams.set("integrator", "agentic-ems");
+
+    let provider: Record<string, unknown>;
+    try {
+      const response = await fetch(url, {
+        headers: apiKey === undefined || apiKey.length === 0 ? {} : { "x-lifi-api-key": apiKey },
+      });
+      provider = (await response.json()) as Record<string, unknown>;
+    } catch (error) {
+      // A provider that is unreachable is not a bridge that failed. Saying which is the difference
+      // between an operator retrying and an operator writing off a transfer that is still moving.
+      throw new HttpError("UNAVAILABLE", `Could not reach the bridge provider: ${(error as Error).message}`);
+    }
+
+    const status = typeof provider["status"] === "string" ? provider["status"] : "unknown";
+    const receiving = (provider["receiving"] ?? {}) as Record<string, unknown>;
+    const dstTxHash = typeof receiving["txHash"] === "string" ? receiving["txHash"] : null;
+    const dstChainId = typeof receiving["chainId"] === "number" ? receiving["chainId"] : null;
+
+    if (dstTxHash !== null) {
+      await runtime.history.recordEvents([
+        {
+          eventId: randomUUID(),
+          at: new Date(),
+          userId,
+          runId: null,
+          intentId: UUID_PATTERN.test(id) ? id : null,
+          stepId: null,
+          type: "step.broadcast",
+          payload: {
+            // `dstTxHash` as well as `txHash`: the read model reads the pair from these two named
+            // fields, so recording the arrival only under `txHash` left the destination invisible and
+            // the panel showed the same source hash twice.
+            txHash: dstTxHash,
+            dstTxHash,
+            chainId: dstChainId ?? toChainId,
+            label: `Arrived via ${typeof provider["tool"] === "string" ? provider["tool"] : "bridge"}`,
+            index: 0,
+            srcTxHash: txHash,
+            kind: "bridge",
+            status: "confirmed",
+          },
+        },
+      ]);
+    }
+
+    return reply.send({
+      txHash,
+      status,
+      // `pending` is a real answer, and the honest one while a relayer is still working.
+      dstTxHash,
+      dstChainId,
+      tool: typeof provider["tool"] === "string" ? provider["tool"] : null,
+      substatus: typeof provider["substatus"] === "string" ? provider["substatus"] : null,
+      recorded: dstTxHash !== null,
+    });
   });
 
   return app;
