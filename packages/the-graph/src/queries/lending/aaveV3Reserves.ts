@@ -12,11 +12,15 @@ export const AaveReserveSchema = z.object({
   id: z.string(),
   symbol: z.string(),
   name: z.string(),
-  totalLiquidity: ZodNonNegativeBigNumberString,
+  // Signed, not non-negative. Aave's own subgraph returns a negative `totalLiquidity` for a
+  // handful of reserves (a derived balance that can go below zero during interest accrual); the
+  // response is valid, and rejecting it failed the whole `aaveV3Arbitrum` payload for reserves
+  // 18 and 19. `availableLiquidity` has the same shape for the same reason.
+  totalLiquidity: ZodBigNumberString,
   totalCurrentVariableDebt: ZodBigNumberString,
   variableBorrowRate: ZodRayRate,
   liquidityRate: ZodRayRate,
-  availableLiquidity: ZodNonNegativeBigNumberString,
+  availableLiquidity: ZodBigNumberString,
   utilizationRate: ZodBigNumberString,
   decimals: z.number(),
   isActive: z.boolean(),
