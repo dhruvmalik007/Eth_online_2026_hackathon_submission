@@ -1,0 +1,9 @@
+# Keep the deploy upload lean: these are build artifacts or unused media that
+# would otherwise be shipped on every deploy.
+.next
+node_modules
+tsconfig.tsbuildinfo
+*.mp4
+!public/demo-pitch.mp4
+.DS_Store
+.vercel/output
