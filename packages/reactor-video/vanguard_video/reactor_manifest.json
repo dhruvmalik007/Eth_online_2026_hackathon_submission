@@ -1,0 +1,331 @@
+{
+  "brand": {
+    "name": "Agentic EMS",
+    "tagline": "Tokenized Execution Management System",
+    "subtitle": "Unified DeFi + tokenized TradFi execution, on-chain",
+    "primary_color": "near-black #0A0E14",
+    "accent_1": "neon cyan #00E5FF (DeFi)",
+    "accent_2": "amber #FFB300 (tokenized TradFi)",
+    "accent_3": "violet #8B5CF6 (crypto ETFs)",
+    "warning_color": "crimson #FF3B5C",
+    "ui_theme": "dark glassmorphism panels over near-black floor"
+  },
+  "reactor_model": "reactor/fast-h3",
+  "transport": "WebRTC (via libreactor_ffi)",
+  "shotlist_source": "ems_shotlist_fasth3.md",
+  "vanguard_pov_directory": "bloomberg_video_context/bloomberg_screens/vanguard_fixed_income/pov_frames",
+  "vanguard_pov_by_clip": {
+    "1": "trader-05",
+    "2": "trader-02",
+    "3": "trader-09",
+    "4": "trader-12",
+    "5": "trader-11",
+    "6": "trader-03",
+    "7": "trader-07",
+    "8": "trader-08",
+    "9": "trader-10",
+    "10": "trader-01"
+  },
+  "voice_blocks": {
+    "MORGAN": {
+      "name": "MORGAN",
+      "role": "execution trader (sell-side voice, decisive)",
+      "register": "Low female baritone, dry, unhurried. American English. One short phrase at a time with real gaps. Radio discipline."
+    },
+    "JAMIE": {
+      "name": "JAMIE",
+      "role": "sales/trader (chattier, dialogue-driven)",
+      "register": "Mid male tenor, light conversational pace. American English. Asks one short question per beat."
+    },
+    "DARIUS": {
+      "name": "DARIUS",
+      "role": "risk/portfolio manager (terse, asks the question)",
+      "register": "Low male baritone, very dry, even pace. American English. No theatrical colour."
+    },
+    "YUKI": {
+      "name": "YUKI",
+      "role": "quant/desk strategist (technical, cites numbers)",
+      "register": "Mid female alto, measured, technical. American English. Two short sentences per beat."
+    }
+  },
+  "dialogue_beats_by_clip": {
+    "1": {
+      "MORGAN": "I'm here. Five-eight on USDS, book is flat.",
+      "JAMIE": "Market's five wide. We're open."
+    },
+    "2": {
+      "MORGAN": "Two-four on the axe, I'm taking fifty.",
+      "JAMIE": "Done. Booking the fifty."
+    },
+    "3": {
+      "YUKI": "Five-eight, plus eight. We cross five by minute three.",
+      "MORGAN": "Copy. I'm at the desk."
+    },
+    "4": {
+      "DARIUS": "VaR check \u2014 what's the gap?",
+      "MORGAN": "Book holds. Four-two on USDC, eleven oh-four on USDe."
+    },
+    "5": {
+      "DARIUS": "She saw it before we did. Send the ticket.",
+      "YUKI": "Twenty-three forty-seven. Two minutes to settle."
+    },
+    "6": {
+      "JAMIE": "Mid. That's the print.",
+      "MORGAN": "Print's mid. I'm in."
+    },
+    "7": {
+      "JAMIE": "Axe on SPDR. Five-two-eight-nine by K. Want it?",
+      "MORGAN": "Send it. Mid, worst, full size."
+    },
+    "8": {
+      "MORGAN": "Eighty-five thousand, eight slices, four-six-two.",
+      "JAMIE": "Print matches. You're live."
+    },
+    "9": {
+      "MORGAN": "Sent. Compliance green.",
+      "DARIUS": "Book's flat. Good print."
+    },
+    "10": {
+      "DARIUS": "Agentic EMS. Tokenized execution, end to end."
+    }
+  },
+  "defi_ticker_strip": [
+    {
+      "pool": "LIDO stETH",
+      "apy": "2.18%",
+      "tvl": "$24.27B",
+      "tag": "REAL",
+      "source": "DefiLlama"
+    },
+    {
+      "pool": "AAVE v3",
+      "apy": "4.20%",
+      "tvl": "$18.41B",
+      "tag": "REAL",
+      "source": "DefiLlama"
+    },
+    {
+      "pool": "SPARK USDS",
+      "apy": "5.18%",
+      "tvl": "$6.20B",
+      "tag": "REAL",
+      "source": "DefiLlama",
+      "note": "5.10 \u2192 5.18 (+8bp) during the ad"
+    },
+    {
+      "pool": "ETHERNA USDe",
+      "apy": "11.04%",
+      "tvl": "$4.70B",
+      "tag": "REAL",
+      "source": "DefiLlama",
+      "note": "11.20 \u2192 11.04 (\u221212bp) during the ad"
+    },
+    {
+      "pool": "COMP v3",
+      "apy": "4.50%",
+      "tvl": "n/a",
+      "tag": "REAL",
+      "source": "DefiLlama"
+    },
+    {
+      "pool": "MORPHO WETH",
+      "apy": "3.20%",
+      "tvl": "$9.79B",
+      "tag": "REAL",
+      "source": "DefiLlama"
+    },
+    {
+      "pool": "BUIDL",
+      "apy": "4.85%",
+      "tvl": "$2.00B",
+      "tag": "REAL",
+      "source": "RWA.xyz"
+    }
+  ],
+  "tradfi_ticker_strip": [
+    {
+      "instrument": "BUIDL",
+      "yield": "4.85%",
+      "aum": "$2.00B",
+      "tag": "REAL",
+      "source": "RWA.xyz",
+      "issuer": "Securitize / BlackRock"
+    },
+    {
+      "instrument": "USDM",
+      "yield": "4.95%",
+      "aum": "$0.45B",
+      "tag": "REAL",
+      "source": "RWA.xyz",
+      "issuer": "Mountain Protocol"
+    },
+    {
+      "instrument": "OUSG",
+      "yield": "4.78%",
+      "aum": "$0.38B",
+      "tag": "REAL",
+      "source": "RWA.xyz",
+      "issuer": "Ondo Finance"
+    }
+  ],
+  "fictional_anchor": {
+    "instrument": "SPDR UST BASKET",
+    "cusip": "U5051",
+    "spot": 99.217,
+    "yield_pct": 4.62,
+    "coupon_pct": 1.734,
+    "maturity": "07/22/27",
+    "size_k": 52890,
+    "method": "Mid",
+    "maturity_sel": "Worst",
+    "almgren_chriss": "8.4M \u00d7 10 slices",
+    "compliance": "PASSED",
+    "settlement_utc": "23:59:00",
+    "forecast_threshold": 5.0,
+    "note": "FICT \u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz"
+  },
+  "prompt_char_cap": 800,
+  "metadata_char_cap": 2000,
+  "scenes": [
+    {
+      "scene_id": 1,
+      "label": "ems_01_terminal_ignition",
+      "seconds": 8.0,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): MORGAN: \"I'm here. Five-eight on USDS, book is flat.\". JAMIE: \"Market's five wide. We're open.\". : Terminal-style UI: candlestick chart in main panel, market-data tickers in top bar, tabs at bottom. Dark Agentic terminal close-up: candlestick chart for 'stETH/USDC CMPN' in main panel \u2014 green/red candles, yellow line overlay; top-bar tickers 'stETH 2.18% / AAVE 4.2% / BUIDL 4.85%'. Bottom: 'Agentic Feed' tabs. DEF...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_01_terminal_ignition\",\"scene_id\":1,\"seconds\":8.0,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-05\",\"vanguard_trader_profile\":\"FX-style screen close-up \\u2014 candlestick with top-bar tickers\",\"vanguard_visual_anchor\":\"Terminal-style UI: candlestick chart in main panel, market-data tickers in top bar, tabs at bottom.\",\"agentic_ems_addition\":\"Dark Agentic terminal close-up: candlestick chart for 'stETH/USDC CMPN' in main panel \\u2014 green/red candles, yellow line o\",\"actors_visible\":\"MORGAN's hand on the keyboard at the bottom of frame, JAMIE's voice off-camera responding.\",\"dialogue_beat_verbatim\":{\"MORGAN\":\"I'm here. Five-eight on USDS, book is flat.\",\"JAMIE\":\"Market's five wide. We're open.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"none \\u2014 machine state\",\"forbidden\":[\"no lens words, no flares, no sky, no people, no neon\"]}",
+      "metadata_chars": 1843,
+      "vanguard_pov_id": "trader-05",
+      "actors": [
+        "MORGAN",
+        "JAMIE"
+      ]
+    },
+    {
+      "scene_id": 2,
+      "label": "ems_02_desk_wide",
+      "seconds": 8.0,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): MORGAN: \"Two-four on the axe, I'm taking fifty.\". JAMIE: \"Done. Booking the fifty.\". : Wall of small candlestick charts, red/green candles, hot-color highlights. Tile wall of mini-candlestick tiles: tokenized UST funds (BUIDL 4.85%, USDM 4.95%) and DeFi lending pools (stETH 2.18%, USDC 4.2%, USDS 5.18%, USDe 11.04%) \u2014 same color rules, same axes, one book. On-screen actors: MORGAN (foreground, gesturing at a char...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_02_desk_wide\",\"scene_id\":2,\"seconds\":8.0,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-02\",\"vanguard_trader_profile\":\"Execution trader \\u2014 over-the-shoulder, multi-chart wall\",\"vanguard_visual_anchor\":\"Wall of small candlestick charts, red/green candles, hot-color highlights.\",\"agentic_ems_addition\":\"Tile wall of mini-candlestick tiles: tokenized UST funds (BUIDL 4.85%, USDM 4.95%) and DeFi lending pools (stETH 2.18%, \",\"actors_visible\":\"MORGAN (foreground, gesturing at a chart) and JAMIE (across the desk, headset, looking up to answer).\",\"dialogue_beat_verbatim\":{\"MORGAN\":\"Two-four on the axe, I'm taking fifty.\",\"JAMIE\":\"Done. Booking the fifty.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"SONAL: \\\"she measures the distance to the mouse she already knows\\\"\",\"forbidden\":[\"no text banners, no flares, no sky\"]}",
+      "metadata_chars": 1823,
+      "vanguard_pov_id": "trader-02",
+      "actors": [
+        "MORGAN",
+        "JAMIE"
+      ]
+    },
+    {
+      "scene_id": 3,
+      "label": "ems_03_eye_and_forecast",
+      "seconds": 8.0,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): YUKI: \"Five-eight, plus eight. We cross five by minute three.\". MORGAN: \"Copy. I'm at the desk.\". : Trader with headset, background shows complex data grids and charts. Headset trader on voice call with counterparty; background monitors show TVL ticker 'SPARK $6.20B +4.71%', Ethena USDe yield curve, SPDR UST basket ticking with Almgren-Chriss schedule. On-screen actors: MORGAN (foreground, headset, mid-dialogue)...",
+      "prompt_chars": 799,
+      "metadata": "{\"label\":\"ems_03_eye_and_forecast\",\"scene_id\":3,\"seconds\":8.0,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-09\",\"vanguard_trader_profile\":\"Execution trader \\u2014 eye-level, headset\",\"vanguard_visual_anchor\":\"Trader with headset, background shows complex data grids and charts.\",\"agentic_ems_addition\":\"Headset trader on voice call with counterparty; background monitors show TVL ticker 'SPARK $6.20B +4.71%', Ethena USDe y\",\"actors_visible\":\"MORGAN (foreground, headset, mid-dialogue) and YUKI (background, also headset, listening).\",\"dialogue_beat_verbatim\":{\"YUKI\":\"Five-eight, plus eight. We cross five by minute three.\",\"MORGAN\":\"Copy. I'm at the desk.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"SONAL \\u2014 one reaction only: the contract; then stillness\",\"forbidden\":[\"nothing about \\\"tense\\\", \\\"worried\\\"\"]}",
+      "metadata_chars": 1804,
+      "vanguard_pov_id": "trader-09",
+      "actors": [
+        "YUKI",
+        "MORGAN"
+      ]
+    },
+    {
+      "scene_id": 4,
+      "label": "ems_04_data_volatility",
+      "seconds": 8.0,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): DARIUS: \"VaR check \u2014 what's the gap?\". MORGAN: \"Book holds. Four-two on USDC, eleven oh-four on USDe.\". : Headphones on, multi-monitor \u2014 left dark code/data, center light application, right dark data grid. Code editor left (Solidity for the AMM pool); center OMS shows the order ticket; right shows the spread/yield ladder. On-screen actors: YUKI at the code editor (foreground), MORGAN at the OMS (mid-ground), JAMI...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_04_data_volatility\",\"scene_id\":4,\"seconds\":8.0,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-12\",\"vanguard_trader_profile\":\"Execution trader \\u2014 over-the-shoulder, code/data + OMS\",\"vanguard_visual_anchor\":\"Headphones on, multi-monitor \\u2014 left dark code/data, center light application, right dark data grid.\",\"agentic_ems_addition\":\"Code editor left (Solidity for the AMM pool); center OMS shows the order ticket; right shows the spread/yield ladder.\",\"actors_visible\":\"YUKI at the code editor (foreground), MORGAN at the OMS (mid-ground), JAMIE pointing from the right.\",\"dialogue_beat_verbatim\":{\"DARIUS\":\"VaR check \\u2014 what's the gap?\",\"MORGAN\":\"Book holds. Four-two on USDC, eleven oh-four on USDe.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"none\",\"forbidden\":[\"no integers beyond the metric table\"]}",
+      "metadata_chars": 1816,
+      "vanguard_pov_id": "trader-12",
+      "actors": [
+        "DARIUS",
+        "MORGAN"
+      ]
+    },
+    {
+      "scene_id": 5,
+      "label": "ems_05_agent_brief",
+      "seconds": 7.292,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): DARIUS: \"She saw it before we did. Send the ticket.\". YUKI: \"Twenty-three forty-seven. Two minutes to settle.\". : Group collaboration around a desk \u2014 multiple monitors visible with charts and data grids. DARIUS (portfolio manager) and YUKI (risk manager) in conversation around the desk. Center: PORT-style risk dashboard \u2014 VaR 0.0002986, ES, Merton PD per pool. Right: 52890K SPDR UST basket ticking (axe flag amber...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_05_agent_brief\",\"scene_id\":5,\"seconds\":7.292,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-11\",\"vanguard_trader_profile\":\"Portfolio/Risk Manager \\u2014 collaboration around desk\",\"vanguard_visual_anchor\":\"Group collaboration around a desk \\u2014 multiple monitors visible with charts and data grids.\",\"agentic_ems_addition\":\"DARIUS (portfolio manager) and YUKI (risk manager) in conversation around the desk. Center: PORT-style risk dashboard \\u2014 \",\"actors_visible\":\"DARIUS and YUKI, both on camera, mid-dialogue \\u2014 natural face-to-face interaction.\",\"dialogue_beat_verbatim\":{\"DARIUS\":\"She saw it before we did. Send the ticket.\",\"YUKI\":\"Twenty-three forty-seven. Two minutes to settle.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"SONAL: \\\"the trade is decided before the reach; the hand is only ceremony\\\"\",\"forbidden\":[\"no inner-monologue subtitle\"]}",
+      "metadata_chars": 1861,
+      "vanguard_pov_id": "trader-11",
+      "actors": [
+        "DARIUS",
+        "YUKI"
+      ]
+    },
+    {
+      "scene_id": 6,
+      "label": "ems_06_pricing_methods",
+      "seconds": 7.292,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): JAMIE: \"Mid. That's the print.\". MORGAN: \"Print's mid. I'm in.\". : Messenger open, conversation threads, market-data tickers in side panels, colored chat bubbles. Web3 OTC desk chat with a market maker on the Aave DAO forum thread, bubbles reading 'SparkLend: 5.18% +8bp', 'Morpho Blue: 4.95% -3bp'. Right rail shows on-chain gas + block-height status. Same screen layout as an institutional trader chat station but...",
+      "prompt_chars": 799,
+      "metadata": "{\"label\":\"ems_06_pricing_methods\",\"scene_id\":6,\"seconds\":7.292,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-03\",\"vanguard_trader_profile\":\"Sales trader \\u2014 chat station with keyboard turret\",\"vanguard_visual_anchor\":\"Messenger open, conversation threads, market-data tickers in side panels, colored chat bubbles.\",\"agentic_ems_addition\":\"Web3 OTC desk chat with a market maker on the Aave DAO forum thread, bubbles reading 'SparkLend: 5.18% +8bp', 'Morpho Bl\",\"actors_visible\":\"JAMIE at the keyboard typing, MORGAN standing behind him with one hand on his shoulder, both visible in frame.\",\"dialogue_beat_verbatim\":{\"JAMIE\":\"Mid. That's the print.\",\"MORGAN\":\"Print's mid. I'm in.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"none (cursor is the actor)\",\"forbidden\":[\"no other number rows on this clip beyond ticket fields\"]}",
+      "metadata_chars": 1814,
+      "vanguard_pov_id": "trader-03",
+      "actors": [
+        "JAMIE",
+        "MORGAN"
+      ]
+    },
+    {
+      "scene_id": 7,
+      "label": "ems_07_inventory_axe",
+      "seconds": 8.0,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): JAMIE: \"Axe on SPDR. Five-two-eight-nine by K. Want it?\". MORGAN: \"Send it. Mid, worst, full size.\". : Center: light-themed bond valuation spreadsheet. Left: dark-themed candlestick chart. Right: dark-themed data grid. Keyboard turret. Center: Core Price Management \u2014 'SPDR UST BASKET / CUSIP U5051 / Mid / Spot 99.217 / Yield 4.620 / Size(K) 52890.000 / Maturity sel: Worst'. Left: candlestick for stETH/USD. Right:...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_07_inventory_axe\",\"scene_id\":7,\"seconds\":8.0,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-07\",\"vanguard_trader_profile\":\"Fixed-income trader \\u2014 over-the-shoulder, 3-monitor with light-themed center\",\"vanguard_visual_anchor\":\"Center: light-themed bond valuation spreadsheet. Left: dark-themed candlestick chart. Right: dark-themed data grid. Keyb\",\"agentic_ems_addition\":\"Center: Core Price Management \\u2014 'SPDR UST BASKET / CUSIP U5051 / Mid / Spot 99.217 / Yield 4.620 / Size(K) 52890.000 / M\",\"actors_visible\":\"MORGAN keys the ticket, YUKI stands behind pointing at the inventory grid, both visible.\",\"dialogue_beat_verbatim\":{\"JAMIE\":\"Axe on SPDR. Five-two-eight-nine by K. Want it?\",\"MORGAN\":\"Send it. Mid, worst, full size.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"SONAL \\u2014 hesitation in the eyes for \\u00a3one beat, then the hand moves\",\"forbidden\":[\"no \\\"red alert\\\" state\"]}",
+      "metadata_chars": 1898,
+      "vanguard_pov_id": "trader-07",
+      "actors": [
+        "JAMIE",
+        "MORGAN"
+      ]
+    },
+    {
+      "scene_id": 8,
+      "label": "ems_08_order_ticket",
+      "seconds": 8.0,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): MORGAN: \"Eighty-five thousand, eight slices, four-six-two.\". JAMIE: \"Print matches. You're live.\". : Central screen with light-themed OMS, side screens with dark-themed charts. IPC-style phone turret. Center: order ticket 'SPDR UST BASKET / Mid / Spot 99.217 / Yield 4.620 / Size(K) 52890.000' with green EXECUTE button. Left: yield-curve panel for tokenized UST funds. Right: Almgren-Chriss schedule badge '8.4M \u00d7 1...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_08_order_ticket\",\"scene_id\":8,\"seconds\":8.0,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-08\",\"vanguard_trader_profile\":\"Execution trader \\u2014 wide desk, IPC phone turret\",\"vanguard_visual_anchor\":\"Central screen with light-themed OMS, side screens with dark-themed charts. IPC-style phone turret.\",\"agentic_ems_addition\":\"Center: order ticket 'SPDR UST BASKET / Mid / Spot 99.217 / Yield 4.620 / Size(K) 52890.000' with green EXECUTE button. \",\"actors_visible\":\"MORGAN (typing), JAMIE (speaker-phone to ear), DARIUS (over her shoulder). Three people in one frame.\",\"dialogue_beat_verbatim\":{\"MORGAN\":\"Eighty-five thousand, eight slices, four-six-two.\",\"JAMIE\":\"Print matches. You're live.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"none; the numbers are the actor\",\"forbidden\":[\"no implied big-typography numbers beyond the table\"]}",
+      "metadata_chars": 1837,
+      "vanguard_pov_id": "trader-08",
+      "actors": [
+        "MORGAN",
+        "JAMIE"
+      ]
+    },
+    {
+      "scene_id": 9,
+      "label": "ems_09_send_payoff",
+      "seconds": 5.875,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): MORGAN: \"Sent. Compliance green.\". DARIUS: \"Book's flat. Good print.\". : Three-monitor setup \u2014 left dark data grid, center light OMS, right dark charts. Center OMS shows the order ticket 'SPDR UST BASKET / Mid / Spot 99.217 / Yield 4.620 / Size(K) 52890.000' with green EXECUTE; left shows ticker strip; right shows TimesFM 30-day APY forecast curve crossing 5.0%. On-screen actors: MORGAN's hand on mouse at SEND bu...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_09_send_payoff\",\"scene_id\":9,\"seconds\":5.875,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-10\",\"vanguard_trader_profile\":\"Execution trader \\u2014 over-the-shoulder, OMS\",\"vanguard_visual_anchor\":\"Three-monitor setup \\u2014 left dark data grid, center light OMS, right dark charts.\",\"agentic_ems_addition\":\"Center OMS shows the order ticket 'SPDR UST BASKET / Mid / Spot 99.217 / Yield 4.620 / Size(K) 52890.000' with green EXE\",\"actors_visible\":\"MORGAN's hand on mouse at SEND button, JAMIE leaning in from the right, both visible.\",\"dialogue_beat_verbatim\":{\"MORGAN\":\"Sent. Compliance green.\",\"DARIUS\":\"Book's flat. Good print.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"SONAL \\u2014 the breath is the payoff, not the fist\",\"forbidden\":[\"no confetti, no fireworks\"]}",
+      "metadata_chars": 1769,
+      "vanguard_pov_id": "trader-10",
+      "actors": [
+        "MORGAN",
+        "DARIUS"
+      ]
+    },
+    {
+      "scene_id": 10,
+      "label": "ems_10_brand_endcard",
+      "seconds": 5.167,
+      "prompt": "Cinematic dark, 16:9, soft 35mm grain. No lens flares. No legacy exchange branding. Brand: Agentic EMS \u2014 Tokenized Execution Management System. Setting: real institutional trading floor. MULTIPLE ACTORS VISIBLE (at least two professional desk agents on camera at the same time \u2014 quad-trader cadence, mic'd through desk headsets, legible English dialogue). (actors speak VERBATIM): DARIUS: \"Agentic EMS. Tokenized execution, end to end.\". : Three vertical monitors with a specialized multi-button keyboard turret. Dark-themed blotter on the left, code/data editor center, dark-themed data grid on the right. Dark-mode Agentic OMS: left = on-chain settlement blotter with confirmed/pending tx hashes; center = Solidity source for the AMM pool; right = tokenized-book grid showing tokenized UST funds...",
+      "prompt_chars": 800,
+      "metadata": "{\"label\":\"ems_10_brand_endcard\",\"scene_id\":10,\"seconds\":5.167,\"brand\":{\"name\":\"Agentic EMS\",\"tagline\":\"Tokenized Execution Management System\",\"subtitle\":\"Unified DeFi + tokenized TradFi execution, on-chain\",\"primary_color\":\"near-black #0A0E14\",\"accent_1\":\"neon cyan #00E5FF (DeFi)\",\"accent_2\":\"amber #FFB300 (tokenized TradFi)\",\"accent_3\":\"violet #8B5CF6 (crypto ETFs)\",\"warning_color\":\"crimson #FF3B5C\",\"ui_theme\":\"dark glassmorphism panels over near-black floor\"},\"vanguard_pov_id\":\"trader-01\",\"vanguard_trader_profile\":\"Execution trader \\u2014 3-monitor turret station\",\"vanguard_visual_anchor\":\"Three vertical monitors with a specialized multi-button keyboard turret. Dark-themed blotter on the left, code/data edit\",\"agentic_ems_addition\":\"Dark-mode Agentic OMS: left = on-chain settlement blotter with confirmed/pending tx hashes; center = Solidity source for\",\"actors_visible\":\"MORGAN (center, headset on, front-of-camera) and a half-glimpsed colleague behind her at the adjacent desk.\",\"dialogue_beat_verbatim\":{\"DARIUS\":\"Agentic EMS. Tokenized execution, end to end.\"},\"fictional_anchor\":{\"instrument\":\"SPDR UST BASKET\",\"cusip\":\"U5051\",\"spot\":99.217,\"yield_pct\":4.62,\"coupon_pct\":1.734,\"maturity\":\"07/22/27\",\"size_k\":52890,\"method\":\"Mid\",\"maturity_sel\":\"Worst\",\"almgren_chriss\":\"8.4M \\u00d7 10 slices\",\"compliance\":\"PASSED\",\"settlement_utc\":\"23:59:00\",\"forecast_threshold\":5.0,\"note\":\"FICT \\u2014 sole fictional anchor; every other number is from DefiLlama or RWA.xyz\"},\"compliance_text_must_render_exactly\":\"PASSED\",\"asset_first_pipeline\":\"Higgsfield Trigger methodology \\u2014 assets locked, every prompt an island\",\"asset_workspace\":\"user_3GVcpTp7fHMxCVPhBelWo5SScmg (Higgsfield Trigger plates)\",\"acting_task\":\"\",\"forbidden\":[\"no score under the endcard; the room tone is the ending\"]}",
+      "metadata_chars": 1797,
+      "vanguard_pov_id": "trader-01",
+      "actors": [
+        "DARIUS"
+      ]
+    }
+  ],
+  "methodology": "Agentic EMS \u2014 Tokenized Execution Management System. Each prompt is built from (a) the cleaned shot-list body (Bloomberg references stripped), (b) Vanguard POV-frame visual intelligence harvested from the cropped frames in bloomberg_video_context/bloomberg_screens/vanguard_fixed_income/pov_frames/, (c) the multi-actor 'actors_visible' field \u2014 at least two professional desk agents on camera at the same time, mic'd, speaking English with quad-trader cadence, (d) the verbatim registered dialogue beats (Higgsfield Trigger voice-block rule), (e) the DefiLlama + RWA.xyz metric lock for on-screen numbers (real anchors + one explicitly-FICT anchor \u2014 SPDR UST BASKET). No legacy exchange branding. Tokenized TradFi (BUIDL/USDM/OUSG) and DeFi (stETH/USDC/USDS/WETH) shown in the same Agentic EMS blotter as one unified book."
+}

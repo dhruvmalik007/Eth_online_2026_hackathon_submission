@@ -1,0 +1,436 @@
+{
+  "pov_frames": [
+    {
+      "id": "trader-01",
+      "trader_profile": "Execution Trader",
+      "timestamp": "01:22.500",
+      "angle": "side profile",
+      "screen_components": [
+        "Three vertical monitors",
+        "Specialized keyboard turret (e.g., Bloomberg or IPC turret)",
+        "Left screen: Dark-themed data grid/blotter",
+        "Center screen: Dark-themed code editor",
+        "Right screen: Dark-themed data grid"
+      ],
+      "crop_hint": [
+        0.0,
+        0.2,
+        1.0,
+        0.8
+      ],
+      "visual_style": {
+        "theme": "dark",
+        "accent_colors": [
+          "white",
+          "blue",
+          "yellow"
+        ]
+      }
+    },
+    {
+      "id": "trader-02",
+      "trader_profile": "Execution Trader",
+      "timestamp": "00:20.500",
+      "angle": "over-the-shoulder",
+      "screen_components": [
+        "Multi-monitor setup",
+        "Multiple small candlestick charts",
+        "Technical analysis indicators",
+        "Data grids with red and green highlights"
+      ],
+      "crop_hint": [
+        0.0,
+        0.2,
+        1.0,
+        0.8
+      ],
+      "visual_style": {
+        "theme": "dark",
+        "accent_colors": [
+          "white",
+          "red",
+          "green"
+        ]
+      }
+    },
+    {
+      "id": "trader-03",
+      "trader_profile": "Sales Trader",
+      "timestamp": "00:22.800",
+      "angle": "side profile, screen close-up",
+      "screen_components": [
+        "Instant messaging application (e.g., Bloomberg IB, Symphony)",
+        "Market data tickers",
+        "Conversation threads"
+      ],
+      "crop_hint": [
+        0.0,
+        0.0,
+        0.6,
+        1.0
+      ],
+      "visual_style": {
+        "theme": "dark",
+        "accent_colors": [
+          "blue",
+          "white",
+          "yellow"
+        ]
+      }
+    },
+    {
+      "id": "trader-04",
+      "trader_profile": "Execution Trader",
+      "timestamp": "00:32.000",
+      "angle": "wide desk shot",
+      "screen_components": [
+        "Multi-monitor setup with charts and data grids",
+        "Candlestick charts with red/green candles"
+      ],
+      "crop_hint": [
+        0.0,
+        0.4,
+        0.7,
+        0.6
+      ],
+      "visual_style": {
+        "theme": "dark",
+        "accent_colors": [
+          "red",
+          "green",
+          "white"
+        ]
+      }
+    },
+    {
+      "id": "trader-05",
+      "trader_profile": "FX Trader",
+      "timestamp": "00:46.500",
+      "angle": "screen close-up",
+      "screen_components": [
+        "Bloomberg Terminal UI",
+        "Main panel: Candlestick chart for JPY CMPN Curncy",
+        "Top bar: Market data tickers (JPY, ANON, CSFX)",
+        "Key Events and Chart Content tabs"
+      ],
+      "crop_hint": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "visual_style": {
+        "theme": "dark",
+        "accent_colors": [
+          "yellow",
+          "white",
+          "green",
+          "red"
+        ]
+      }
+    },
+    {
+      "id": "trader-06",
+      "trader_profile": "FX Trader",
+      "timestamp": "00:59.500",
+      "angle": "side profile",
+      "screen_components": [
+        "Dual monitor setup",
+        "Light-themed application with data grids",
+        "Background wall decorated with various international currency notes"
+      ],
+      "crop_hint": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "visual_style": {
+        "theme": "light",
+        "accent_colors": [
+          "black",
+          "blue"
+        ]
+      }
+    },
+    {
+      "id": "trader-07",
+      "trader_profile": "Fixed Income Trader",
+      "timestamp": "01:03.800",
+      "angle": "over-the-shoulder",
+      "screen_components": [
+        "Three monitor setup",
+        "Center screen: Light-themed bond valuation spreadsheet/application",
+        "Left screen: Dark-themed candlestick chart",
+        "Right screen: Dark-themed data grid or code",
+        "Specialized keyboard turret"
+      ],
+      "crop_hint": [
+        0.0,
+        0.2,
+        1.0,
+        0.8
+      ],
+      "visual_style": {
+        "theme": "mixed",
+        "accent_colors": [
+          "white",
+          "black",
+          "blue"
+        ]
+      }
+    },
+    {
+      "id": "trader-08",
+      "trader_profile": "Execution Trader",
+      "timestamp": "01:14.200",
+      "angle": "wide desk shot",
+      "screen_components": [
+        "Multi-monitor setup",
+        "Central screen: Light-themed order management system or spreadsheet",
+        "Side screens: Dark-themed charts and data grids",
+        "IPC-style phone turret"
+      ],
+      "crop_hint": [
+        0.0,
+        0.3,
+        1.0,
+        0.7
+      ],
+      "visual_style": {
+        "theme": "mixed",
+        "accent_colors": [
+          "white",
+          "blue",
+          "red",
+          "green"
+        ]
+      }
+    },
+    {
+      "id": "trader-09",
+      "trader_profile": "Execution Trader",
+      "timestamp": "01:17.000",
+      "angle": "eye-level",
+      "screen_components": [
+        "Headset for communication",
+        "Background screens show complex data grids and charts"
+      ],
+      "crop_hint": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "visual_style": {
+        "theme": "dark",
+        "accent_colors": [
+          "red",
+          "green",
+          "blue"
+        ]
+      }
+    },
+    {
+      "id": "trader-10",
+      "trader_profile": "Execution Trader",
+      "timestamp": "01:27.000",
+      "angle": "over-the-shoulder",
+      "screen_components": [
+        "Three monitor setup",
+        "Left screen: Dark-themed data grid",
+        "Center screen: Light-themed application (OMS or spreadsheet)",
+        "Right screen: Dark-themed charts"
+      ],
+      "crop_hint": [
+        0.0,
+        0.2,
+        1.0,
+        0.8
+      ],
+      "visual_style": {
+        "theme": "mixed",
+        "accent_colors": [
+          "white",
+          "black",
+          "blue"
+        ]
+      }
+    },
+    {
+      "id": "trader-11",
+      "trader_profile": "Portfolio/Risk Manager",
+      "timestamp": "02:24.500",
+      "angle": "eye-level",
+      "screen_components": [
+        "Group collaboration around a desk",
+        "Multiple monitors with charts and data grids visible"
+      ],
+      "crop_hint": [
+        0.0,
+        0.2,
+        1.0,
+        0.8
+      ],
+      "visual_style": {
+        "theme": "dark",
+        "accent_colors": [
+          "white",
+          "blue"
+        ]
+      }
+    },
+    {
+      "id": "trader-12",
+      "trader_profile": "Execution Trader",
+      "timestamp": "02:29.500",
+      "angle": "over-the-shoulder",
+      "screen_components": [
+        "Headphones for audio focus",
+        "Multi-monitor setup",
+        "Left screen: Dark-themed code/data",
+        "Center screen: Light-themed application",
+        "Right screen: Dark-themed data grid"
+      ],
+      "crop_hint": [
+        0.0,
+        0.3,
+        1.0,
+        0.7
+      ],
+      "visual_style": {
+        "theme": "mixed",
+        "accent_colors": [
+          "white",
+          "black",
+          "blue"
+        ]
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "timestamp": "00:00.000",
+      "description": "A man and woman walk down an office hallway. Text overlay: Day in the life: Fixed Income Trading Floor."
+    },
+    {
+      "timestamp": "00:03.215",
+      "description": "Wide shot of the bustling Vanguard Fixed Income trading floor."
+    },
+    {
+      "timestamp": "00:04.883",
+      "description": "Over-the-shoulder view of a trader's multi-monitor setup with code and data grids."
+    },
+    {
+      "timestamp": "00:07.816",
+      "description": "A woman asks about the traders' process for making moves for clients."
+    },
+    {
+      "timestamp": "00:12.547",
+      "description": "A man begins to explain the process of receiving orders from portfolio managers."
+    },
+    {
+      "timestamp": "00:19.884",
+      "description": "A trader is shown from behind, viewing multiple screens with complex financial charts."
+    },
+    {
+      "timestamp": "00:22.018",
+      "description": "A trader with a headset focuses on a screen with a messaging application."
+    },
+    {
+      "timestamp": "00:28.897",
+      "description": "The man and woman review data on a trader's multi-chart screen."
+    },
+    {
+      "timestamp": "00:33.868",
+      "description": "A trader participates in a video conference call on his monitor."
+    },
+    {
+      "timestamp": "00:42.042",
+      "description": "High-angle wide shot of the entire trading floor in motion."
+    },
+    {
+      "timestamp": "00:43.543",
+      "description": "A team of three traders collaborates around a single monitor."
+    },
+    {
+      "timestamp": "00:45.512",
+      "description": "A trader's hand points to a specific point on a Japanese Yen currency chart."
+    },
+    {
+      "timestamp": "00:58.863",
+      "description": "A woman works at her desk, with a wall of international currency notes behind her."
+    },
+    {
+      "timestamp": "01:01.265",
+      "description": "Over-the-shoulder view of a trader's desk with bond valuation data on the central screen."
+    },
+    {
+      "timestamp": "01:13.782",
+      "description": "A woman points out something on a light-themed application screen to a colleague."
+    },
+    {
+      "timestamp": "01:16.384",
+      "description": "A female trader with a headset looks up and listens intently."
+    },
+    {
+      "timestamp": "01:22.188",
+      "description": "A trader works at a desk with a specialized multi-button keyboard turret."
+    },
+    {
+      "timestamp": "01:24.057",
+      "description": "A trader with a headset checks his smartphone at his desk."
+    },
+    {
+      "timestamp": "01:29.896",
+      "description": "The man explains how traders are set up with portfolio managers for specific desks."
+    },
+    {
+      "timestamp": "01:56.895",
+      "description": "Close-up shot of a trader's hands typing quickly on a keyboard."
+    },
+    {
+      "timestamp": "01:58.696",
+      "description": "A woman asks about Vanguard's active trading strategy, beyond indexing."
+    },
+    {
+      "timestamp": "02:04.936",
+      "description": "The man explains Vanguard's role as one of the largest active portfolio managers."
+    },
+    {
+      "timestamp": "02:21.172",
+      "description": "A group of traders collaborates, with one man gesturing to explain a concept."
+    },
+    {
+      "timestamp": "02:27.178",
+      "description": "A trader wearing headphones works at a desk with multiple monitors."
+    },
+    {
+      "timestamp": "02:34.385",
+      "description": "At the end of the day, a group of colleagues gathers their jackets to leave."
+    },
+    {
+      "timestamp": "02:37.889",
+      "description": "A team holds a brief standing meeting on the trading floor."
+    },
+    {
+      "timestamp": "02:44.896",
+      "description": "The man explains the importance of interactions and information flow between different trading desks."
+    },
+    {
+      "timestamp": "02:58.900",
+      "description": "The woman asks how the traders' work throughout the day impacts investors' goals."
+    },
+    {
+      "timestamp": "03:03.338",
+      "description": "The man explains that minimizing trading costs is key to giving investors the best chance of success."
+    },
+    {
+      "timestamp": "03:18.840",
+      "description": "The video ends with the Vanguard logo and copyright information."
+    }
+  ],
+  "model": "gemini-2.5-pro",
+  "gcs_uri": "gs://meghdoot-artifacts/video_analysis/vanguard_fixed_income_trading_floor.mp4",
+  "video_duration_s": 206.294
+}

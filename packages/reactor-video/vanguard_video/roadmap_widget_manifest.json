@@ -1,0 +1,328 @@
+{
+  "flow_stages": [
+    {
+      "id": "taker-fees",
+      "label": "Taker Fees",
+      "kind": "commit",
+      "status": "complete",
+      "value": "98.64M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "100%"
+    },
+    {
+      "id": "gross-protocol-revenue",
+      "label": "Gross Protocol Revenue",
+      "kind": "pool",
+      "status": "complete",
+      "value": "98.64M",
+      "unit": "USD",
+      "venue": "DefiLlama",
+      "sub_label": null
+    },
+    {
+      "id": "gross-profit",
+      "label": "Gross Profit",
+      "kind": "pool",
+      "status": "complete",
+      "value": "61.99M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "63%"
+    },
+    {
+      "id": "earnings",
+      "label": "Earnings",
+      "kind": "settle",
+      "status": "complete",
+      "value": "61.99M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "100%"
+    },
+    {
+      "id": "cost-of-revenue",
+      "label": "Cost of Revenue",
+      "kind": "pool",
+      "status": "complete",
+      "value": "36.65M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "37%"
+    },
+    {
+      "id": "maker-rebates-cost",
+      "label": "Maker Rebates (Cost)",
+      "kind": "exit",
+      "status": "complete",
+      "value": "20.79M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "57%"
+    },
+    {
+      "id": "liquidity-rewards-cost",
+      "label": "Liquidity Rewards (Cost)",
+      "kind": "exit",
+      "status": "complete",
+      "value": "9.48M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "26%"
+    },
+    {
+      "id": "referral-rewards-cost",
+      "label": "Referral Rewards (Cost)",
+      "kind": "exit",
+      "status": "complete",
+      "value": "2.6M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "7%"
+    },
+    {
+      "id": "taker-rebates-cost",
+      "label": "Taker Rebates (Cost)",
+      "kind": "exit",
+      "status": "complete",
+      "value": "2.73M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "7%"
+    },
+    {
+      "id": "holding-rewards-cost",
+      "label": "Holding Rewards (Cost)",
+      "kind": "exit",
+      "status": "complete",
+      "value": "1.06M",
+      "unit": "USD",
+      "venue": null,
+      "sub_label": "3%"
+    }
+  ],
+  "edges": [
+    {
+      "from": "taker-fees",
+      "to": "gross-protocol-revenue",
+      "amount": "98.64M",
+      "meaning": "Taker Fees -> Gross Protocol Revenue"
+    },
+    {
+      "from": "gross-protocol-revenue",
+      "to": "gross-profit",
+      "amount": "61.99M",
+      "meaning": "Gross Protocol Revenue -> Gross Profit"
+    },
+    {
+      "from": "gross-protocol-revenue",
+      "to": "cost-of-revenue",
+      "amount": "36.65M",
+      "meaning": "Gross Protocol Revenue -> Cost of Revenue"
+    },
+    {
+      "from": "cost-of-revenue",
+      "to": "maker-rebates-cost",
+      "amount": "20.79M",
+      "meaning": "Cost of Revenue -> Maker Rebates (Cost)"
+    },
+    {
+      "from": "cost-of-revenue",
+      "to": "liquidity-rewards-cost",
+      "amount": "9.48M",
+      "meaning": "Cost of Revenue -> Liquidity Rewards (Cost)"
+    },
+    {
+      "from": "cost-of-revenue",
+      "to": "referral-rewards-cost",
+      "amount": "2.6M",
+      "meaning": "Cost of Revenue -> Referral Rewards (Cost)"
+    },
+    {
+      "from": "cost-of-revenue",
+      "to": "taker-rebates-cost",
+      "amount": "2.73M",
+      "meaning": "Cost of Revenue -> Taker Rebates (Cost)"
+    },
+    {
+      "from": "cost-of-revenue",
+      "to": "holding-rewards-cost",
+      "amount": "1.06M",
+      "meaning": "Cost of Revenue -> Holding Rewards (Cost)"
+    },
+    {
+      "from": "gross-profit",
+      "to": "earnings",
+      "amount": "61.99M",
+      "meaning": "Gross Profit -> Earnings"
+    }
+  ],
+  "hover_cards": [
+    {
+      "stage_id": "gross-profit",
+      "fields": [
+        {
+          "label": "Gross Profit \u2192 Earnings",
+          "value": "61.99M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "taker-fees",
+      "fields": [
+        {
+          "label": "Taker Fees",
+          "value": "98.64M (100%)",
+          "kind": "value"
+        },
+        {
+          "label": null,
+          "value": "Users pay fees when they trade binary options on polymarket.",
+          "kind": "chip"
+        }
+      ]
+    },
+    {
+      "stage_id": "gross-protocol-revenue",
+      "fields": [
+        {
+          "label": "Gross Protocol Revenue \u2192 Gross Profit",
+          "value": "61.99M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "gross-protocol-revenue",
+      "fields": [
+        {
+          "label": "Gross Protocol Revenue \u2192 Cost of Revenue",
+          "value": "36.65M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "cost-of-revenue",
+      "fields": [
+        {
+          "label": "Cost of Revenue \u2192 Maker Rebates (Cost)",
+          "value": "20.79M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "cost-of-revenue",
+      "fields": [
+        {
+          "label": "Cost of Revenue",
+          "value": "36.65M (37%)",
+          "kind": "value"
+        },
+        {
+          "label": null,
+          "value": "Maker rebates, taker rebates, referral rewards, liquidity and holding rewards",
+          "kind": "chip"
+        }
+      ]
+    },
+    {
+      "stage_id": "cost-of-revenue",
+      "fields": [
+        {
+          "label": "Cost of Revenue \u2192 Liquidity Rewards (Cost)",
+          "value": "9.48M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "cost-of-revenue",
+      "fields": [
+        {
+          "label": "Cost of Revenue \u2192 Referral Rewards (Cost)",
+          "value": "2.6M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "cost-of-revenue",
+      "fields": [
+        {
+          "label": "Cost of Revenue \u2192 Taker Rebates (Cost)",
+          "value": "2.73M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "cost-of-revenue",
+      "fields": [
+        {
+          "label": "Cost of Revenue \u2192 Holding Rewards (Cost)",
+          "value": "1.06M",
+          "kind": "value"
+        }
+      ]
+    },
+    {
+      "stage_id": "earnings",
+      "fields": [
+        {
+          "label": "Earnings",
+          "value": "61.99M (100%)",
+          "kind": "value"
+        },
+        {
+          "label": null,
+          "value": "Fees going to protocol address post maker rebate, taker rebate, referral reward, liquidity and holding rewards distribution",
+          "kind": "chip"
+        }
+      ]
+    }
+  ],
+  "ui_grammar": {
+    "rail": "The flow is represented by a series of connected, variable-width bands (sankey diagram style) that act as the 'rail'.",
+    "node_styles": "Nodes are represented by vertical rectangular blocks that span the width of the incoming/outgoing flows. They contain a label, a value, and a percentage. The 'DefiLlama' node is a smaller, central icon.",
+    "states": "Green color indicates profit or earnings. Red color indicates costs. Grey/dark grey indicates initial revenue or input.",
+    "animation": "Hovering over a stage or a flow highlights that specific path and displays a tooltip/hover card with detailed information. The width of the flow bands dynamically adjusts to represent the magnitude of the value."
+  },
+  "color_system": [
+    {
+      "hex_or_name": "green",
+      "meaning": "Profit or Earnings"
+    },
+    {
+      "hex_or_name": "red",
+      "meaning": "Costs"
+    },
+    {
+      "hex_or_name": "grey",
+      "meaning": "Initial Revenue / Input"
+    },
+    {
+      "hex_or_name": "dark grey",
+      "meaning": "Background / Unhighlighted elements"
+    }
+  ],
+  "motion_cues": [
+    "Hovering over a flow path highlights the path and displays a tooltip.",
+    "Hovering over a stage node highlights the node and displays a tooltip."
+  ],
+  "data_fields": [
+    "stage_id",
+    "label",
+    "value",
+    "percentage",
+    "description",
+    "from_stage_id",
+    "to_stage_id",
+    "flow_amount",
+    "flow_description"
+  ],
+  "model": "gemini-2.5-flash",
+  "source": "example-ui-workflow-roadmap-widget.mov (first 12s)"
+}

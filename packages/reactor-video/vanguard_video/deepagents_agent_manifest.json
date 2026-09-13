@@ -1,0 +1,85 @@
+{
+  "agents": [
+    {
+      "id": "orchestrator",
+      "name": "Orchestrator",
+      "role": "Receives initial prompt, plans by spinning up specialists, synthesizes results.",
+      "tools": [],
+      "subagents_spawned": [
+        "researcher",
+        "researcher",
+        "researcher"
+      ],
+      "output_manifests_as": "chat"
+    },
+    {
+      "id": "researcher-deepagents",
+      "name": "researcher",
+      "role": "Researches the DeepAgents framework.",
+      "tools": [
+        "grep",
+        "ls",
+        "glob"
+      ],
+      "subagents_spawned": [],
+      "output_manifests_as": "chat"
+    },
+    {
+      "id": "researcher-langchain",
+      "name": "researcher",
+      "role": "Researches the LangChain framework.",
+      "tools": [
+        "glob",
+        "grep",
+        "ls"
+      ],
+      "subagents_spawned": [],
+      "output_manifests_as": "chat"
+    },
+    {
+      "id": "researcher-langgraph",
+      "name": "researcher",
+      "role": "Researches the LangGraph framework.",
+      "tools": [
+        "grep",
+        "ls"
+      ],
+      "subagents_spawned": [],
+      "output_manifests_as": "chat"
+    }
+  ],
+  "planning_artifacts": {
+    "exists": true,
+    "shape": "A progress indicator 'Specialist agents - X/3 completed' and individual panels for each specialist agent showing their status (Running/Complete) and a list of tools called with checkmarks.",
+    "lifecycle": [
+      "Initial state: 'Specialist agents - 0/3 completed'",
+      "Three 'researcher' panels appear, all marked 'Running' with 'Working...' status.",
+      "Individual tool calls (grep, ls, glob) are listed within each researcher panel and marked with a green checkmark upon completion.",
+      "As each researcher completes its task, its panel status changes from 'Running' to 'Complete'.",
+      "The overall progress indicator updates: '1/3 completed', '2/3 completed', '3/3 completed'."
+    ]
+  },
+  "file_artifacts": [],
+  "ui_grammar": {
+    "panel_positions": "Main chat input at the bottom, chat history above it. Agent activity (specialist agent panels) appears below the main chat history. A static 'Quickstart' section is present at the very bottom.",
+    "colors": [
+      "dark blue/black background",
+      "white text",
+      "blue for active elements/borders/agent icons",
+      "green for completed steps (checkmarks)",
+      "orange for 'Running' status tags"
+    ],
+    "list_styles": "Tool calls within agent panels are presented as a list with green checkmarks indicating completion. The final comparison is presented with bullet points.",
+    "working_states": "Agents show 'Running' tags, 'Working...' text, and an animated ellipsis (...) during active processing. Tool calls are listed and checked off as they complete. A progress bar/text 'X/3 completed' indicates overall task progress."
+  },
+  "steering_moments": [
+    {
+      "timestamp": "00:01",
+      "human_action": "Clicks on the suggested prompt 'Compare DeepAgents, LangChain, and LangGraph for building an agent'.",
+      "effect": "Initiates the agentic workflow."
+    }
+  ],
+  "dashboard_built_steps": [],
+  "model": "gemini-2.5-flash",
+  "source": "vanguard_video/deepAgents-example-workflow.mov"
+}
