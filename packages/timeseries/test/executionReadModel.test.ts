@@ -184,22 +184,46 @@ describe("ExecutionReadModel — every panel is tenant-scoped", () => {
     expect(runner.last.values).toContain(USER);
   });
 
+  /**
+   * The bridge panel reads two tables, so `last` is no longer the steps query.
+   *
+   * Steps carry the lifecycle a live bridge needs and events carry the broadcasts that actually
+   * happened — `exec_steps` is unreachable without a run row and `exec_events` has no foreign keys,
+   * so a panel that wants to show a real transaction has to read both. These helpers select the
+   * query under test by its table rather than by position, which keeps them honest if the order
+   * changes again.
+   */
+  const stepsQuery = (runner: RecordingRunner) =>
+    runner.queries.find((q) => q.text.includes("exec_steps")) ?? (() => { throw new Error("no exec_steps query"); })();
+  const eventsQuery = (runner: RecordingRunner) =>
+    runner.queries.find((q) => q.text.includes("exec_events")) ?? (() => { throw new Error("no exec_events query"); })();
+
   it("excludes finished work from the bridge panel", async () => {
     const runner = new RecordingRunner().willReturn([]);
     await new ExecutionReadModel(runner, undefined as never).bridgeProgress(USER);
 
     // The panel answers "what is still moving?" — a confirmed or failed leg is
     // history, and `skipped` never moved at all.
-    expect(runner.last.text).toMatch(/status NOT IN|status <>|NOT \(status/i);
+    const q = stepsQuery(runner);
+    expect(q.text).toMatch(/status NOT IN|status <>|NOT \(status/i);
     for (const terminal of ["confirmed", "failed", "skipped"]) {
-      expect(runner.last.text).toContain(terminal);
+      expect(q.text).toContain(terminal);
     }
   });
 
   it("filters the bridge panel to bridge steps specifically", async () => {
     const runner = new RecordingRunner().willReturn([]);
     await new ExecutionReadModel(runner, undefined as never).bridgeProgress(USER);
-    expect(runner.last.text).toMatch(/kind\s*=\s*'bridge'|kind IN \('bridge'/i);
+    expect(stepsQuery(runner).text).toMatch(/kind\s*=\s*'bridge'|kind IN \('bridge'/i);
+  });
+
+  it("also reads broadcasts recorded as events, since steps are unreachable without a run", async () => {
+    const runner = new RecordingRunner().willReturn([]);
+    await new ExecutionReadModel(runner, undefined as never).bridgeProgress(USER);
+
+    const q = eventsQuery(runner);
+    expect(q.text).toContain("step.broadcast");
+    expect(q.values).toContain(USER);
   });
 
   it("takes the latest position per account/chain/pool rather than every snapshot", async () => {

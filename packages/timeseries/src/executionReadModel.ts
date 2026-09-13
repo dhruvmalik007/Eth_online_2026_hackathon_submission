@@ -126,7 +126,56 @@ export class ExecutionReadModel {
        ORDER BY updated_at DESC`,
       [userId],
     );
-    return result.rows.map(toStepRow);
+    const steps = result.rows.map(toStepRow);
+
+    /**
+     * Broadcasts recorded as events, which is where every one of them actually lands.
+     *
+     * `exec_steps` is only reachable through a run → intent chain, and nothing in the service
+     * creates those rows: `POST /runs/:id/simulate` requires a run that already exists, and there is
+     * no route that makes one. So a step row is, today, unreachable from the API — while
+     * `exec_events` carries no foreign keys at all and accepts a broadcast the moment it happens.
+     *
+     * Reading both is not a workaround layered over a bug; it is the honest description of where the
+     * data is. A broadcast that happened is a broadcast that happened, whether or not a run row was
+     * ever created for it, and a desk that hid it because of a missing parent row would be lying
+     * about a transaction that is on chain.
+     */
+    const events = await this.runner.query(
+      `SELECT event_id, at, user_id, intent_id, step_id, type, payload FROM exec_events
+       WHERE user_id = $1 AND type = 'step.broadcast'
+       ORDER BY at DESC
+       LIMIT 100`,
+      [userId],
+    );
+
+    const fromEvents: ExecutionStepRow[] = events.rows.map((row) => {
+      const payload = (row['payload'] ?? {}) as Record<string, unknown>;
+      const rawChain = asNumber(payload['chainId']);
+      return {
+        // `step_id` is nullable on an event, so fall back to the event's own id — it is a uuid too,
+        // and the field exists to give the row a stable identity in the UI, not to join on.
+        stepId: (asString(row['step_id']) ?? asString(row['event_id'])) as string,
+        intentId: asString(row['intent_id']) ?? "",
+        userId: asString(row['user_id']) as string,
+        seq: asNumber(payload['index']) ?? 0,
+        kind: "bridge",
+        label: asString(payload['label']) ?? "Broadcast",
+        status: "submitted",
+        chainId: rawChain !== null && rawChain > 0 ? rawChain : 1,
+        txHash: asString(payload['txHash']),
+        nonce: null,
+        gasUsed: null,
+        srcTxHash: asString(payload['srcTxHash']),
+        dstTxHash: asString(payload['dstTxHash']),
+        guid: asString(payload['guid']),
+        error: null,
+      };
+    });
+
+    // Steps first: a real step row carries lifecycle a broadcast never will.
+    const seen = new Set(steps.map((step) => step.txHash).filter((hash) => hash !== null));
+    return [...steps, ...fromEvents.filter((event) => event.txHash === null || !seen.has(event.txHash))];
   }
 
   /**
