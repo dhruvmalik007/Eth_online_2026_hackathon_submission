@@ -298,7 +298,16 @@ export class LiFiBridge {
       chainId: Number(tx['chainId'] ?? 0),
       to: String(tx['to'] ?? context.sender),
       data: String(tx['data'] ?? "0x"),
-      value: String(tx['value'] ?? 0),
+      /**
+       * Normalised to decimal, because LI.FI returns this field in hex and the port's schema
+       * (`/^\d+$/`) accepts only decimal.
+       *
+       * Passing it through unchanged failed every route that carried native value, and a bridge of a
+       * native token is exactly that: the service rejected the call as malformed before it ever
+       * reached the signer, so the failure looked like a bad request rather than a formatting bug in
+       * the adapter that produced it.
+       */
+      value: normalizeValue(tx['value']),
     };
   }
 
@@ -357,6 +366,25 @@ function mapState(status: string | undefined, substatus: string | undefined): Br
 }
 
 /** The quoted step, which the build step replays back to LI.FI. */
+/**
+ * LI.FI's `value` in decimal.
+ *
+ * Accepts what the provider actually returns — a hex quantity (`0x…`), a decimal string, a number, or
+ * nothing — and yields the decimal string the port requires. Throws on anything else rather than
+ * coercing, so a shape change upstream is a loud failure here instead of a `0` value silently sent.
+ */
+export function normalizeValue(raw: unknown): string {
+  if (raw === undefined || raw === null) return "0";
+  if (typeof raw === "number") {
+    if (!Number.isInteger(raw) || raw < 0) throw new Error(`LI.FI returned a non-integer value: ${raw}`);
+    return String(raw);
+  }
+  const text = String(raw).trim();
+  if (text.length === 0) return "0";
+  const wei = text.startsWith("0x") || text.startsWith("0X") ? BigInt(text) : BigInt(/^\d+$/.test(text) ? text : NaN);
+  return wei.toString();
+}
+
 function firstStep(quote: QuoteEnvelope): unknown {
   const raw = quote.raw as { routes?: Array<{ steps?: unknown[] }> } | undefined;
   const step = raw?.routes?.[0]?.steps?.[0];
