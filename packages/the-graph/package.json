@@ -15,10 +15,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint src test",
+    "lint": "eslint src test scripts",
     "test": "vitest run",
     "clean": "rm -rf dist",
     "cli": "tsx src/cli.ts",
+    "registry:messari": "tsx scripts/build-messari-registry.ts",
+    "probe:messari": "tsx scripts/messari-probe.ts",
     "graphclient:build": "graphclient build",
     "graphclient:serve-dev": "graphclient serve-dev",
     "smoke:studio": "tsx src/cli.ts health --endpoint studio",
