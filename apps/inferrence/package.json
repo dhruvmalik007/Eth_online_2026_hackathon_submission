@@ -1,0 +1,58 @@
+{
+  "name": "@ethonline2026/inferrence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Production inference + agent-orchestration microservice: sandboxed agent sessions, TimesFM-3 forecasting, and DMK signable Web3 intents, streamed over SSE to the agentic-ems app.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test scripts",
+    "test": "vitest run",
+    "start": "node --env-file-if-exists=.env dist/src/main.js",
+    "dev": "tsx watch --env-file-if-exists=.env src/main.ts",
+    "smoke": "tsx --env-file-if-exists=.env scripts/smoke-sse.ts",
+    "pipeline": "tsx --env-file-if-exists=.env scripts/production-pipeline.ts",
+    "verify:agent": "tsx --env-file-if-exists=.env scripts/verify-agent.ts",
+    "verify:tracing": "tsx --env-file-if-exists=.env scripts/verify-tracing.ts",
+    "e2e:signing": "tsx --env-file-if-exists=.env scripts/e2e-signing.ts",
+    "verify:image": "bash scripts/verify-image.sh",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@ethonline2026/arc-client": "workspace:*",
+    "@ethonline2026/bridges": "workspace:*",
+    "@ethonline2026/custody": "workspace:*",
+    "@ethonline2026/execution-domain": "workspace:*",
+    "@ethonline2026/langchain-agent": "workspace:*",
+    "@ethonline2026/risk-analysis-data-pipeline": "workspace:*",
+    "@ethonline2026/timeseries": "workspace:*",
+    "@ethonline2026/ux-workflow": "workspace:*",
+    "@langchain/core": "^1.2.9",
+    "fastify": "^5.2.1",
+    "langsmith": "^0.10.2",
+    "viem": "^2.56.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "eslint": "^9.39.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.6.0"
+  }
+}
