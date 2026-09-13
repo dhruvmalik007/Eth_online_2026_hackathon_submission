@@ -1,4 +1,11 @@
 packages:
   - 'packages/*'
-  - 'agentic-ems'
+  # Was 'agentic-ems' — a directory that does not exist at the repo root. The app lives at
+  # apps/agentic-ems, so it was never actually a workspace member: local builds passed only
+  # because the root node_modules happened to be there, and remote installs failed to link
+  # its @ethonline2026/* dependencies.
+  - 'apps/agentic-ems'
   - 'apps/indexer'
+  - 'apps/execution'
+  - 'apps/inferrence'
+  - 'apps/fork-execution'
