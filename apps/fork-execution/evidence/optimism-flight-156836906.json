@@ -1,0 +1,53 @@
+{
+  "schema": "fork-evidence/1",
+  "scenario": "flight",
+  "chain": "optimism",
+  "chainId": 10,
+  "rpcHost": "mainnet.optimism.io",
+  "forkBlock": null,
+  "observedBlockNumber": 156836906,
+  "generatedAt": "2026-09-13T04:10:33.638Z",
+  "checks": [
+    {
+      "name": "forge:FlightForkTest.test_flight_convertsTheVolatileLegIntoUsdcAndDepositsIt()",
+      "ok": true,
+      "detail": "passed"
+    },
+    {
+      "name": "forge:FlightForkTest.test_flight_isInertUntilTheSignalSaysOtherwise()",
+      "ok": true,
+      "detail": "passed"
+    },
+    {
+      "name": "quoteEqualsSwap",
+      "ok": true,
+      "detail": "quote 1000000000000000000/3400000000 vs swap 1000000000000000000/3400000000 — SwapVM's core invariant, and the strongest single signal the instruction is correct"
+    },
+    {
+      "name": "clampedToTheBand",
+      "ok": true,
+      "detail": "output 3400000000 vs band 3400000000 — a band that did not bind would prove nothing"
+    },
+    {
+      "name": "inputUnchanged",
+      "ok": true,
+      "detail": "the taker's input must not be touched by an exactIn clamp"
+    },
+    {
+      "name": "vaultSharesMinted",
+      "ok": true,
+      "detail": "3400000000 USDC of proceeds deposited for 3310230045403785004472 shares in 0xC30ce6A5758786e0F640cC5f881Dd96e9a1C5C59 — a real position, not a hardcoded address"
+    },
+    {
+      "name": "proceedsFullyDeployed",
+      "ok": true,
+      "detail": "the whole flight output was deployed, so nothing is left stranded between the two legs"
+    },
+    {
+      "name": "routerEmitted",
+      "ok": true,
+      "detail": "1 log(s) from 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f, so the redeployed router did the work"
+    }
+  ],
+  "txs": []
+}
