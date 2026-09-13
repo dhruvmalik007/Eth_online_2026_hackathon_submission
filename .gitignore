@@ -273,3 +273,9 @@ packages/*/contracts/broadcast/
 # Scratch data dumps — regenerable, not part of the deliverable
 data/*.batch.jsonl
 data/higgsfield_trigger_text.txt
+
+# lib/ is a Python-template ignore; these TypeScript lib dirs are source, not build output.
+!apps/*/app/lib/
+!apps/*/app/lib/**
+!packages/*/scripts/lib/
+!packages/*/scripts/lib/**
