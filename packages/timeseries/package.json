@@ -23,6 +23,7 @@
     "backfill:embeddings": "tsx scripts/backfill-embeddings.ts"
   },
   "dependencies": {
+    "@ethonline2026/execution-domain": "workspace:*",
     "@timescaledb/core": "^0.0.1",
     "google-auth-library": "^11.0.2",
     "pg": "^8.16.0",

@@ -34,6 +34,24 @@ export interface MigrateOptions {
   readonly vector?: VectorMode;
   /** Measured outcome window for `v_decision_outcomes`. */
   readonly decisionHorizon?: string;
+  /**
+   * Attach retention to the high-volume trace tables (default true).
+   *
+   * Separate from `compression` because the two answer different questions:
+   * compression makes old rows cheaper to store, retention decides how long they
+   * exist at all.
+   */
+  readonly retention?: boolean;
+  /**
+   * Enable tenant row-level security on the `exec_*` tables.
+   *
+   * Off by default, and deliberately **without `FORCE`**: the table owner still
+   * sees every row, so the existing single-role deployment is unaffected and the
+   * policies stay inert until a restricted role exists. That is what makes it
+   * safe to apply now and useful later, rather than a switch that changes
+   * behaviour the moment it is flipped.
+   */
+  readonly rls?: boolean;
 }
 
 export interface MigrationReport {
@@ -119,6 +137,28 @@ const HYPERTABLES: readonly HypertableSpec[] = [
     timeColumn: 'occurred_at',
     segmentBy: 'subject',
     orderBy: 'occurred_at DESC',
+    compress: true,
+  },
+  // ── Execution service history ─────────────────────────────────────────────
+  // Only these two are time-series. The rest of the `exec_*` family is *mutable*
+  // current state — a step's status changes in place — and TimescaleDB
+  // compression is for append-only data, so those stay plain tables.
+  //
+  // `segmentby user_id` is what makes this per-user without partitioning per
+  // user: one user's rows sit together, so compression works better and a
+  // dashboard scan for a single user reads fewer chunks.
+  {
+    table: 'exec_events',
+    timeColumn: 'at',
+    segmentBy: 'user_id',
+    orderBy: 'at DESC',
+    compress: true,
+  },
+  {
+    table: 'exec_position_snapshots',
+    timeColumn: 'at',
+    segmentBy: 'user_id',
+    orderBy: 'at DESC',
     compress: true,
   },
 ];
@@ -303,6 +343,358 @@ const TABLE_DDL: readonly { readonly name: string; readonly sql: string }[] = [
   CONSTRAINT security_incidents_severity_check
     CHECK (severity IN ('low', 'medium', 'high', 'critical'))
 )`,
+  },
+
+  // ── Execution service: the session → strategy → run → intent → step chain ──
+  //
+  // One schema for every user. What makes this per-user is the `user_id` column
+  // repeated on every table plus `segmentby user_id` on the two hypertables —
+  // not a table or database per user, which would be hundreds of databases to
+  // migrate, back up and pay for.
+  //
+  // Note that `status` columns are deliberately NOT constrained by CHECK: the
+  // lifecycle has fourteen states and is enforced by the state machine in
+  // `@ethonline2026/execution-domain` (every write goes through
+  // `assertTransition`). A CHECK here would mean two sources of truth for the
+  // same vocabulary, drifting on the next state added.
+  {
+    name: 'exec_users',
+    sql: `CREATE TABLE IF NOT EXISTS exec_users (
+  user_id    text        PRIMARY KEY,
+  created_at timestamptz NOT NULL DEFAULT now()
+)`,
+  },
+  {
+    // A short-lived interaction context, not a container. Nothing depends on it
+    // staying open — which is what lets a risk-triggered rebalance run with
+    // nobody logged in.
+    name: 'exec_sessions',
+    sql: `CREATE TABLE IF NOT EXISTS exec_sessions (
+  session_id       uuid        PRIMARY KEY,
+  user_id          text        NOT NULL REFERENCES exec_users(user_id) ON DELETE CASCADE,
+  agent            text        NOT NULL,
+  status           text        NOT NULL DEFAULT 'open',
+  thread_id        text,
+  mandate_snapshot jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  started_at       timestamptz NOT NULL DEFAULT now(),
+  last_active_at   timestamptz NOT NULL DEFAULT now(),
+  closed_at        timestamptz,
+  CONSTRAINT exec_session_agent_check  CHECK (agent  IN ('v01', 'deep', 'desk')),
+  CONSTRAINT exec_session_status_check CHECK (status IN ('open', 'paused', 'closed'))
+)`,
+  },
+  {
+    // `provisioning` is explicit because a Privy server signer must be
+    // provisioned per user (authorization key + policy), and its failure mode is
+    // silent: a missing policy means the signer simply cannot act.
+    name: 'exec_accounts',
+    sql: `CREATE TABLE IF NOT EXISTS exec_accounts (
+  account_id      uuid        PRIMARY KEY,
+  user_id         text        NOT NULL REFERENCES exec_users(user_id) ON DELETE CASCADE,
+  kind            text        NOT NULL,
+  chain_id        integer     NOT NULL,
+  address         text        NOT NULL,
+  privy_wallet_id text        NOT NULL,
+  provisioning    text        NOT NULL DEFAULT 'pending',
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT exec_account_kind_check         CHECK (kind IN ('eoa', 'smart')),
+  CONSTRAINT exec_account_provisioning_check CHECK (provisioning IN ('pending', 'ready', 'failed')),
+  CONSTRAINT exec_account_address_check      CHECK (address ~ '^0x[0-9a-fA-F]{40}$'),
+  UNIQUE (user_id, chain_id, kind, address)
+)`,
+  },
+  {
+    // Durable and user-owned — the parent of runs, not a session.
+    // `risk_thresholds` is what the risk engine watches; a breach starts a run.
+    name: 'exec_strategies',
+    sql: `CREATE TABLE IF NOT EXISTS exec_strategies (
+  strategy_id     uuid        PRIMARY KEY,
+  user_id         text        NOT NULL REFERENCES exec_users(user_id) ON DELETE CASCADE,
+  name            text        NOT NULL,
+  mandate         jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  risk_thresholds jsonb       NOT NULL DEFAULT '[]'::jsonb,
+  status          text        NOT NULL DEFAULT 'active',
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT exec_strategy_status_check CHECK (status IN ('active', 'paused', 'retired'))
+)`,
+  },
+  {
+    // `session_id` is nullable audit metadata; `trigger_detail` is the audit
+    // answer to "why did this run happen?".
+    name: 'exec_runs',
+    sql: `CREATE TABLE IF NOT EXISTS exec_runs (
+  run_id         uuid        PRIMARY KEY,
+  strategy_id    uuid        NOT NULL REFERENCES exec_strategies(strategy_id) ON DELETE CASCADE,
+  user_id        text        NOT NULL,
+  session_id     uuid        REFERENCES exec_sessions(session_id) ON DELETE SET NULL,
+  parent_run_id  uuid        REFERENCES exec_runs(run_id) ON DELETE SET NULL,
+  trigger        text        NOT NULL,
+  trigger_detail jsonb,
+  mode           text        NOT NULL DEFAULT 'dry',
+  status         text        NOT NULL DEFAULT 'draft',
+  started_at     timestamptz NOT NULL DEFAULT now(),
+  finished_at    timestamptz,
+  CONSTRAINT exec_run_trigger_check CHECK (trigger IN ('user', 'agent', 'risk_breach', 'schedule')),
+  CONSTRAINT exec_run_mode_check    CHECK (mode IN ('dry', 'live'))
+)`,
+  },
+  {
+    // One simulation pass, pinned to a block so every quote describes the same
+    // state. Large traces go to object storage; only the key lives here.
+    name: 'exec_simulations',
+    sql: `CREATE TABLE IF NOT EXISTS exec_simulations (
+  simulation_id uuid        PRIMARY KEY,
+  run_id        uuid        NOT NULL REFERENCES exec_runs(run_id) ON DELETE CASCADE,
+  user_id       text        NOT NULL,
+  attempt       integer     NOT NULL DEFAULT 1,
+  state_block   bigint,
+  gas_price_wei numeric,
+  status        text        NOT NULL DEFAULT 'running',
+  trace_key     text,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (run_id, attempt)
+)`,
+  },
+  {
+    // Every attempted path is recorded, including the rejects and why — a user
+    // must be able to ask "why not the third one?".
+    name: 'exec_paths',
+    sql: `CREATE TABLE IF NOT EXISTS exec_paths (
+  path_id       uuid        PRIMARY KEY,
+  simulation_id uuid        NOT NULL REFERENCES exec_simulations(simulation_id) ON DELETE CASCADE,
+  run_id        uuid        NOT NULL REFERENCES exec_runs(run_id) ON DELETE CASCADE,
+  user_id       text        NOT NULL,
+  rank          integer     NOT NULL,
+  label         text        NOT NULL DEFAULT '',
+  net_value_usd numeric     NOT NULL,
+  fee_total_usd numeric     NOT NULL,
+  fee_breakdown jsonb       NOT NULL DEFAULT '[]'::jsonb,
+  steps         jsonb       NOT NULL DEFAULT '[]'::jsonb,
+  viable        boolean     NOT NULL DEFAULT true,
+  reject_reason text,
+  selected_at   timestamptz,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (simulation_id, rank)
+)`,
+  },
+  {
+    // The signed intent. `typed_data_hash` binds the signature to the exact
+    // payload the user reviewed, so a mismatch is detectable afterwards.
+    name: 'exec_intents',
+    sql: `CREATE TABLE IF NOT EXISTS exec_intents (
+  intent_id         uuid        PRIMARY KEY,
+  run_id            uuid        NOT NULL REFERENCES exec_runs(run_id) ON DELETE CASCADE,
+  path_id           uuid        REFERENCES exec_paths(path_id) ON DELETE SET NULL,
+  user_id           text        NOT NULL,
+  signer_account_id uuid        REFERENCES exec_accounts(account_id) ON DELETE SET NULL,
+  status            text        NOT NULL DEFAULT 'proposed',
+  typed_data_hash   text,
+  signature         text,
+  signed_at         timestamptz,
+  created_at        timestamptz NOT NULL DEFAULT now()
+)`,
+  },
+  {
+    // Mutable current state for one leg. The append-only history is
+    // `exec_events`; this is the row the dashboard reads for "where is it now".
+    name: 'exec_steps',
+    sql: `CREATE TABLE IF NOT EXISTS exec_steps (
+  step_id     uuid        PRIMARY KEY,
+  intent_id   uuid        NOT NULL REFERENCES exec_intents(intent_id) ON DELETE CASCADE,
+  user_id     text        NOT NULL,
+  seq         integer     NOT NULL,
+  kind        text        NOT NULL,
+  label       text        NOT NULL DEFAULT '',
+  status      text        NOT NULL DEFAULT 'queued',
+  chain_id    integer     NOT NULL,
+  tx_hash     text,
+  nonce       bigint,
+  gas_used    numeric,
+  src_tx_hash text,
+  dst_tx_hash text,
+  guid        text,
+  error       text,
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (intent_id, seq),
+  CONSTRAINT exec_step_kind_check CHECK (kind IN (
+    'approve', 'wrap', 'bridge', 'lzSend', 'lzCompose',
+    'supply', 'swap', 'order', 'transfer'
+  ))
+)`,
+  },
+  {
+    // One row per step per token. `estimated` distinguishes the pre-trade quote
+    // from the amount actually paid, which is what the receipt's actual-vs-quoted
+    // trust signal is built on.
+    name: 'exec_fee_actuals',
+    sql: `CREATE TABLE IF NOT EXISTS exec_fee_actuals (
+  fee_id    uuid        PRIMARY KEY,
+  step_id   uuid        REFERENCES exec_steps(step_id) ON DELETE CASCADE,
+  user_id   text        NOT NULL,
+  chain_id  integer     NOT NULL,
+  token     text        NOT NULL,
+  amount    numeric     NOT NULL,
+  usd       numeric,
+  kind      text        NOT NULL,
+  estimated boolean     NOT NULL DEFAULT false,
+  at        timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT exec_fee_kind_check CHECK (kind IN (
+    'gas', 'bridge', 'lp', 'protocol', 'aggregator', 'other'
+  ))
+)`,
+  },
+  {
+    // The append-only trace. Primary key includes the time column, which a
+    // hypertable requires. Deliberately NO foreign keys: this is the highest
+    // write volume table in the schema, and FK checks on every event would cost
+    // more than the referential guarantee is worth here — the ids are written by
+    // the same transaction that writes the parent rows.
+    name: 'exec_events',
+    sql: `CREATE TABLE IF NOT EXISTS exec_events (
+  event_id  uuid        NOT NULL,
+  at        timestamptz NOT NULL DEFAULT now(),
+  user_id   text        NOT NULL,
+  run_id    uuid,
+  intent_id uuid,
+  step_id   uuid,
+  type      text        NOT NULL,
+  payload   jsonb       NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (event_id, at)
+)`,
+  },
+  {
+    // Downsampled at write time — one row per position per horizon, never per
+    // block. `account_id` is NOT NULL because it is part of the primary key and
+    // Postgres forbids a nullable primary-key column.
+    name: 'exec_position_snapshots',
+    sql: `CREATE TABLE IF NOT EXISTS exec_position_snapshots (
+  at         timestamptz NOT NULL,
+  user_id    text        NOT NULL,
+  account_id uuid        NOT NULL,
+  chain_id   integer     NOT NULL,
+  protocol   text        NOT NULL,
+  pool_id    text        NOT NULL,
+  value_usd  numeric     NOT NULL,
+  units      numeric,
+  apy        numeric,
+  PRIMARY KEY (at, user_id, account_id, chain_id, pool_id)
+)`,
+  },
+  {
+    // One row per principal *per agent*, not per principal: the same operator running a conservative
+    // agent and an opportunistic one needs two limits, and keying on the user alone would silently
+    // give both whichever number was written last.
+    //
+    // This is the durable home for a mandate. `APPROVAL_MAX_SPEND_USD` remains the *default* for
+    // agents with no row, so a deployment with an empty table behaves exactly as it did before.
+    name: 'exec_agent_mandates',
+    sql: `CREATE TABLE IF NOT EXISTS exec_agent_mandates (
+  user_id           text        NOT NULL,
+  agent             text        NOT NULL,
+  max_spend_usd     numeric     NOT NULL,
+  approval_required boolean     NOT NULL DEFAULT true,
+  updated_by        text        NOT NULL,
+  updated_at        timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, agent),
+  CONSTRAINT exec_agent_mandates_max_spend_check CHECK (max_spend_usd > 0)
+)`,
+  },
+];
+
+/**
+ * Indexes built for the dashboard's actual questions, not for hypothetical ones.
+ *
+ * Every one is led by the column the read filters on first — `user_id` for the
+ * tenant-scoped panels, `strategy_id`/`session_id` for the lineage walks.
+ */
+const INDEX_DDL: readonly { readonly name: string; readonly sql: string }[] = [
+  {
+    name: 'exec_sessions_user_activity_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_sessions_user_activity_idx
+       ON exec_sessions (user_id, last_active_at DESC)`,
+  },
+  {
+    name: 'exec_strategies_user_status_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_strategies_user_status_idx
+       ON exec_strategies (user_id, status)`,
+  },
+  {
+    name: 'exec_runs_strategy_started_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_runs_strategy_started_idx
+       ON exec_runs (strategy_id, started_at DESC)`,
+  },
+  {
+    name: 'exec_runs_session_started_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_runs_session_started_idx
+       ON exec_runs (session_id, started_at DESC)`,
+  },
+  {
+    name: 'exec_runs_user_status_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_runs_user_status_idx
+       ON exec_runs (user_id, status)`,
+  },
+  {
+    name: 'exec_paths_run_rank_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_paths_run_rank_idx
+       ON exec_paths (run_id, rank)`,
+  },
+  {
+    name: 'exec_intents_user_status_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_intents_user_status_idx
+       ON exec_intents (user_id, status)`,
+  },
+  {
+    // Partial, deliberately. `status` changes on every transition, and indexing
+    // a frequently-updated column defeats HOT updates. The only question ever
+    // asked of this table is "what is still moving?", so the index holds just
+    // those rows — small to maintain, and a step leaves it on completion rather
+    // than updating a large index in place.
+    name: 'exec_steps_in_flight_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_steps_in_flight_idx
+       ON exec_steps (user_id, updated_at DESC)
+       WHERE status NOT IN ('confirmed', 'failed', 'skipped')`,
+  },
+  {
+    name: 'exec_fee_actuals_user_at_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_fee_actuals_user_at_idx
+       ON exec_fee_actuals (user_id, at DESC)`,
+  },
+  {
+    name: 'exec_events_user_at_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_events_user_at_idx
+       ON exec_events (user_id, at DESC)`,
+  },
+  {
+    name: 'exec_position_snapshots_user_at_idx',
+    sql: `CREATE INDEX IF NOT EXISTS exec_position_snapshots_user_at_idx
+       ON exec_position_snapshots (user_id, at DESC)`,
+  },
+];
+
+/**
+ * Retention for the highest-volume table only.
+ *
+ * `exec_events` is a trace, not a system of record: the current state lives in
+ * the mutable `exec_steps`/`exec_intents` rows, and the position history lives in
+ * `exec_position_snapshots`. Dropping raw events after 180 days bounds storage
+ * without losing anything the dashboard reads.
+ *
+ * Wrapped in a `DO` block because `add_retention_policy` errors when a policy
+ * already exists, and this migration is expected to be safe to re-run.
+ */
+const RETENTION_STATEMENTS: readonly { readonly name: string; readonly sql: string }[] = [
+  {
+    name: 'exec_events_retention',
+    sql: `DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM timescaledb_information.jobs
+    WHERE proc_name = 'policy_retention' AND hypertable_name = 'exec_events'
+  ) THEN
+    PERFORM add_retention_policy('exec_events', INTERVAL '180 days');
+  END IF;
+END $$`,
   },
 ];
 
@@ -667,13 +1059,77 @@ export async function migrate(
     await ensureHypertable(runner, spec, { compression: options.compression ?? true }, { created, existing });
   }
 
-  // 6. Views (replaced wholesale so a definition change always applies).
+  // 6. Lineage indexes for the execution tables — built for the dashboard's
+  // reads, each led by the column the query filters on first.
+  for (const index of INDEX_DDL) {
+    await run(index.sql);
+  }
+
+  // 7. Retention for the execution trace. Bounds storage on the one table whose
+  // purpose is many small appends; the mutable state it describes is unaffected.
+  if (options.retention ?? true) {
+    for (const policy of RETENTION_STATEMENTS) {
+      await run(policy.sql);
+    }
+  }
+
+  // 7b. Tenant row-level security (optional, opt-in).
+  //
+  // Applied **without `FORCE`**, so the table owner keeps full access and this
+  // changes nothing for the current single-role deployment. The policies become
+  // real the moment a restricted role connects — which is the point: the control
+  // is in place before it is needed, and flipping it on cannot lock anyone out.
+  //
+  // Fail-closed by construction. `current_setting('app.user_id', true)` returns
+  // NULL when unset, and `user_id = NULL` evaluates to NULL rather than true, so
+  // a connection that forgets to declare its tenant sees nothing. The failure
+  // mode of a missing setting is an empty result, never a full one.
+  //
+  // ## Why compressed hypertables are skipped
+  //
+  // TimescaleDB refuses the DDL outright on a hypertable with compression
+  // enabled — verified against the live database, which returns
+  // `0A000: operation not supported on hypertables that have columnstore enabled`
+  // naming the offending statement. So `exec_events` and
+  // `exec_position_snapshots` cannot carry a policy while compression is on, and
+  // they are excluded rather than silently retried.
+  //
+  // That leaves those two tables relying on the repository's `user_id` scoping
+  // alone. Worth knowing: this is the *absence* of a second layer on the two
+  // highest-volume tables, not a second layer that happens to be idle.
+  if (options.rls ?? false) {
+    await run(`
+DO $$
+DECLARE t text;
+BEGIN
+  FOR t IN
+    SELECT c.relname
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relkind = 'r'
+      AND c.relname LIKE 'exec\\_%'
+      AND NOT EXISTS (
+        SELECT 1 FROM timescaledb_information.compression_settings s
+        WHERE s.hypertable_name = c.relname
+      )
+  LOOP
+    EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format('DROP POLICY IF EXISTS tenant_isolation ON %I', t);
+    EXECUTE format(
+      'CREATE POLICY tenant_isolation ON %I USING (user_id = current_setting(''app.user_id'', true))', t
+    );
+  END LOOP;
+END $$`);
+  }
+
+  // 8. Views (replaced wholesale so a definition change always applies).
   for (const view of VIEW_STATEMENTS(options.decisionHorizon ?? DEFAULT_DECISION_HORIZON)) {
     await run(view.sql);
     created.push(view.name);
   }
 
-  // 7. Record capabilities after extensions were installed.
+  // 9. Record capabilities after extensions were installed.
   const capabilities = await probeCapabilities(runner);
   await run(
     `INSERT INTO ts_capabilities
