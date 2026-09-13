@@ -39,3 +39,16 @@ export {
   dexV4Position,
 } from './dex/uniswapV4.js';
 export { RedemptionSchema, predictionPolymarketProbe, predictionPolymarketActivity } from './prediction/polymarket.js';
+
+// Messari-standard core: one shared entity set across lending, liquid staking,
+// perpetuals and standard-implementing DEXes. See the module for the caveat that a
+// `dex-amm` label does not guarantee a standard deployment.
+export * from './messari/schemas.js';
+export {
+  messariProtocols,
+  messariProtocolFinancials,
+  messariProtocolUsage,
+  messariProtocolPools,
+  messariTokens,
+  messariProbe,
+} from './messari/protocolCore.js';

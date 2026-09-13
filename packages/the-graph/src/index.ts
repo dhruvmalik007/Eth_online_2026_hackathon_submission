@@ -7,8 +7,20 @@ export {
   type RequestOptions,
 } from './clients/SubgraphTransport.js';
 export { SubgraphRegistry } from './registry/SubgraphRegistry.js';
+export type { ClientForOptions } from './registry/SubgraphRegistry.js';
 export { ProtocolRegistry } from './registry/ProtocolRegistry.js';
 export type { ProtocolSource, ProtocolCategory } from './registry/ProtocolRegistry.js';
+export {
+  MESSARI_CATEGORIES,
+  MessariDeploymentSchema,
+  messariRegistry,
+  messariRegistrySource,
+  listMessariDeployments,
+  listMessariProtocols,
+  findMessariDeployment,
+  messariNetworksFor,
+} from './registry/messariRegistry.js';
+export type { MessariCategory, MessariDeployment } from './registry/messariRegistry.js';
 export { FnoDataExtractor } from './fno/FnoDataExtractor.js';
 export type {
   ProtocolSnapshot,
@@ -106,6 +118,24 @@ export {
 } from './queries/dex/uniswapV4Schemas.js';
 export { RedemptionSchema, type Redemption } from './queries/prediction/polymarket.js';
 
+// ─── Messari-standard core (shared across lending / LSD / perps / standard DEX) ──
+export {
+  MessariProtocolSchema,
+  MessariFinancialsSnapshotSchema,
+  MessariUsageSnapshotSchema,
+  MessariPoolSchema,
+  MessariTokenSchema,
+  SubgraphMetaSchema,
+} from './queries/messari/schemas.js';
+export type {
+  MessariProtocol,
+  MessariFinancialsSnapshot,
+  MessariUsageSnapshot,
+  MessariPool,
+  MessariToken,
+  SubgraphMeta,
+} from './queries/messari/schemas.js';
+
 // ─── Response types derived from the templates (never hand-written) ──────────
 
 import type { ZodType, z } from 'zod';
@@ -138,7 +168,20 @@ import type {
   dexV4Position,
   predictionPolymarketProbe,
   predictionPolymarketActivity,
+  messariProtocols,
+  messariProtocolFinancials,
+  messariProtocolUsage,
+  messariProtocolPools,
+  messariTokens,
+  messariProbe,
 } from './queries/index.js';
+
+export type MessariProtocolsResponse = ResponseOf<typeof messariProtocols>;
+export type MessariProtocolFinancialsResponse = ResponseOf<typeof messariProtocolFinancials>;
+export type MessariProtocolUsageResponse = ResponseOf<typeof messariProtocolUsage>;
+export type MessariProtocolPoolsResponse = ResponseOf<typeof messariProtocolPools>;
+export type MessariTokensResponse = ResponseOf<typeof messariTokens>;
+export type MessariProbeResponse = ResponseOf<typeof messariProbe>;
 
 export type ProtocolSnapshotResponse = ResponseOf<typeof fnoProtocolSnapshot>;
 export type FundingResponse = ResponseOf<typeof fnoFunding>;

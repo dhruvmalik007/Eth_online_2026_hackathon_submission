@@ -1,0 +1,1269 @@
+{
+  "$schema": "internal://messari-liveness/v1",
+  "probe": "scripts/messari-probe.ts",
+  "verifiedAt": "2026-09-13",
+  "note": "Result of probing every registry entry. `standard` means the endpoint answered AND implemented the Messari core; `partial` means it answered but the core query hit a schema difference (native schema, or an older Messari version); `dead` means it did not answer and must not be used.",
+  "counts": {
+    "total": 204,
+    "standard": 108,
+    "partial": 8,
+    "dead": 88
+  },
+  "byCategory": {
+    "dex": {
+      "standard": 36,
+      "partial": 2,
+      "dead": 19
+    },
+    "lending": {
+      "standard": 54,
+      "partial": 6,
+      "dead": 38
+    },
+    "liquid-staking": {
+      "standard": 10,
+      "partial": 0,
+      "dead": 17
+    },
+    "perpetual": {
+      "standard": 7,
+      "partial": 0,
+      "dead": 14
+    },
+    "prediction": {
+      "standard": 1,
+      "partial": 0,
+      "dead": 0
+    }
+  },
+  "standard": [
+    {
+      "protocol": "polymarket",
+      "network": "polygon",
+      "category": "prediction",
+      "detail": "block=93717066 indexingErrors=false (own schema, not Messari)"
+    },
+    {
+      "protocol": "lido",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "block=25966693 protocol=0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84 indexingErrors=false"
+    },
+    {
+      "protocol": "rocket-pool",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "block=25619092 protocol=0xae78736Cd615f374D3085123A210448E74Fc6393 indexingErrors=false"
+    },
+    {
+      "protocol": "apeswap",
+      "network": "bsc",
+      "category": "dex",
+      "detail": "block=121597235 protocol=0x0841bd0b734e4f5853f0dd8d7ea041c241fb0da6 indexingErrors=false"
+    },
+    {
+      "protocol": "apeswap",
+      "network": "polygon",
+      "category": "dex",
+      "detail": "block=93717067 protocol=0xcf083be4164828f00cae704ec15a36d711491284 indexingErrors=false"
+    },
+    {
+      "protocol": "bancor-v3",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "block=25966693 protocol=0xeEF417e1D5CC832e619ae18D2F140De2999dD4fB indexingErrors=false"
+    },
+    {
+      "protocol": "camelot-v2",
+      "network": "arbitrum",
+      "category": "dex",
+      "detail": "block=504647816 protocol=0x6eccab422d763ac031210895c81787e87b43a652 indexingErrors=false"
+    },
+    {
+      "protocol": "curve-finance",
+      "network": "avalanche",
+      "category": "dex",
+      "detail": "block=95159838 protocol=0x0000000022d53366457f9d5e68ec105046fc4383 indexingErrors=false"
+    },
+    {
+      "protocol": "curve-finance",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "block=25966693 protocol=0x0000000022d53366457f9d5e68ec105046fc4383 indexingErrors=false"
+    },
+    {
+      "protocol": "curve-finance",
+      "network": "gnosis",
+      "category": "dex",
+      "detail": "block=21586870 protocol=0x0000000022d53366457f9d5e68ec105046fc4383 indexingErrors=false"
+    },
+    {
+      "protocol": "iguanadex-v3",
+      "network": "etherlink-mainnet",
+      "category": "dex",
+      "detail": "block=25966692 protocol=0xcbc632833687dacdcc7dfac96f6c5989381f4b47 indexingErrors=false"
+    },
+    {
+      "protocol": "mm-finance",
+      "network": "polygon",
+      "category": "dex",
+      "detail": "block=93717067 protocol=0x7cfb780010e9c861e03bcbc7ac12e013137d47a5 indexingErrors=false"
+    },
+    {
+      "protocol": "pancakeswap-v3",
+      "network": "bsc",
+      "category": "dex",
+      "detail": "block=113799773 protocol=0x0bfbcf9fa4f9c56b0f40a671ad40e0805a091865 indexingErrors=false"
+    },
+    {
+      "protocol": "pangolin",
+      "network": "avalanche",
+      "category": "dex",
+      "detail": "block=95159838 protocol=0xefa94de7a4656d787667c749f7e1223d71e9fd88 indexingErrors=false"
+    },
+    {
+      "protocol": "platypus-finance",
+      "network": "avalanche",
+      "category": "dex",
+      "detail": "block=95159838 protocol=0x416a7989a964c9ed60257b064efc3a30fe6bf2ee indexingErrors=false"
+    },
+    {
+      "protocol": "saddle-finance",
+      "network": "arbitrum",
+      "category": "dex",
+      "detail": "block=504647818 protocol=0x5bdb37d0ddea3a90f233c7b7f6b9394b6b2eef34 indexingErrors=false"
+    },
+    {
+      "protocol": "saddle-finance",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "block=504647819 protocol=0x5bdb37d0ddea3a90f233c7b7f6b9394b6b2eef34 indexingErrors=false"
+    },
+    {
+      "protocol": "saddle-finance",
+      "network": "optimism",
+      "category": "dex",
+      "detail": "block=156840927 protocol=0x5bdb37d0ddea3a90f233c7b7f6b9394b6b2eef34 indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "arbitrum",
+      "category": "dex",
+      "detail": "block=504647820 protocol=0xc35dadb65012ec5796536bd9864ed8773abc74c4 indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "avalanche",
+      "category": "dex",
+      "detail": "block=95159839 protocol=0xc35dadb65012ec5796536bd9864ed8773abc74c4 indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "celo",
+      "category": "dex",
+      "detail": "block=77379877 protocol=0xc35dadb65012ec5796536bd9864ed8773abc74c4 indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "block=25966693 protocol=0xc0aee478e3658e2610c5f7a4a2e1777ce9e4f2ac indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "fuse",
+      "category": "dex",
+      "detail": "block=44046675 protocol=0x43ea90e2b786728520e4f930d2a71a477bf2737c indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "gnosis",
+      "category": "dex",
+      "detail": "block=48225173 protocol=0xc35dadb65012ec5796536bd9864ed8773abc74c4 indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "polygon",
+      "category": "dex",
+      "detail": "block=93717068 protocol=0xc35dadb65012ec5796536bd9864ed8773abc74c4 indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "network": "arbitrum",
+      "category": "dex",
+      "detail": "block=504647821 protocol=0x1af415a1eba07a4986a52b6f2e7de7003d82231e indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "network": "avalanche",
+      "category": "dex",
+      "detail": "block=95159836 protocol=0x3e603c14af37ebdad31709c4f848fc6ad5bec715 indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "block=25966693 protocol=0xbaceb8ec6b9355dfc0269c18bac9d6e2bdc29c4f indexingErrors=false"
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "network": "gnosis",
+      "category": "dex",
+      "detail": "block=48225173 protocol=0xf78031cbca409f2fb6876bdfdbc1b2df24cf9bef indexingErrors=false"
+    },
+    {
+      "protocol": "trader-joe",
+      "network": "avalanche",
+      "category": "dex",
+      "detail": "block=95159839 protocol=0x9ad6c38be94206ca50bb0d90783181662f0cfa10 indexingErrors=false"
+    },
+    {
+      "protocol": "ubeswap",
+      "network": "celo",
+      "category": "dex",
+      "detail": "block=77379877 protocol=0x62d5b84be28a183abb507e125b384122d2c25fae indexingErrors=false"
+    },
+    {
+      "protocol": "uniswap-v2-swap",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "block=25966693 protocol=0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f indexingErrors=false"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "arbitrum",
+      "category": "dex",
+      "detail": "block=504647806 protocol=0x1f98431c8ad98523631ae4a59f267346ea31f984 indexingErrors=false"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "base",
+      "category": "dex",
+      "detail": "block=51245644 protocol=0x33128a8fc17869897dce68ed026d694621f6fdfd indexingErrors=false"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "bsc",
+      "category": "dex",
+      "detail": "block=121597239 protocol=0xdb1d10011ad0ff90774d0c6bb92e5c5c8b4461f7 indexingErrors=false"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "celo",
+      "category": "dex",
+      "detail": "block=77379878 protocol=0xd9dc0d8f754c027df7ecb4bd381301cec76cd32f indexingErrors=false"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "optimism",
+      "category": "dex",
+      "detail": "block=156840927 protocol=0x1f98431c8ad98523631ae4a59f267346ea31f984 indexingErrors=false"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "polygon",
+      "category": "dex",
+      "detail": "block=93717068 protocol=0x1f98431c8ad98523631ae4a59f267346ea31f984 indexingErrors=false"
+    },
+    {
+      "protocol": "velodrome-finance-v2",
+      "network": "optimism",
+      "category": "dex",
+      "detail": "block=156840929 protocol=0xf1046053aa5682b4f9a81b5481394da16be5ff5a indexingErrors=false"
+    },
+    {
+      "protocol": "aave-amm",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0xacc030ef66f9dfeae9cbb0cd1b25654b82cfa8d5 indexingErrors=false"
+    },
+    {
+      "protocol": "aave-arc",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x6fdfafb66d39cd72cfe7984d3bbcc76632faab00 indexingErrors=false"
+    },
+    {
+      "protocol": "aave-rwa",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966692 protocol=0xb953a066377176092879a151c07798b3946eea4b indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v2",
+      "network": "avalanche",
+      "category": "lending",
+      "detail": "block=95159839 protocol=0xb6a86025f0fe1862b372cb0ca18ce3ede02a318f indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v2",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0xb53c1a33016b2dc2ff3653530bff1848a515c8c5 indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v2",
+      "network": "polygon",
+      "category": "lending",
+      "detail": "block=93717066 protocol=0xd05e3e715d945b59290df0ae8ef85c1bdb684744 indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "avalanche",
+      "category": "lending",
+      "detail": "block=95159839 protocol=0x770ef9f4fe897e59dacc474ef11238303f9552b6 indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "block=121597242 protocol=0xff75b6da14ffbbfd355daf7a2731456b3562ba6d indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "gnosis",
+      "category": "lending",
+      "detail": "block=47788569 protocol=0x36616cf17557639614c1cddb356b1b83fc0b2132 indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "polygon",
+      "category": "lending",
+      "detail": "block=93717068 protocol=0x770ef9f4fe897e59dacc474ef11238303f9552b6 indexingErrors=false"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "scroll",
+      "category": "lending",
+      "detail": "block=121597235 protocol=0xff75b6da14ffbbfd355daf7a2731456b3562ba6d indexingErrors=false"
+    },
+    {
+      "protocol": "abracadabra",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647822 protocol=0x74c764d41b77dbbb4fe771dab1939b00b146894a indexingErrors=false"
+    },
+    {
+      "protocol": "abracadabra",
+      "network": "avalanche",
+      "category": "lending",
+      "detail": "block=95159836 protocol=0xf4f46382c2be1603dc817551ff9a7b333ed1d18f indexingErrors=false"
+    },
+    {
+      "protocol": "banker-joe",
+      "network": "avalanche",
+      "category": "lending",
+      "detail": "block=95159839 protocol=0xdc13687554205e5b89ac783db14bb5bba4a1edac indexingErrors=false"
+    },
+    {
+      "protocol": "benqi",
+      "network": "avalanche",
+      "category": "lending",
+      "detail": "block=95159839 protocol=0x486af39519b4dc9a7fccd318217352830e8ad9b4 indexingErrors=false"
+    },
+    {
+      "protocol": "compound-v2",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b indexingErrors=false"
+    },
+    {
+      "protocol": "compound-v3",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647806 protocol=0xb21b06d71c75973babde35b49ffdac3f82ad3775 indexingErrors=false"
+    },
+    {
+      "protocol": "compound-v3",
+      "network": "base",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x316f9708bb98af7da9c68c1c3b5e79039cd336e3 indexingErrors=false"
+    },
+    {
+      "protocol": "compound-v3",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x316f9708bb98af7da9c68c1c3b5e79039cd336e3 indexingErrors=false"
+    },
+    {
+      "protocol": "compound-v3",
+      "network": "polygon",
+      "category": "lending",
+      "detail": "block=93717070 protocol=0x83e0f742cacbe66349e3701b171ee2487a26e738 indexingErrors=false"
+    },
+    {
+      "protocol": "cream-finance",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647829 protocol=0xbadac56c9aca307079e8b8fc699987aac89813ee indexingErrors=false"
+    },
+    {
+      "protocol": "cream-finance",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "block=121597239 protocol=0x589de0f0ccf905477646599bb3e5c622c84cc0ba indexingErrors=false"
+    },
+    {
+      "protocol": "cream-finance",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x3d5bc3c8d13dcb8bf317092d84783c2697ae9258 indexingErrors=false"
+    },
+    {
+      "protocol": "dforce",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647830 protocol=0x8e7e9ea9023b81457ae7e6d2a51b003d421e5408 indexingErrors=false"
+    },
+    {
+      "protocol": "dforce",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "block=121597246 protocol=0x0b53e608bd058bb54748c35148484fd627e6dc0a indexingErrors=false"
+    },
+    {
+      "protocol": "dforce",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x8b53ab2c0df3230ea327017c91eb909f815ad113 indexingErrors=false"
+    },
+    {
+      "protocol": "dforce",
+      "network": "optimism",
+      "category": "lending",
+      "detail": "block=156840929 protocol=0xa300a84d8970718dac32f54f61bd568142d8bcf4 indexingErrors=false"
+    },
+    {
+      "protocol": "euler-finance",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x27182842e098f60e3d576794a5bffb0777e025d3 indexingErrors=false"
+    },
+    {
+      "protocol": "iron-bank",
+      "network": "avalanche",
+      "category": "lending",
+      "detail": "block=95159842 protocol=0x2ee80614ccbc5e28654324a66a396458fa5cd7cc indexingErrors=false"
+    },
+    {
+      "protocol": "iron-bank",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0xab1c342c7bf5ec5f02adea1c2270670bca144cbb indexingErrors=false"
+    },
+    {
+      "protocol": "kinza-finance",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "block=121597247 protocol=0x37d7eb561e189895e5c8601cd03eeab67c269189 indexingErrors=false"
+    },
+    {
+      "protocol": "liquity",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0xa39739ef8b0231dbfa0dcda07d7e29faabcf4bb2 indexingErrors=false"
+    },
+    {
+      "protocol": "makerdao",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b indexingErrors=false"
+    },
+    {
+      "protocol": "maple-finance-v1",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0xc234c62c8c09687dff0d9047e40042cd166f3600 indexingErrors=false"
+    },
+    {
+      "protocol": "maple-finance-v2",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0xe463cd473ecc1d1a4ecf20b62624d84dd20a8339 indexingErrors=false"
+    },
+    {
+      "protocol": "moonwell",
+      "network": "base",
+      "category": "lending",
+      "detail": "block=51245645 protocol=0xfbb21d0380bee3312b33c4353c8936a0f13ef26c indexingErrors=false"
+    },
+    {
+      "protocol": "morpho-aave-v2",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x777777c9898d384f785ee44acfe945efdff5f3e0 indexingErrors=false"
+    },
+    {
+      "protocol": "morpho-aave-v3",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x33333aea097c193e66081e930c33020272b33333 indexingErrors=false"
+    },
+    {
+      "protocol": "qidao",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647834 protocol=0x3f56e0c36d275367b8c502090edf38289b3dea0d indexingErrors=false"
+    },
+    {
+      "protocol": "qidao",
+      "network": "avalanche",
+      "category": "lending",
+      "detail": "block=95159842 protocol=0x5c49b268c9841aff1cc3b0a418ff5c3442ee3f3b indexingErrors=false"
+    },
+    {
+      "protocol": "qidao",
+      "network": "base",
+      "category": "lending",
+      "detail": "block=51245644 protocol=0xbf1aea8670d2528e08334083616dd9c5f3b087ae indexingErrors=false"
+    },
+    {
+      "protocol": "qidao",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x8D6CeBD76f18E1558D4DB88138e2DeFB3909fAD6 indexingErrors=false"
+    },
+    {
+      "protocol": "qidao",
+      "network": "gnosis",
+      "category": "lending",
+      "detail": "block=48225173 protocol=0x3f56e0c36d275367b8c502090edf38289b3dea0d indexingErrors=false"
+    },
+    {
+      "protocol": "radiant",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647824 protocol=0xe21b295ed46528efd5f3ef66e18bc6ad1c87f003 indexingErrors=false"
+    },
+    {
+      "protocol": "rari-fuse",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647837 protocol=0xc201b8c8dd22c779025e16f1825c90e1e6dd6a08 indexingErrors=false"
+    },
+    {
+      "protocol": "rari-fuse",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x835482fe0532f169024d5e9410199369aad5c77e indexingErrors=false"
+    },
+    {
+      "protocol": "sonne-finance",
+      "network": "optimism",
+      "category": "lending",
+      "detail": "block=156840929 protocol=0x60cf091cd3f50420d50fd7f707414d0df4751c58 indexingErrors=false"
+    },
+    {
+      "protocol": "spark-lend",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x03cfa0c4622ff84e50e75062683f44c9587e6cc1 indexingErrors=false"
+    },
+    {
+      "protocol": "spark-lend",
+      "network": "gnosis",
+      "category": "lending",
+      "detail": "block=48225173 protocol=0xa98dacb3fc964a6a0d2ce3b77294241585eaba6d indexingErrors=false"
+    },
+    {
+      "protocol": "superlend",
+      "network": "etherlink-mainnet",
+      "category": "lending",
+      "detail": "block=156840927 protocol=0x59d9356e565ab3a36dd77763fc0d87feaf85508c indexingErrors=false"
+    },
+    {
+      "protocol": "truefi",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=TrueFi indexingErrors=false"
+    },
+    {
+      "protocol": "uwu-lend",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "block=25966693 protocol=0x011c0d38da64b431a1bdfc17ad72678eabf7f1fb indexingErrors=false"
+    },
+    {
+      "protocol": "venus",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "block=121597249 protocol=0xfd36e2c2a6789db23113685031d7f16329158384 indexingErrors=false"
+    },
+    {
+      "protocol": "vesta-finance",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "block=504647839 protocol=0x100ec08129e0fd59959df93a8b914944a3bbd5df indexingErrors=false"
+    },
+    {
+      "protocol": "benqi-staked-avax",
+      "network": "avalanche",
+      "category": "liquid-staking",
+      "detail": "block=95159829 protocol=0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be indexingErrors=false"
+    },
+    {
+      "protocol": "binance-staked-eth",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "block=25966692 protocol=0xa2e3356610840701bdf5611a53974510ae27e2e1 indexingErrors=false"
+    },
+    {
+      "protocol": "eigenlayer",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "block=25959638 protocol=0x369e6f597e22eab55ffb173c6d9cd234bd699111 indexingErrors=false"
+    },
+    {
+      "protocol": "lido",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "block=25966693 protocol=0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84 indexingErrors=false"
+    },
+    {
+      "protocol": "rocket-pool",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "block=25916308 protocol=0xae78736Cd615f374D3085123A210448E74Fc6393 indexingErrors=false"
+    },
+    {
+      "protocol": "stader",
+      "network": "mainnet",
+      "category": "liquid-staking",
+      "detail": "block=25966693 protocol=0x4abef2263d5a5ed582fc9a9789a41d85b68d69db indexingErrors=false"
+    },
+    {
+      "protocol": "stakewise-v2",
+      "network": "gnosis",
+      "category": "liquid-staking",
+      "detail": "block=48225174 protocol=0xa4ef9da5ba71cc0d2e5e877a910a37ec43420445 indexingErrors=false"
+    },
+    {
+      "protocol": "yieldyak-staked-avax",
+      "network": "avalanche",
+      "category": "liquid-staking",
+      "detail": "block=95159829 protocol=0x6026a85e11bd895c934af02647e8c7b4ea2d9808 indexingErrors=false"
+    },
+    {
+      "protocol": "gmx",
+      "network": "arbitrum",
+      "category": "perpetual",
+      "detail": "block=504647843 protocol=0x489ee077994b6658eafa855c308275ead8097c4a indexingErrors=false"
+    },
+    {
+      "protocol": "gmx",
+      "network": "avalanche",
+      "category": "perpetual",
+      "detail": "block=95159846 protocol=0x9ab2de34a33fb459b538c43f251eb825645e8595 indexingErrors=false"
+    },
+    {
+      "protocol": "kwenta",
+      "network": "optimism",
+      "category": "perpetual",
+      "detail": "block=156840932 protocol=0x920cf626a271321c151d027030d5d08af699456b indexingErrors=false"
+    },
+    {
+      "protocol": "mux-protocol",
+      "network": "arbitrum",
+      "category": "perpetual",
+      "detail": "block=504647830 protocol=0x3e0199792ce69dc29a0a36146bfa68bd7c8d6633 indexingErrors=false"
+    },
+    {
+      "protocol": "mux-protocol",
+      "network": "optimism",
+      "category": "perpetual",
+      "detail": "block=156840930 protocol=0xc6bd76fa1e9e789345e003b361e4a0037dfb7260 indexingErrors=false"
+    },
+    {
+      "protocol": "opyn-gamma",
+      "network": "avalanche",
+      "category": "perpetual",
+      "detail": "block=95159829 protocol=0x9e3b94819aaf6de606c4aa844e3215725b997064 indexingErrors=false"
+    },
+    {
+      "protocol": "opyn-gamma",
+      "network": "polygon",
+      "category": "perpetual",
+      "detail": "block=93717073 protocol=0x7a23c712bddde52b22d8ff52e4cdadb1bcb0b203 indexingErrors=false"
+    }
+  ],
+  "partial": [
+    {
+      "protocol": "aave-v3",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "answered, but the Messari core query did not resolve: [aaveV3Ethereum] request failed: Type `Protocol` has no field `name`: {\"response\":{\"errors\":[{\"locations\":[{\"line\":12,\"column\":5}],\"message\":\"Type `Pr"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "answered, but the Messari core query did not resolve: [aaveV3Arbitrum] request failed: Type `Protocol` has no field `name`: {\"response\":{\"errors\":[{\"locations\":[{\"line\":12,\"column\":5}],\"message\":\"Type `Pr"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "optimism",
+      "category": "lending",
+      "detail": "answered, but the Messari core query did not resolve: [aaveV3Optimism] request failed: Type `Protocol` has no field `name`: {\"response\":{\"errors\":[{\"locations\":[{\"line\":12,\"column\":5}],\"message\":\"Type `Pr"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "answered, but the Messari core query did not resolve: [uniswapV3] request failed: Type `Query` has no field `protocols`: {\"response\":{\"errors\":[{\"locations\":[{\"column\":3,\"line\":10}],\"message\":\"Type `Query"
+    },
+    {
+      "protocol": "uniswap-v3",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "answered, but the Messari core query did not resolve: [uniswapV3] request failed: Type `Query` has no field `protocols`: {\"response\":{\"errors\":[{\"locations\":[{\"column\":3,\"line\":10}],\"message\":\"Type `Query"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "answered, but the Messari core query did not resolve: [aaveV3Arbitrum] request failed: Type `Protocol` has no field `name`: {\"response\":{\"errors\":[{\"locations\":[{\"line\":12,\"column\":5}],\"message\":\"Type `Pr"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "answered, but the Messari core query did not resolve: [aaveV3Ethereum] request failed: Type `Protocol` has no field `name`: {\"response\":{\"errors\":[{\"locations\":[{\"column\":5,\"line\":12}],\"message\":\"Type `Pr"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "optimism",
+      "category": "lending",
+      "detail": "answered, but the Messari core query did not resolve: [aaveV3Optimism] request failed: Type `Protocol` has no field `name`: {\"response\":{\"errors\":[{\"locations\":[{\"line\":12,\"column\":5}],\"message\":\"Type `Pr"
+    }
+  ],
+  "dead": [
+    {
+      "protocol": "balancer-v2",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "[messari:balancer-v2:ethereum] request failed: bad indexers: {0xf92f430dd8567b0d466358c79594ab58d919a6d4: BadResponse(no attestation: indexing_error)}: {\"respon"
+    },
+    {
+      "protocol": "biswap",
+      "network": "bsc",
+      "category": "dex",
+      "detail": "[messari:biswap:bsc] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":200,\""
+    },
+    {
+      "protocol": "curve-finance",
+      "network": "aurora",
+      "category": "dex",
+      "detail": "[messari:curve-finance:aurora] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"sta"
+    },
+    {
+      "protocol": "curve-finance",
+      "network": "harmony",
+      "category": "dex",
+      "detail": "[messari:curve-finance:harmony] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"st"
+    },
+    {
+      "protocol": "curve-finance",
+      "network": "optimism",
+      "category": "dex",
+      "detail": "[messari:curve-finance:optimism] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"s"
+    },
+    {
+      "protocol": "ellipsis-finance",
+      "network": "bsc",
+      "category": "dex",
+      "detail": "[messari:ellipsis-finance:bsc] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"sta"
+    },
+    {
+      "protocol": "honeyswap",
+      "network": "gnosis",
+      "category": "dex",
+      "detail": "[messari:honeyswap:gnosis] request failed: bad indexers: {0x5b3c8f7245dfbd9bea22d9c4b975df60a638e5a3: Unavailable(no status: indexer not available)}: {\"response"
+    },
+    {
+      "protocol": "honeyswap",
+      "network": "polygon",
+      "category": "dex",
+      "detail": "[messari:honeyswap:polygon] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status"
+    },
+    {
+      "protocol": "pancakeswap-v3",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "[messari:pancakeswap-v3:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\""
+    },
+    {
+      "protocol": "saddle-finance",
+      "network": "fantom",
+      "category": "dex",
+      "detail": "[messari:saddle-finance:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"st"
+    },
+    {
+      "protocol": "solarbeam",
+      "network": "moonriver",
+      "category": "dex",
+      "detail": "[messari:solarbeam:moonriver] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"stat"
+    },
+    {
+      "protocol": "spiritswap",
+      "network": "fantom",
+      "category": "dex",
+      "detail": "[messari:spiritswap:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status"
+    },
+    {
+      "protocol": "substream-uniswap-v2",
+      "network": "ethereum",
+      "category": "dex",
+      "detail": "[messari:substream-uniswap-v2:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocation"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "bsc",
+      "category": "dex",
+      "detail": "[messari:sushiswap:bsc] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: BadResponse(no attestation: indexing_error)}: {\"response\":{\"e"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "fantom",
+      "category": "dex",
+      "detail": "[messari:sushiswap:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\""
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "harmony",
+      "category": "dex",
+      "detail": "[messari:sushiswap:harmony] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "moonbeam",
+      "category": "dex",
+      "detail": "[messari:sushiswap:moonbeam] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"statu"
+    },
+    {
+      "protocol": "sushiswap",
+      "network": "moonriver",
+      "category": "dex",
+      "detail": "[messari:sushiswap:moonriver] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"stat"
+    },
+    {
+      "protocol": "velodrome-finance-v1",
+      "network": "optimism",
+      "category": "dex",
+      "detail": "[messari:velodrome-finance-v1:optimism] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocation"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "base",
+      "category": "lending",
+      "detail": "[messari:aave-v3:base] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":200"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "fantom",
+      "category": "lending",
+      "detail": "[messari:aave-v3:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":2"
+    },
+    {
+      "protocol": "aave-v3",
+      "network": "harmony",
+      "category": "lending",
+      "detail": "[messari:aave-v3:harmony] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":"
+    },
+    {
+      "protocol": "abracadabra",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "[messari:abracadabra:bsc] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)}: {"
+    },
+    {
+      "protocol": "abracadabra",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "[messari:abracadabra:ethereum] request failed: bad indexers: {0x5b3c8f7245dfbd9bea22d9c4b975df60a638e5a3: Unavailable(no status: indexer not available)}: {\"resp"
+    },
+    {
+      "protocol": "abracadabra",
+      "network": "fantom",
+      "category": "lending",
+      "detail": "[messari:abracadabra:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"statu"
+    },
+    {
+      "protocol": "alpaca-finance-lending",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "[messari:alpaca-finance-lending:bsc] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}"
+    },
+    {
+      "protocol": "alpaca-finance-lending",
+      "network": "fantom",
+      "category": "lending",
+      "detail": "[messari:alpaca-finance-lending:fantom] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing"
+    },
+    {
+      "protocol": "bastion-protocol",
+      "network": "aurora",
+      "category": "lending",
+      "detail": "[messari:bastion-protocol:aurora] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\""
+    },
+    {
+      "protocol": "burrow",
+      "network": "near-mainnet",
+      "category": "lending",
+      "detail": "[messari:burrow:near-mainnet] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)"
+    },
+    {
+      "protocol": "cream-finance",
+      "network": "polygon",
+      "category": "lending",
+      "detail": "[messari:cream-finance:polygon] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: BadResponse(no attestation: deployment `QmYFb4YbR6yqQ"
+    },
+    {
+      "protocol": "dforce",
+      "network": "polygon",
+      "category": "lending",
+      "detail": "[messari:dforce:polygon] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":2"
+    },
+    {
+      "protocol": "geist-finance",
+      "network": "fantom",
+      "category": "lending",
+      "detail": "[messari:geist-finance:fantom] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress"
+    },
+    {
+      "protocol": "goldfinch",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "[messari:goldfinch:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"statu"
+    },
+    {
+      "protocol": "inverse-finance",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "[messari:inverse-finance:ethereum] request failed: bad indexers: {0x3e1536fc83cd5bed83a521a26034ff3e59c6a7c4: BadResponse(no attestation: indexing_error), 0xf92"
+    },
+    {
+      "protocol": "iron-bank",
+      "network": "fantom",
+      "category": "lending",
+      "detail": "[messari:iron-bank:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\""
+    },
+    {
+      "protocol": "iron-bank",
+      "network": "optimism",
+      "category": "lending",
+      "detail": "[messari:iron-bank:optimism] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"statu"
+    },
+    {
+      "protocol": "moonwell",
+      "network": "moonbeam",
+      "category": "lending",
+      "detail": "[messari:moonwell:moonbeam] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status"
+    },
+    {
+      "protocol": "moonwell",
+      "network": "moonriver",
+      "category": "lending",
+      "detail": "[messari:moonwell:moonriver] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)}"
+    },
+    {
+      "protocol": "morpho-compound",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "[messari:morpho-compound:ethereum] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: BadResponse(no attestation: deployment `QmVv8VBkWZ"
+    },
+    {
+      "protocol": "notional-finance",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "[messari:notional-finance:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}]"
+    },
+    {
+      "protocol": "pac-finance",
+      "network": "blast-mainnet",
+      "category": "lending",
+      "detail": "[messari:pac-finance:blast-mainnet] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}]"
+    },
+    {
+      "protocol": "qidao",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "[messari:qidao:bsc] request failed: bad indexers: {0x63c9dc729ba7a22bb8605216b24a34b902e5fe94: BadResponse(400), 0xb4b4570df6f7fe320f10fdfb702dba7e35244550: Bad"
+    },
+    {
+      "protocol": "qidao",
+      "network": "fantom",
+      "category": "lending",
+      "detail": "[messari:qidao:fantom] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)}: {\"re"
+    },
+    {
+      "protocol": "qidao",
+      "network": "harmony",
+      "category": "lending",
+      "detail": "[messari:qidao:harmony] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":20"
+    },
+    {
+      "protocol": "qidao",
+      "network": "moonriver",
+      "category": "lending",
+      "detail": "[messari:qidao:moonriver] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":"
+    },
+    {
+      "protocol": "qidao",
+      "network": "optimism",
+      "category": "lending",
+      "detail": "[messari:qidao:optimism] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":2"
+    },
+    {
+      "protocol": "qidao",
+      "network": "polygon",
+      "category": "lending",
+      "detail": "[messari:qidao:polygon] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":20"
+    },
+    {
+      "protocol": "radiant-v2",
+      "network": "arbitrum",
+      "category": "lending",
+      "detail": "[messari:radiant-v2:arbitrum] response for \"the-graph.messari.probe\" failed schema validation:\n  - protocols.0.cumulativeTotalRevenueUSD: expected a non-negativ"
+    },
+    {
+      "protocol": "radiant-v2",
+      "network": "bsc",
+      "category": "lending",
+      "detail": "[messari:radiant-v2:bsc] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)}: {\""
+    },
+    {
+      "protocol": "scream",
+      "network": "fantom",
+      "category": "lending",
+      "detail": "[messari:scream:fantom] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)}: {\"r"
+    },
+    {
+      "protocol": "seamless-protocol",
+      "network": "base",
+      "category": "lending",
+      "detail": "[messari:seamless-protocol:base] request failed: bad indexers: {0x63c9dc729ba7a22bb8605216b24a34b902e5fe94: BadResponse(400), 0xb4b4570df6f7fe320f10fdfb702dba7e"
+    },
+    {
+      "protocol": "seismic",
+      "network": "blast-mainnet",
+      "category": "lending",
+      "detail": "[messari:seismic:blast-mainnet] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"st"
+    },
+    {
+      "protocol": "zerolend",
+      "network": "blast-mainnet",
+      "category": "lending",
+      "detail": "[messari:zerolend:blast-mainnet] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"s"
+    },
+    {
+      "protocol": "zerolend",
+      "network": "ethereum",
+      "category": "lending",
+      "detail": "[messari:zerolend:ethereum] response for \"the-graph.messari.probe\" failed schema validation:\n  - protocols.0.cumulativeTotalRevenueUSD: expected a non-negative "
+    },
+    {
+      "protocol": "zerolend",
+      "network": "linea",
+      "category": "lending",
+      "detail": "[messari:zerolend:linea] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":2"
+    },
+    {
+      "protocol": "zerolend",
+      "network": "xlayer-mainnet",
+      "category": "lending",
+      "detail": "[messari:zerolend:xlayer-mainnet] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\""
+    },
+    {
+      "protocol": "zerolend",
+      "network": "zksync-era",
+      "category": "lending",
+      "detail": "[messari:zerolend:zksync-era] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)"
+    },
+    {
+      "protocol": "binance-staked-eth",
+      "network": "bsc",
+      "category": "liquid-staking",
+      "detail": "[messari:binance-staked-eth:bsc] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"s"
+    },
+    {
+      "protocol": "coinbase-wrapped-staked-eth",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:coinbase-wrapped-staked-eth:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no all"
+    },
+    {
+      "protocol": "creth2",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:creth2:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":"
+    },
+    {
+      "protocol": "eigenpie",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:eigenpie:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status"
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "network": "arbitrum",
+      "category": "liquid-staking",
+      "detail": "[messari:frax-ether-staking:arbitrum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\""
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "network": "bsc",
+      "category": "liquid-staking",
+      "detail": "[messari:frax-ether-staking:bsc] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"s"
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:frax-ether-staking:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\""
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "network": "fantom",
+      "category": "liquid-staking",
+      "detail": "[messari:frax-ether-staking:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}]"
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "network": "moonbeam",
+      "category": "liquid-staking",
+      "detail": "[messari:frax-ether-staking:moonbeam] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\""
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "network": "optimism",
+      "category": "liquid-staking",
+      "detail": "[messari:frax-ether-staking:optimism] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\""
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "network": "polygon",
+      "category": "liquid-staking",
+      "detail": "[messari:frax-ether-staking:polygon] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}"
+    },
+    {
+      "protocol": "mantle-staked-eth",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:mantle-staked-eth:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}"
+    },
+    {
+      "protocol": "prime-staked-eth",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:prime-staked-eth:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}]"
+    },
+    {
+      "protocol": "stake-link-liquid",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:stake-link-liquid:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}"
+    },
+    {
+      "protocol": "stakestone",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:stakestone:ethereum] request failed: bad indexers: {0xbdfb5ee5a2abf4fc7bb1bd1221067aef7f9de491: Unavailable(no status: failed to get indexing progress)"
+    },
+    {
+      "protocol": "stakewise-v2",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:stakewise-v2:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"st"
+    },
+    {
+      "protocol": "swell-liquid-staking",
+      "network": "ethereum",
+      "category": "liquid-staking",
+      "detail": "[messari:swell-liquid-staking:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocation"
+    },
+    {
+      "protocol": "dopex",
+      "network": "arbitrum",
+      "category": "perpetual",
+      "detail": "[messari:dopex:arbitrum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":2"
+    },
+    {
+      "protocol": "dopex",
+      "network": "polygon",
+      "category": "perpetual",
+      "detail": "[messari:dopex:polygon] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\":20"
+    },
+    {
+      "protocol": "gains-trade",
+      "network": "arbitrum",
+      "category": "perpetual",
+      "detail": "[messari:gains-trade:arbitrum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"sta"
+    },
+    {
+      "protocol": "gains-trade",
+      "network": "polygon",
+      "category": "perpetual",
+      "detail": "[messari:gains-trade:polygon] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"stat"
+    },
+    {
+      "protocol": "level-finance",
+      "network": "arbitrum",
+      "category": "perpetual",
+      "detail": "[messari:level-finance:arbitrum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"s"
+    },
+    {
+      "protocol": "level-finance",
+      "network": "bsc",
+      "category": "perpetual",
+      "detail": "[messari:level-finance:bsc] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status"
+    },
+    {
+      "protocol": "mummy-finance",
+      "network": "arbitrum",
+      "category": "perpetual",
+      "detail": "[messari:mummy-finance:arbitrum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"s"
+    },
+    {
+      "protocol": "mummy-finance",
+      "network": "fantom",
+      "category": "perpetual",
+      "detail": "[messari:mummy-finance:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"sta"
+    },
+    {
+      "protocol": "mummy-finance",
+      "network": "optimism",
+      "category": "perpetual",
+      "detail": "[messari:mummy-finance:optimism] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"s"
+    },
+    {
+      "protocol": "mux-protocol",
+      "network": "avalanche",
+      "category": "perpetual",
+      "detail": "[messari:mux-protocol:avalanche] response for \"the-graph.messari.probe\" failed schema validation:\n  - protocols.0.totalValueLockedUSD: expected a non-negative d"
+    },
+    {
+      "protocol": "mux-protocol",
+      "network": "bsc",
+      "category": "perpetual",
+      "detail": "[messari:mux-protocol:bsc] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"status\""
+    },
+    {
+      "protocol": "mux-protocol",
+      "network": "fantom",
+      "category": "perpetual",
+      "detail": "[messari:mux-protocol:fantom] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"stat"
+    },
+    {
+      "protocol": "opyn-gamma",
+      "network": "arbitrum",
+      "category": "perpetual",
+      "detail": "[messari:opyn-gamma:arbitrum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"stat"
+    },
+    {
+      "protocol": "opyn-gamma",
+      "network": "ethereum",
+      "category": "perpetual",
+      "detail": "[messari:opyn-gamma:ethereum] request failed: subgraph not found: no allocations: {\"response\":{\"errors\":[{\"message\":\"subgraph not found: no allocations\"}],\"stat"
+    }
+  ]
+}

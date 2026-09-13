@@ -5,8 +5,14 @@ import { getEndpointsByCategory, getEndpointsByProtocol, makeClient, resolveEndp
 
 /**
  * Protocol category types for the fixed income EMS.
+ *
+ * Re-exported from `config/endpoints.ts`, where the union is defined, so a category
+ * added there cannot disagree with the one the registry accepts. The five categories
+ * are lending, perpetual, dex, prediction, and liquid-staking — the last being the
+ * staking-yield leg a fixed-income mandate allocates to.
  */
-export type ProtocolCategory = 'lending' | 'perpetual' | 'dex' | 'prediction';
+export type { ProtocolCategory } from '../config/index.js';
+import type { ProtocolCategory } from '../config/index.js';
 
 /**
  * Protocol source resolution — maps a protocol + network to its data source.
@@ -99,59 +105,50 @@ export class ProtocolRegistry {
   }
 
   /**
-   * Get all lending protocol sources.
+   * Every source in a category, each with a cached client.
+   *
+   * One helper rather than one near-identical getter per category: adding the fifth
+   * category should be a line, not another eight-line copy to keep in sync.
    */
+  private sourcesIn(category: ProtocolCategory): ProtocolSource[] {
+    return this.getByCategory(category).map((endpoint) => ({
+      protocol: endpoint.protocol,
+      network: endpoint.network,
+      category,
+      endpoint,
+      client: this.getOrCreateClient(endpoint),
+    }));
+  }
+
+  /** Get all lending protocol sources. */
   getLendingProtocols(): ProtocolSource[] {
-    return this.getByCategory('lending')
-      .map((endpoint) => ({
-        protocol: endpoint.protocol,
-        network: endpoint.network,
-        category: 'lending' as ProtocolCategory,
-        endpoint,
-        client: this.getOrCreateClient(endpoint),
-      }));
+    return this.sourcesIn('lending');
   }
 
-  /**
-   * Get all DEX protocol sources.
-   */
+  /** Get all DEX protocol sources. */
   getDexProtocols(): ProtocolSource[] {
-    return this.getByCategory('dex')
-      .map((endpoint) => ({
-        protocol: endpoint.protocol,
-        network: endpoint.network,
-        category: 'dex' as ProtocolCategory,
-        endpoint,
-        client: this.getOrCreateClient(endpoint),
-      }));
+    return this.sourcesIn('dex');
   }
 
-  /**
-   * Get all perpetual protocol sources.
-   */
+  /** Get all perpetual / F&O protocol sources. */
   getPerpetualProtocols(): ProtocolSource[] {
-    return this.getByCategory('perpetual')
-      .map((endpoint) => ({
-        protocol: endpoint.protocol,
-        network: endpoint.network,
-        category: 'perpetual' as ProtocolCategory,
-        endpoint,
-        client: this.getOrCreateClient(endpoint),
-      }));
+    return this.sourcesIn('perpetual');
+  }
+
+  /** Get all prediction market protocol sources. */
+  getPredictionProtocols(): ProtocolSource[] {
+    return this.sourcesIn('prediction');
   }
 
   /**
-   * Get all prediction market protocol sources.
+   * Get all liquid-staking protocol sources.
+   *
+   * Curated to the protocols the mandate allocates to (Lido, Rocket Pool). The Messari
+   * registry carries 25 liquid-staking deployments; the remainder are reachable by name
+   * through `SubgraphRegistry.clientFor` rather than probed by `healthReport`.
    */
-  getPredictionProtocols(): ProtocolSource[] {
-    return this.getByCategory('prediction')
-      .map((endpoint) => ({
-        protocol: endpoint.protocol,
-        network: endpoint.network,
-        category: 'prediction' as ProtocolCategory,
-        endpoint,
-        client: this.getOrCreateClient(endpoint),
-      }));
+  getLiquidStakingProtocols(): ProtocolSource[] {
+    return this.sourcesIn('liquid-staking');
   }
 
   /**
