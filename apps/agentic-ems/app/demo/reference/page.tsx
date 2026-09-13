@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { probeServices } from "@/lib/server/service-health";
 
 /**
  * The workflow reference, served from the app.
@@ -96,26 +97,26 @@ function parse(md: string): Block[] {
  *
  * The transaction counts below are read from the manifest, so they are the real ones.
  */
-function StatusStrip({ txCount }: { txCount: number }) {
-  const items: { label: string; value: string; tone: "ok" | "info" }[] = [
-    { label: "indexer", value: "OK", tone: "ok" },
-    { label: "execution", value: "OK", tone: "ok" },
-    { label: "traces", value: "langsmith", tone: "info" },
-    { label: "on-chain", value: `${txCount} tx`, tone: "ok" },
+function StatusStrip({ txCount, services }: { txCount: number; services: readonly { label: string; value: string; tone: "ok" | "warn" | "info" }[] }) {
+  // Service rows are probed, not asserted — see lib/server/service-health.ts. The on-chain count
+  // comes from the manifest this page already reads.
+  const items: { label: string; value: string; tone: "ok" | "warn" | "info" }[] = [
+    ...services,
+    { label: "on-chain", value: `${txCount} tx`, tone: txCount > 0 ? "ok" : "warn" },
   ];
   return (
     <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 border border-edge-2 bg-panel px-4 py-3">
       {items.map((it) => (
         <span key={it.label} className="flex items-center gap-2">
           <span
-            className={`h-1.5 w-1.5 ${it.tone === "ok" ? "bg-amber" : "bg-fg-faint"}`}
+            className={`h-1.5 w-1.5 ${it.tone === "ok" ? "bg-amber" : it.tone === "warn" ? "bg-red-400" : "bg-fg-faint"}`}
             aria-hidden
           />
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg-faint">
             {it.label}
           </span>
           <span
-            className={`font-mono text-[11px] ${it.tone === "ok" ? "text-amber" : "text-fg-dim"}`}
+            className={`font-mono text-[11px] ${it.tone === "ok" ? "text-amber" : it.tone === "warn" ? "text-red-400" : "text-fg-dim"}`}
           >
             {it.value}
           </span>
@@ -125,7 +126,7 @@ function StatusStrip({ txCount }: { txCount: number }) {
   );
 }
 
-export default function ReferencePage() {
+export default async function ReferencePage() {
   const markdown = (() => {
     try {
       return readFileSync(join(process.cwd(), "public", "reference", "workflow-reference.md"), "utf8");
@@ -147,6 +148,8 @@ export default function ReferencePage() {
     }
   })();
 
+  const services = await probeServices();
+
   return (
     <div className="flex min-h-screen flex-col bg-ink">
       <header className="flex flex-wrap items-center gap-3 border-b border-edge bg-panel px-4 py-3">
@@ -165,7 +168,7 @@ export default function ReferencePage() {
       </header>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
-        <StatusStrip txCount={txCount} />
+        <StatusStrip txCount={txCount} services={services} />
         {parse(markdown).map((block, i) => {
           if (block.kind === "hr") return <hr key={i} className="my-8 border-edge-2" />;
           if (block.kind === "h2")
