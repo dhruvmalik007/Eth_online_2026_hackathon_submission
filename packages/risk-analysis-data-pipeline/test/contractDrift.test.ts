@@ -14,6 +14,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SecurityIncidentRowSchema } from '@ethonline2026/timeseries';
 import { describe, expect, it } from 'vitest';
 import {
   ChainRiskProfileSchema,
@@ -99,6 +100,42 @@ describe('contract drift: Python output validates against the TypeScript schemas
       // how an operator learns what broke without reading individual snapshots.
       expect(parsed.data.sources['discourse']?.state).toBe('failed');
       expect(parsed.data.sources['discourse']?.error).toContain('403');
+    }
+  });
+
+  /**
+   * The cyber family's boundary test.
+   *
+   * `security_incidents` existed from v0.1.0 with a zod row schema, an embedding
+   * kind and a covariate builder, but nothing ever produced a row. The incident
+   * collector is the producer, so this is the assertion that it actually feeds the
+   * table rather than merely emitting a look-alike shape.
+   */
+  it('validates security incident rows, across the date boundary', () => {
+    const rows = fixture('security-incidents.json') as Record<string, unknown>[];
+
+    // 18 incidents attributed to 9 roster protocols. Both numbers are asserted
+    // because they are what the curated alias table buys: if attribution
+    // regresses, the count collapses and this fails rather than passing quietly
+    // on a smaller set.
+    expect(rows.length).toBe(18);
+    expect(new Set(rows.map((row) => row['subject'])).size).toBe(9);
+
+    for (const row of rows) {
+      // The wire contract carries the timestamp as an ISO-8601 string, because
+      // JSON has no date type. `SecurityIncidentRowSchema` types it `z.date()` --
+      // that is a *DB-row* contract, not a wire one. The conversion below is the
+      // boundary, asserted rather than assumed: it is precisely what a reader
+      // must perform before inserting into `security_incidents`.
+      expect(typeof row['occurredAt']).toBe('string');
+      expect(row['occurredAt']).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+
+      const parsed = SecurityIncidentRowSchema.safeParse({
+        ...row,
+        occurredAt: new Date(row['occurredAt'] as string),
+      });
+      expect(parsed.error?.issues ?? []).toEqual([]);
+      expect(parsed.success).toBe(true);
     }
   });
 });
