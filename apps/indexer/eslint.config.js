@@ -8,6 +8,13 @@ export default defineConfig(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // The .mjs maintenance scripts run under Node; the flat config has no ambient globals.
+    files: ['**/*.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly', Buffer: 'readonly' },
+    },
+  },
+  {
     ignores: ['node_modules/', '.vercel/', 'public/'],
   },
   {
