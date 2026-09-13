@@ -76,9 +76,10 @@ export function arcChainConfig(network: ArcNetwork): ArcChainConfig {
     network,
     chainId: Number(process.env.ARC_TESTNET_CHAIN_ID ?? 5042002),
     rpcUrl: process.env.ARC_TESTNET_RPC_URL ?? "https://rpc.testnet.arc.network",
-    // ⚠️ 18 decimals on Arc native USDC (bridging scales 6↔18).
+    // VERIFIED on-chain: `decimals()` returns 6, symbol "USDC". An earlier note here claimed 18,
+    // which scaled every Arc amount by 10^12 — a real balance of 40 read as 0.00000000004.
     usdcAddress: process.env.ARC_TESTNET_USDC ?? "0x3600000000000000000000000000000000000000",
-    usdcDecimals: 18,
+    usdcDecimals: 6,
     // VERIFIED: Circle quickstart "Transfer USDC from Ethereum to Arc".
     messageTransmitterV2:
       process.env.ARC_TESTNET_MESSAGE_V2 ??
