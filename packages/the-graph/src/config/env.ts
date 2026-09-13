@@ -1,3 +1,4 @@
+import { assertCatalogKeys } from "@ethonline2026/env";
 import { z } from 'zod';
 
 /**
@@ -84,3 +85,6 @@ export function loadEnv(): Env {
   }
   return parsed.data;
 }
+
+// The catalog owns the names; a key added here without a catalog entry fails at boot.
+assertCatalogKeys("the-graph", Object.keys(envSchema.shape));

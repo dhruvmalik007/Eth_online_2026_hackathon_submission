@@ -1,3 +1,4 @@
+import { assertCatalogKeys } from "@ethonline2026/env";
 /**
  * Configuration for the execution service.
  *
@@ -139,3 +140,6 @@ export function loadExecutionEnv(
   }
   return parsed.data;
 }
+
+// The catalog owns the names; a key added here without a catalog entry fails at boot.
+assertCatalogKeys("execution", Object.keys(ExecutionEnvSchema.shape));

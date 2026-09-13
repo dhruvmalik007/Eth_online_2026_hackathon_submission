@@ -46,7 +46,7 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
     default: "local",
     example: "local",
   }),
-  v("LOG_LEVEL", ["shared"], "Pino log level.", {
+  v("LOG_LEVEL", ["shared", "execution", "inference"], "Pino log level.", {
     format: "enum",
     allowed: ["fatal", "error", "warn", "info", "debug", "trace"],
     default: "info",

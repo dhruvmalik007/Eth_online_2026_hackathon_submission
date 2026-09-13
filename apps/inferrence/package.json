@@ -32,6 +32,7 @@
     "@ethonline2026/arc-client": "workspace:*",
     "@ethonline2026/bridges": "workspace:*",
     "@ethonline2026/custody": "workspace:*",
+    "@ethonline2026/env": "workspace:*",
     "@ethonline2026/execution-domain": "workspace:*",
     "@ethonline2026/langchain-agent": "workspace:*",
     "@ethonline2026/risk-analysis-data-pipeline": "workspace:*",
