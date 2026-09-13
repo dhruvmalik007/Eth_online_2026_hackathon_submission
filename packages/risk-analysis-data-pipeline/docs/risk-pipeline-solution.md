@@ -21,19 +21,26 @@ pydantic enforces the shape on write, zod enforces it on read, and a drift test
 (`test/contractDrift.test.ts`) feeds real Python output through the TypeScript
 schemas so the two cannot diverge silently.
 
-### The three source families
+### The four source families
 
 | Source | Transport | What it yields |
 |---|---|---|
 | L2Beat | server-rendered HTML, per-chain page | five decentralisation dimensions + Stage + value secured |
 | Governance forums | Discourse JSON API (no auth, no browser) | proposals, stages, activity/participation scores |
 | DefiLlama market makers | server-rendered HTML + one detail drawer per maker | 30-day depth/volume/spread/uptime, venue coverage |
+| DefiLlama security incidents | plain JSON API (no auth, no browser) | recorded exploits: date, subject, technique, disclosed loss |
 
-**Why a browser at all, when two of three are plain HTTP.** The L2Beat chain pages
-and the market-maker leaderboard are JavaScript-rendered in a way that a plain
+**Why a browser at all, when three of the four are plain HTTP.** The L2Beat chain
+pages and the market-maker leaderboard are JavaScript-rendered in a way that a plain
 fetch does not reliably reproduce, and the venue-coverage data exists *only*
-behind a click. One transport that handles all three is simpler than two, and the
+behind a click. One transport that handles all four is simpler than two, and the
 browser is the thing that cannot move to the request path regardless.
+
+**The incident family needed no new capability.** It is a plain JSON array, so it
+exercises the `Source` port exactly as the L2Beat and Discourse adapters do — added
+without touching `base.py`, which is the open/closed claim below demonstrated
+rather than asserted. Its output also fills a table the TypeScript side declared in
+v0.1.0 and nothing had ever written to, so no migration accompanied it.
 
 ---
 

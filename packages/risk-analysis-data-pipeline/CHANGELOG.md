@@ -7,7 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+**Cyber risk: the security-incident collector (issue #13's third area)**
+
+- `IncidentSource` reads DeFiLlama's hacks feed and emits `SecurityIncident`
+  records for roster subjects. Against the live feed: 1,268 records produce 18
+  incidents across 9 protocols, spanning all four severity bands.
+- `SecurityIncident` and `IncidentFeed` complete the Python half of a contract
+  the TypeScript side already declared. The `security_incidents` table, its zod
+  row schema, its embedding kind and its covariate builder all shipped in v0.1.0
+  with no producer. **No migration is needed** to store this collector's output:
+  `types.ts` says as much — *"the table exists so the schema is complete and a
+  collector can be added without a migration"*.
+- `ManifestTemporal.securityIncidents` records the count, defaulted to zero so
+  the change is additive.
+- Incidents publish one feed per subject at `risk/incidents/{subject}.json`,
+  matching the per-subject shape of the chain and protocol families.
+
+Two derivations are stated rather than hidden:
+
+- **Severity is derived from the disclosed loss**, because the feed publishes
+  none. The thresholds sit at the feed's own quartiles (p25 ≈ $180k, median
+  ≈ $980k, p75 ≈ $5M) rather than at round numbers, so "high" means "worse than
+  about three quarters of recorded incidents". An incident whose amount is
+  undisclosed is skipped and counted: there is no honest severity for an unknown
+  loss, and labelling it `low` would put a reassuring number where the truth is
+  "not stated".
+- **Subject attribution is a curated alias table, never a substring match.** The
+  feed contains `compounder finance`, `super sushi samurai`, `crosscurve`,
+  `hyperliquid malaysia` and `leadblock's morpho blue market`, each of which
+  contains a roster slug and none of which is that protocol. All five are listed
+  in `EXCLUDED_UPSTREAM_NAMES` with their reason and asserted by test, so an
+  exclusion is a recorded decision rather than a silent omission.
+
+### Fixed
+
+- The incident identifier is a digest of the record's own fields, **not** the
+  feed's `defillamaId`. That field is a *project* id reused across a project's
+  incidents: the same value `337` appears on both the September 2022 and the July
+  2025 GMX entries, and likewise for `144` (dYdX), `3` (Curve) and `119`
+  (Sushi). Using it collapsed four protocols' histories into a single row each
+  and made their embedding subjects ambiguous. Caught by asserting id uniqueness
+  against the real feed rather than by inspection.
+
+### Notes
+
+- Chain and market-maker incident subjects are deliberately not produced. The
+  feed's `chain` array names where an incident's contracts were deployed, which
+  is not the same claim as "this chain was compromised"; attributing it that way
+  would manufacture chain-risk signal the data does not support.
+- The subject alias table lives in the source module rather than `roster.json`.
+  The roster is validated by both languages, so extending it would require a
+  matching change to the TypeScript schema; the roster remains the authority on
+  which subjects exist, and an alias targeting an unknown slug is dropped rather
+  than trusted.
 
 ## [0.1.0] - 2026-09-11
 
