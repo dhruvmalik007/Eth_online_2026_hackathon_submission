@@ -1,0 +1,2612 @@
+{
+  "$schema": "internal://messari-deployments/v1",
+  "source": {
+    "url": "https://raw.githubusercontent.com/messari/subgraphs/master/deployment/deployment.json",
+    "repository": "https://github.com/messari/subgraphs",
+    "generator": "scripts/build-messari-registry.ts",
+    "verifiedAt": "2026-09-13",
+    "rule": "Only deployments carrying services.decentralized-network.query-id. Messari's hosted-service endpoints died with The Graph hosted-service shutdown.",
+    "upstreamProtocols": 256,
+    "upstreamDeployments": 480,
+    "retained": 197,
+    "droppedHostedOnly": 96,
+    "droppedBySchemaExclusion": 98,
+    "droppedByLiquidStakingAllowlist": 89,
+    "excludedSchemas": {
+      "bridge": "Not a fixed-income category.",
+      "governance": "Governance data has no role in a fixed-income mandate.",
+      "nft-marketplace": "Not a fixed-income category.",
+      "yield-aggregator": "Yield routing, not a direct yield source the mandate allocates to.",
+      "erc20": "Bare token metadata; no protocol or yield surface.",
+      "erc721": "Bare NFT metadata; no protocol or yield surface."
+    },
+    "liquidStakingProtocols": [
+      "benqi-staked-avax",
+      "binance-staked-eth",
+      "coinbase-wrapped-staked-eth",
+      "creth2",
+      "eigenlayer",
+      "eigenpie",
+      "frax-ether-staking",
+      "lido",
+      "mantle-staked-eth",
+      "prime-staked-eth",
+      "rocket-pool",
+      "stader",
+      "stake-link-liquid",
+      "stakestone",
+      "stakewise-v2",
+      "swell-liquid-staking",
+      "yieldyak-staked-avax"
+    ],
+    "categories": {
+      "dex": 56,
+      "lending": 95,
+      "liquid-staking": 25,
+      "perpetual": 21
+    }
+  },
+  "deployments": [
+    {
+      "protocol": "apeswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "bsc",
+      "queryId": "4u1aTvzBMjBdm7aK7uQmjffhoPc6Ceu3w2nTfq6vUQnb",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "apeswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "polygon",
+      "queryId": "2x478mWv6rECUcJR4VxNxRnuMuRsY22Jxy7xxXJu4Q7F",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.14",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "balancer-v2",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "794H6CNzdGF5YfBK9nPsUgGn7EBbdJSCTjgcKPEPyFnn",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "bancor-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "4Q4eEMDBjYM8JGsvnWCafFB5wCu6XntmsgxsxwYSnMib",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.4",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "biswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "bsc",
+      "queryId": "EnAR2ancKqJqpCU6cJ8aq9xHquTSWsK2wQWVfdDSwacN",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.6",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "camelot-v2",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "arbitrum",
+      "queryId": "E6J42xXvRQGsqcMEoWRkdeJjUTsWdcHL8khuFMY6CDAM",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "curve-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "aurora",
+      "queryId": "9zXFpPQHyTmXXygtNPwjBS6d4SMGzv7qMiha4bJ3fbyB",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "curve-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "avalanche",
+      "queryId": "2Vt8WtdXNZUEeaVtzyEd1dpioJf44nvomzkd4HhubfKS",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "curve-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "3fy93eAT56UJsRCEht8iFhfi6wjHWXtZ9dnnbQmvFopF",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "curve-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "gnosis",
+      "queryId": "J8k2z8MhdhABfVZU5HtyRvzCT85bLLF886V4iDpt53Jr",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "curve-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "harmony",
+      "queryId": "6gnHHn7562tDjCrrnSiMiR1H1NndrannPQ7LcYxMgF9t",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "curve-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "optimism",
+      "queryId": "CXDZPduZE6nWuWEkSzWkRoJSSJ6CneSqiDxdnhhURShX",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "ellipsis-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "bsc",
+      "queryId": "3oK7vysHSCqXkQ5L3G6S4ifBG3Xr5mjkEEzZKtGEg5x1",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "honeyswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "gnosis",
+      "queryId": "33aQTj7abtAR5zGcG9JBd1fd1sodgKDjoTsKuA8QrUW7",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.1",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "honeyswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "polygon",
+      "queryId": "7YaQPHXFrPCwbt2MUPQ5N5PgmgMch14Ab5cZVYxvtPgW",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.10",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "iguanadex-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "etherlink-mainnet",
+      "queryId": "DNp3H73UxzbLMbK9sTr3MC2oLwF27aa6ptM7aYzsgxmt",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mm-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "polygon",
+      "queryId": "7B7R7aie7erfqUijkH2HNQcZ8bK6DpuXJaB5myt6nrs7",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "pancakeswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "bsc",
+      "queryId": "A1BC1hzDsK4NTeXBpKQnDBphngpYZAwDUF7dEBfa3jHK",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.3.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "pancakeswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "JAGXF8B14mpB8QGKnwhKTs5JxsQZBJQvbDGFcWwL7gbm",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.3.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "pangolin",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "avalanche",
+      "queryId": "6f3YqP75bLuLZAv7Cm1BohFot17kT3Svekg6giuvaTmg",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "platypus-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "avalanche",
+      "queryId": "B35cLTayreXTML6fXPTrFNSYx7mKyDuuV51LjVxWwWjp",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.3.3",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "saddle-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "arbitrum",
+      "queryId": "H36tAWQeYVioE4hHtaKJEMJMxwzVJWjfg2mimva2wcUj",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.7",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "saddle-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "H36tAWQeYVioE4hHtaKJEMJMxwzVJWjfg2mimva2wcUj",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.7",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "saddle-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "fantom",
+      "queryId": "DToFejYjMRXcCrBrsdP9AZGBqwxpEumNHReRTfAmqgeP",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.7",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "saddle-finance",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "optimism",
+      "queryId": "CFu1DWY9DyiC25WRmGreowMyuvLB27JfNRCa8rKkTDjK",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.7",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "solarbeam",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "moonriver",
+      "queryId": "EoN2oon5KNH6XL1xSQCRsLHFPSZ2xLJD9DApizNtfGWo",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.12",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "spiritswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "fantom",
+      "queryId": "ARnDoat2Zyft9miSW8Md6V32nd5YUfngMCDCaNgqLqXv",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.10",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "substream-uniswap-v2",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "J2oP9UNBjsnuDDW1fAoHKskyrNLFNBB2badQU6UvEtJp",
+      "status": "dev",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "arbitrum",
+      "queryId": "9tSS5FaePZnjmnXnSKCCqKVLAqA6eGg6jA2oRojsXUbP",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.3.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "avalanche",
+      "queryId": "4KgG6aek9cEp8MXQZKWCmeJWj5Y77mK9tPRAD1kDQa8Q",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.2.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "bsc",
+      "queryId": "7QyoZFgo1bYvTD7bmdBxsjFLjmeDLgBT3nC3H8y6yuKZ",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.14",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "celo",
+      "queryId": "5H97eNhy9fVHcqRXZtCV2UxHG2DbzcFA7yth1TaVZ45x",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.14",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "77jZ9KWeyi3CJ96zkkj5s1CojKPHt6XJKjLFzsDCd8Fd",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.2.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "fantom",
+      "queryId": "9wj3CmJFtoe7J25h4t39ioQHXexGe2rbsLfBgLefU7mN",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.14",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "fuse",
+      "queryId": "7MhgrLAB5B4D6PLDjF9Stx7fzS54MA3d5oi9dT3fHxbz",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.14",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "gnosis",
+      "queryId": "GvgkY82DTAkYqRShBbPQMjF1WJyUcknXre3QPWiXrPnS",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.15",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "harmony",
+      "queryId": "96NBskquxSxSDV8W42g3nmzECziCvhftSXFFpbY4geaC",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.2.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "moonbeam",
+      "queryId": "8oFzyJBeHoojoe23u3YYNruTZsqgn91q44U8hrFocbtp",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.14",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "moonriver",
+      "queryId": "EuYBux3ZPq1v3Uipo837WDq6WrK4AB3LGD6w78edRHib",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.14",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "polygon",
+      "queryId": "B3Jt84tHJJjanE4W1YijyksTwtm7jqK8KcG5dcoc1ZNF",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.3.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "arbitrum",
+      "queryId": "3oHCddbQGTi42kPZBwyGzD2JzZR33zK2MwXtxAerNJy2",
+      "status": "dev",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.2.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "avalanche",
+      "queryId": "9WGqYsU8h1KVZeKz32663gFrbjVUNhBgmhRavMFqiSZz",
+      "status": "dev",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.2.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "2tGWMrDha4164KkFAfkU3rDCtuxGb4q1emXmFdLLzJ8x",
+      "status": "dev",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.2.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sushiswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "gnosis",
+      "queryId": "9LC6MvaFHXyY3dmxM7VCwGNA9dvM6g2AuZxEGCyfvck3",
+      "status": "dev",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.2.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "trader-joe",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "avalanche",
+      "queryId": "H2VGe2tYavUEosSjomHwxbvCKy3LaNaW8Kjw2KhhHs1K",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "ubeswap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "celo",
+      "queryId": "9WiZHUk2d3rM4sEQ4NSz6ihFRc2zWmPj7yk8w51dNdhT",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.16",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v2-swap",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "3onEbd9MLfXTTWAfP91yqsKr7C68VCT2ZiF7EoQiQAFj",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.1.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "arbitrum",
+      "queryId": "FQ6JYszEKApsBpAmiHesRsd9Ygc6mzmpNRANeVQFYoVX",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.5.3",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "base",
+      "queryId": "FUbEPQw1oMghy39fwWBFY5fE6MXPXZQtjncQy2cXdrNS",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "bsc",
+      "queryId": "8f1KyiuNYiNGrjagzEVpf6k6KkPG517prtjdrJihgHw",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.5.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "celo",
+      "queryId": "8cLf29KxAedWLVaEqjV8qKomdwwXQxjptBZFrqWNH5u2",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.4.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "ethereum",
+      "queryId": "4cKy6QQMc5tpfdx8yxfYeb9TLZmgLQe44ddW1G7NwkA6",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.0",
+        "subgraph": "1.6.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "optimism",
+      "queryId": "EgnS9YE1avupkvCNj9fHnJxppfEmNNywYJtghqiu2pd9",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.5.3",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uniswap-v3",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "polygon",
+      "queryId": "BvYimJ6vCLkk63oWZy7WB5cVDTVVMugUAF35RAUZpQXE",
+      "status": "prod",
+      "versions": {
+        "schema": "4.0.1",
+        "subgraph": "1.5.3",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "velodrome-finance-v1",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "optimism",
+      "queryId": "7tA4PY1VmbycJeoVtn2mjQK4NbozgwTuZgrxDTxzEDL1",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "velodrome-finance-v2",
+      "category": "dex",
+      "messariSchema": "dex-amm",
+      "network": "optimism",
+      "queryId": "A4Y1A82YhSLTn998BVVELC8eWzhi992k4ZitByvssxqA",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "aave-amm",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "41ooPWnDYKwckqyG1mvg7ZEndy5zMemXinx6uQxscrBS",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-arc",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "5hyqnEzjZbwFBU1rk4JBknCeiF2Mj93qBzsyQfpAa3QA",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-rwa",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "C8ynQrjVKcmqxb9fWrLvSCBFNf2ChFkxCg7Q8gknJrza",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "avalanche",
+      "queryId": "9nh6Ums63wFcoZpmegyPcAFtY3CAzQc3S6cuERALYMqa",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "C2zniPn45RnLDGzVeGZCx2Sw3GXrbc9gL4ZfL8B8Em2j",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "polygon",
+      "queryId": "GrZQJ7sWdTqiNUD8Vh2THaeBM4wGwiF8mFv9FBfyzwxm",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "4xyasjQeREe7PxnF6wVdobZvCw5mhoHZq3T7guRpuNPf",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.3",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "avalanche",
+      "queryId": "72Cez54APnySAn6h8MswzYkwaL9KjvuuKnKArnPJ8yxb",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "base",
+      "queryId": "D7mapexM5ZsQckLJai2FawTKXJ7CqYGKM8PErnS3cJi9",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.4.1",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "43jbGkvSw55sMvYyF6MZieksmJbajMu3hNGF8PN9ucuP",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.3.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "JCNWRypm7FYwV8fx5HhzZPSFaMxgkPuw4TnR3Gpi81zk",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.1",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "fantom",
+      "queryId": "ZcLcVKJNQboeqACXhGuL3WFLBZzf5uUWheNsaFvLph6",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.1",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "gnosis",
+      "queryId": "GiNMLDxT1Bdn2dQZxjQLmW24uwpc3geKUBW8RP6oEdg",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "harmony",
+      "queryId": "G1BNHqmteZiUwSEacfXG2nzMm13KLNo5xoxv62ErAyQv",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "optimism",
+      "queryId": "3RWFxWNstn4nP3dXiDfKi9GgBoHx7xzc7APkXs1MLEgi",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "polygon",
+      "queryId": "6yuf1C49aWEscgk5n9D1DekeG1BCk5Z9imJYJT3sVmAT",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "scroll",
+      "queryId": "DkvXMxq1skgSe1ehLHWpiUthHU1znnMDK2SUmj9avhEX",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "abracadabra",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "3m97d2dJ2pXwPFuiHrm8T37V9TCoAHBpMqRwdguyUZXF",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "abracadabra",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "avalanche",
+      "queryId": "3Gkei7B24o9C2bCoAbQpApZqMStPta7oCAnNhmNv5dab",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "abracadabra",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "6bFCfHn5Uuv5fH7PxKL12dzWh3zz7fkQ46EnMa7nZUj2",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "abracadabra",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "GLAu42kvVs7ixfXcmkAsRiS7Xt1NCpgkKsnz3qiriuvV",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "abracadabra",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "fantom",
+      "queryId": "2nxGrxxPShrm49dEWusJjB5dpmonN16JFzLwDrS1pCyq",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "alpaca-finance-lending",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "ED3ayhcLA7h7DCGwbysgcxtfMEcoeYCdMEsdZJeoaUFS",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "alpaca-finance-lending",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "fantom",
+      "queryId": "6EfFr7xDpD7LLi1X8Cj9b6ytjFjX3GZYrMrCKomEuCmx",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "banker-joe",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "avalanche",
+      "queryId": "9NjYuG2BFU1BPacNdKymd9eNdfVCaJM6LhsgD8zSQgDK",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "bastion-protocol",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "aurora",
+      "queryId": "BD4rW7Ga5YQ3x68tALbi8vsXNodd6LrvFeaVocdJt3bD",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "benqi",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "avalanche",
+      "queryId": "8ZjJGsaKea7WwLJPJNdHXPGsvXDe3iq2231aRjgBPisi",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "burrow",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "near-mainnet",
+      "queryId": "5W5fhZAq6QABBijKo7wqYps7TLzqAqS2mU1C1rhktvtg",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "compound-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "4TbqVA8p2DoBd5qDbPMwmDZv3CsJjWtxo8nVSqF2tA9a",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.9.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "compound-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "5MjRndNWGhqvNX7chUYLQDnvEgc8DaH8eisEkcJt71SR",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "compound-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "base",
+      "queryId": "AwoxEZbiWLvv6e3QdvdMZw4WDURdGbvPfHmZRc8Dpfz9",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "compound-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "AwoxEZbiWLvv6e3QdvdMZw4WDURdGbvPfHmZRc8Dpfz9",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "compound-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "polygon",
+      "queryId": "5wfoWBpfYv59b99wDxJmyFiKBu9brXESeqJAzw8WP5Cz",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "cream-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "GzHkVNf7BBqUjV8Sy6U6xUaWdGheFMdin1cB6sNvfdzs",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "cream-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "Dd2ak11qC4mS2spUXzJm5v9EtVNJqmBC9rLzbckTwfN1",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "cream-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "43NeT7UTACLUkohKBaG7auvkhsj4Kwux9kNTJr6sFdNe",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "cream-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "polygon",
+      "queryId": "CBeERkhQNwPwU3jSWdKHeAtPQh4TFucUyUMcqAJk19ij",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "dforce",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "Dpk4Gen22wxQ3Laojf7DR2me8wGzjaHwjsKAsLf2rCFV",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "dforce",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "DKu1HqTTi26uLZKAmvDbqyAvcnFAjXEuRJmF35RLpyFg",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "dforce",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "6PaB6tKFqrL6YoAELEhFGU6Gc39cEynLbo6ETZMF3sCy",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "dforce",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "optimism",
+      "queryId": "6AmkakXwadWiZ2jN7oJcFreWmKG1nZrT5P8om52upYPd",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "dforce",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "polygon",
+      "queryId": "9CFGPWpntYisBp7NpHMrgYzFrBmtVxSw58haGyZ3ewoZ",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "euler-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "95nyAWFFaiz6gykko3HtBCyhRuP5vZzuKYsZiLxHxLhr",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.4.0",
+        "methodology": "1.2.3"
+      }
+    },
+    {
+      "protocol": "geist-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "fantom",
+      "queryId": "45LX32kZPBRNiXaBKDrzbCnidoKv3cMEc8cXt3kvPifz",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "goldfinch",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "GRwpFCPYyQPdz84sCnKemzrNvgFPuKkFLcRLR6jsRxHr",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.4.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "inverse-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "EXuutY6qkZbXjYeJZdiDBf2imJswTNdfm8YZCqhAthfW",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.2.6",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "iron-bank",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "avalanche",
+      "queryId": "9YiJM9oHy25estSJjB1Z71Hdz5C814R3vDoS2ezpN27C",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "iron-bank",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "5YoxED3bbWV9byvn3x3S3ebZ3idrQmQmsJhL5LMyY26v",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "iron-bank",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "fantom",
+      "queryId": "4dWx6UZNcLEzgtipy45VkgtptYRqoHdZeCGNKxHAxKWo",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "iron-bank",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "optimism",
+      "queryId": "4WKePP5QfwrW6Hfd8YKWHuivivmdxPubuP45BryeGo4g",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "kinza-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "435cubRAqNsFYKzyQHRRiHvR7oJjh828r5Aqe4cZC586",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "liquity",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "2D2dFCLjUt3MfFgTKW8cBxiRQ3Adss7KUtYh2rTcFVY",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.4.0",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "makerdao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "8sE6rTNkPhzZXZC6c8UQy2ghFTu5PPdGauwUBm4t7HZ1",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "2.4.1",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "maple-finance-v1",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "J9dtvE11PWNZH74frWyx9QZonyC1Db2UWDMUegmT3zkG",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "maple-finance-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "94swSaaFChsQoZzb9Vc7Lo6FWFV6YZUMNSdFVTMAeRgj",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.1",
+        "subgraph": "1.0.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "moonwell",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "base",
+      "queryId": "33ex1ExmYQtwGVwri1AP3oMFPGSce6YbocBP7fWbsBrg",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "moonwell",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "moonbeam",
+      "queryId": "DQhrdUHwspQf3hSjDtyfS6uqq9YiKoLF3Ut3U9os2HK",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "moonwell",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "moonriver",
+      "queryId": "8ayELti1UNCNCWuvwSwapjh4mvvCejeXsk4PmsWBmQ82",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "morpho-aave-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "DsznTYxGdsqxWB6a474rSksvB7qWSth5Ff1PcxW28vZy",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "morpho-aave-v3",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "FKe6ANnWmGPE6hajGLoTgPrVF2jYPHiRu2Jwcg9ZmG9A",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "morpho-compound",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "9dTy23tkahyiap1THgwnJuMwxNHVnQM57jFQQiUzjcY6",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "notional-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "2t4T7bts8ZQCpGcVq9VSzDyPVCQc5Y7TFwZKfmXKeSVx",
+      "status": "dev",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "pac-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "blast-mainnet",
+      "queryId": "ERsfyKMQTpTEN6LtyWvFwhDENLf6aAAggbtrNEnFKLpx",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "Duw2tSACo9uRGFctAGsCc9pF7ZGMyqpjkAHPwm49dZe6",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "avalanche",
+      "queryId": "98GG74FxxsG25Ltd8qvJ9BRfFmQWyN1AkS92MZBG1BsR",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "base",
+      "queryId": "9NHJ9k31qaGCYXppm9isJTiEoiB6v3tJDnR6SrQrxcjw",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "4DcztqYL7UG5bjdisWWvnj3m4NtK5J3bs89scihAkicr",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "BmQSQaXsivq866kUobQSbyxycjk3D7CiaczKgu3P9ifB",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "fantom",
+      "queryId": "hf51jYbZ9uESiuBabfxf6fRdc22xtmNWX9c3SRrct2q",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "gnosis",
+      "queryId": "7vJEsy8pJmRQZQh5kTXNz68SRHXBS859hMq3o5uWF1Ac",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.5",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "harmony",
+      "queryId": "DCEQvXCiqtpMybQLL4YAgdCzqHzRH6wFFnCDnnLBBuvf",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "moonriver",
+      "queryId": "HzDP5zXKyjnEJP9TnFirk3qA24SUp4AfzKUBSRcBekgz",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "optimism",
+      "queryId": "4JbWxzxBNCpAaVz72Gt2UthgiwcWZQLKDBhmSE7wKY2K",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "qidao",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "polygon",
+      "queryId": "5UxEcMvYW4vVYP81tkPQMAvJv1e4m1xU8BJkDXBnpc6x",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.0",
+        "subgraph": "1.1.4",
+        "methodology": "1.0.1"
+      }
+    },
+    {
+      "protocol": "radiant",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "5HTkKJNSm72tUGakwj8yroDGHxc6fBhmLaA5oJepZGL3",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "radiant-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "2rQAKGJkvkiAXsCjx1n4E3DSgk2b7nCZMtt2BrV5TBgt",
+      "status": "dev",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "radiant-v2",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "cM9BYtdT8aVBX8JEbi9SQjV2Ft8onEh6qwZHxCUyAAh",
+      "status": "dev",
+      "versions": {
+        "schema": "3.0.1",
+        "subgraph": "2.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "rari-fuse",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "HnV3fhwsWfmQGdD2AeGzqvRVTDBqnMH74jCsDVq1DXYP",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "rari-fuse",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "kecp6SPMvbB4GTqg9r5PXvztYriexj5F3ZCaATpjmb2",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "scream",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "fantom",
+      "queryId": "Cj3pDoqHgLBntkaXAKMxtJTZr3StxYvVEedTXyJGJoK4",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "seamless-protocol",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "base",
+      "queryId": "2u4mWUV4xS19ef1MbnxZHWLLMwdPxtVifH46JbonXwXP",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "seismic",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "blast-mainnet",
+      "queryId": "d7gMk1zkEyCQuNVeirBYA6keCZv8hTLheCZ4DBCjRfz",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "sonne-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "optimism",
+      "queryId": "DQqb7FiQ1joLhESkAwvAYiuXhwfz4zf6qHmbt7stnec8",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "spark-lend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "GbKdmBe4ycCYCQLQSjqGg6UHYoYfbyJyq5WrG35pv1si",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "spark-lend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "gnosis",
+      "queryId": "Bw4RH37UbbGEhHo4FaWwT1dn9QJzm1XSZCyK1cbr6ZKM",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.4.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "superlend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "etherlink-mainnet",
+      "queryId": "HCzjsuU3dW7V6Z2BP4ncyzkkKYi3QXeuJFaboSak2U7V",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "truefi",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "39F8fYCvLYmutjqpzEwx3dcEJTtFFVupvBzJqkEzftA7",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.0.5",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "uwu-lend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "CZBD7e8VGvNa6WkBHZAaC688bsZ35UvAM1AuDdVng2aE",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "2.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "venus",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "bsc",
+      "queryId": "CwswJ7sfENafqgAYU1upn3hQgoEV2CXXRZRJ7XtgJrKG",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.4.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "vesta-finance",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "arbitrum",
+      "queryId": "zGuPrsVqtY5ehJDCmweb9ZnBrae3tSQWRux8Mz1M4Gn",
+      "status": "prod",
+      "versions": {
+        "schema": "2.0.1",
+        "subgraph": "1.1.1",
+        "methodology": "1.1.0"
+      }
+    },
+    {
+      "protocol": "zerolend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "blast-mainnet",
+      "queryId": "6JP9542ArawumBSYczerbWGu6k7uu3hqk6qJnSkrgTM5",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "zerolend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "ethereum",
+      "queryId": "4Zf4doH54RDit9KVsfCp3MkjrP3szhJZwvw2z5PHczx9",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "zerolend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "linea",
+      "queryId": "DLzwo1WFaKy7R7MgQWrnBXr19EbGwPRubu9YmsSmRMfC",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "zerolend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "xlayer-mainnet",
+      "queryId": "NRh6ScvPKoieeSH7tRiKyXJ97DR9aYraas8eREPQ8e3",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "zerolend",
+      "category": "lending",
+      "messariSchema": "lending",
+      "network": "zksync-era",
+      "queryId": "3CHaJvCkTMqXa4PRKNshVecE9JqgNFCdsXNyGLZXFeM2",
+      "status": "prod",
+      "versions": {
+        "schema": "3.1.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "benqi-staked-avax",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "avalanche",
+      "queryId": "6vSK9N1NGT65mRgMtNfoxwPkaMJoJBQJA2Z5G1fKEKCu",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "binance-staked-eth",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "bsc",
+      "queryId": "Hfb8J7aNfT8cjgDTYMjWt5Mb7yRtS1CJC4UQeWEfWNsU",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "binance-staked-eth",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "EdxuQc4V8zGV9f34KZJhUNmBrfdPWMmbjVTzjUsyJZgd",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "coinbase-wrapped-staked-eth",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "4bPFmTTqoKZcQL8DXj8jBbo86pm4RisAQeuGhZKkvA9X",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "creth2",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "8aXEEhktu4zb1qv388ZgP1GggJUY1btKVoqm1S1mGHmY",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "eigenlayer",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "68g9WSC4QTUJmMpuSbgLNENrcYha4mPmXhWGCoupM7kB",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "eigenpie",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "BbkLSUBpyJv8UiCyMyQBGpngz8qfdhx4LJBqFdHqiwhH",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "arbitrum",
+      "queryId": "FSafXUhkuwqARZNNe82isspkjQJcPK2PrSjQLvNXuakU",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "bsc",
+      "queryId": "A113zHKpiXzugLyKDVknAxjQ6qFSPQwfiGK7rjiuqbcq",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "FeKHrGeNxVctN6EeAhba2Kv78xNxuEhbRKNECLfVH8z2",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "fantom",
+      "queryId": "Ba52AgUJfCmWQpBJEwRvygC45iGr9uqnrehpymN2Xmx4",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "moonbeam",
+      "queryId": "FhaAErF9146bnqJsQD34zPHNC11quKTuk9HBA7RdGrjz",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "optimism",
+      "queryId": "G9nDvQw6S7LkzNxj7oGFZUsahe3ebpAtEww716kWkfZd",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "frax-ether-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "polygon",
+      "queryId": "FMkrjPgSyGm2UBFrMqpJVwWgGHLek8U39W1M4R9TfP1T",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "lido",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "F7qb71hWab6SuRL5sf6LQLTpNahmqMsBnnweYHzLGUyG",
+      "status": "prod",
+      "versions": {
+        "schema": "1.4.0",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mantle-staked-eth",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "VVKZagj4XUyamqXysVBniarN8HMz87DnwkTChuXH18Z",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "prime-staked-eth",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "222GCE8sewRURAfh7meRbkyNE9NNG2HqfVfYmfFg9MkR",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "rocket-pool",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "Dtj2HicXKpoUjNB7ffdBkMwt3L9Sz3cbENd67AdHu6Vb",
+      "status": "prod",
+      "versions": {
+        "schema": "1.4.0",
+        "subgraph": "1.3.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "stader",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "mainnet",
+      "queryId": "2RLAUqUMvGGFygtuJfmTyeo62zFSJswDZSRMTcu28fSa",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "stake-link-liquid",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "AV8BsSRc9oC4dr6yN7wPi4PyXsBnW3oHqbvoKfbEr1XW",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "stakestone",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "Dks14vz78EJf4i5SomNUBcpoLRbFKrAD8imtMdUC37bg",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "stakewise-v2",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "2vmnaGa7TjrKP9Q6ncbV5WvFvEJMvAHgMAQaMpFnTmpS",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "stakewise-v2",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "gnosis",
+      "queryId": "3RMneHsDkc3e9J2HeqNezZ2hssGm8Kmuknsy5kiqEtfv",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "swell-liquid-staking",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "ethereum",
+      "queryId": "F8nUFWAC9vE1gHcUj5ZHXSt53eXo9vRqf2SuCcYVs93S",
+      "status": "prod",
+      "versions": {
+        "schema": "2.1.1",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "yieldyak-staked-avax",
+      "category": "liquid-staking",
+      "messariSchema": "generic",
+      "network": "avalanche",
+      "queryId": "DFD6o4jyHAXnrEHNZv45JHEJJAwq9atyyCoJ2oq8spc1",
+      "status": "prod",
+      "versions": {
+        "schema": "3.0.0",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "dopex",
+      "category": "perpetual",
+      "messariSchema": "derivatives-options",
+      "network": "arbitrum",
+      "queryId": "6C7okGPnmQw4eahgvkjzKGqHyXsZBLSWz7BBEyyfe6vB",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "dopex",
+      "category": "perpetual",
+      "messariSchema": "derivatives-options",
+      "network": "polygon",
+      "queryId": "nTecf2j4MGgqgJrKTGmvVyWn169py1H9fgvaiN29MVu",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.1",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "gains-trade",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "arbitrum",
+      "queryId": "DuPBYBj3nfP3sFiHwkRfTATmA4iSqoPvxBaRXWiwpELk",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "gains-trade",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "polygon",
+      "queryId": "4d1zcsK9f1T2wzZTGZHaLKswbhmKTRWu1yeyX94htoMW",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "gmx",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "arbitrum",
+      "queryId": "DiR5cWwB3pwXXQWWdus7fDLR2mnFRQLiBFsVmHAH9VAs",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "gmx",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "avalanche",
+      "queryId": "6pXgnXcL6mkXBjKX7NyHN7tCudv2JGFnXZ8wf8WbjPXv",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.2.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "kwenta",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "optimism",
+      "queryId": "5sbJJTTJQQ4kYuVYNBVw9sX8C5juRpVJNLHg7uFugw2e",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.0.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "level-finance",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "arbitrum",
+      "queryId": "9KPc6WMUXg6mqQ9KbCeosJrgmsZyH97vpFPKwJHkVkui",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "level-finance",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "bsc",
+      "queryId": "97TRgysfrSPH7sumNXSasdjhKBnDwig2JKE7PwB4W2J8",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mummy-finance",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "arbitrum",
+      "queryId": "4Po9haSDCDbQ2XtrSXqT8BNB9H6T7EUAmbAorAzHQi9S",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mummy-finance",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "fantom",
+      "queryId": "FP8YzYVARZ6jEYrciiTEtzrNfug7STzYyUr3fRUjQkEA",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mummy-finance",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "optimism",
+      "queryId": "GvgdFS6dFXCSXwq9PDTdcs5uZzwZYuTrqFjiTRC3jy54",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.4",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mux-protocol",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "arbitrum",
+      "queryId": "AMh1u4wCbz8Jybs4Nf7uGBdU9dz2C8mJkH1Aocz6HXUf",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mux-protocol",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "avalanche",
+      "queryId": "97XbzzGmRpUvHwdZyArbyrZHFnmWU15tC381epA1Fp7H",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mux-protocol",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "bsc",
+      "queryId": "3zRKcHbGqvMe6BG6fiLiaKx3y41ytzjw4jetbh5Q2fx1",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mux-protocol",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "fantom",
+      "queryId": "46iwTwh5F6yAuKHF9iwFccu9wsYEaXwQCwnj2EjcEgBk",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "mux-protocol",
+      "category": "perpetual",
+      "messariSchema": "derivatives-perpfutures",
+      "network": "optimism",
+      "queryId": "7hUM4US9DPz6JqLD6ySqwFmLq4XiAF7cEZLmEesQnYgR",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.1",
+        "subgraph": "1.1.0",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "opyn-gamma",
+      "category": "perpetual",
+      "messariSchema": "derivatives-options",
+      "network": "arbitrum",
+      "queryId": "BC766cXkcBxAwQ6LAYnQytdHJLpJX1C1bbrMFhLCHx7C",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "opyn-gamma",
+      "category": "perpetual",
+      "messariSchema": "derivatives-options",
+      "network": "avalanche",
+      "queryId": "3eaTJDJ1Y867jkDMY1iEJJLRZTSREfGZjusgmucptWJE",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "opyn-gamma",
+      "category": "perpetual",
+      "messariSchema": "derivatives-options",
+      "network": "ethereum",
+      "queryId": "3zUv74ekxpiy92MQ2MwemR8fJhjvgyBFaGzQLkYHmaUy",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    },
+    {
+      "protocol": "opyn-gamma",
+      "category": "perpetual",
+      "messariSchema": "derivatives-options",
+      "network": "polygon",
+      "queryId": "6WbUbvCBtjhKyf9ddZEfVReHNHHunzspGBp3hFsy1c8P",
+      "status": "prod",
+      "versions": {
+        "schema": "1.3.2",
+        "subgraph": "1.0.2",
+        "methodology": "1.0.0"
+      }
+    }
+  ]
+}
