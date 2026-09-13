@@ -1,0 +1,227 @@
+@import "tailwindcss";
+@source "../../../packages/ux-workflow/dist";
+
+/*
+ * Terminal Noir — Agentic EMS landing page.
+ * Dual theme (dark default / light) via CSS variables that flip on html.light.
+ * Terminal-viewport blocks (.term) re-pin the dark palette in their subtree so
+ * the hero terminal and math terminal stay dark in both themes.
+ * i18n: en / hi / fr — copy lives in lib/i18n.ts; Devanagari falls back to
+ * Noto Sans Devanagari (see layout.tsx).
+ */
+@theme inline {
+  --font-sans: var(--font-inter), var(--font-noto-deva), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
+
+  --color-ink: var(--tk-ink);
+  --color-panel: var(--tk-panel);
+  --color-panel-2: var(--tk-panel-2);
+  --color-edge: var(--tk-edge);
+  --color-edge-2: var(--tk-edge-2);
+  --color-fg: var(--tk-fg);
+  --color-fg-dim: var(--tk-fg-dim);
+  --color-fg-faint: var(--tk-fg-faint);
+  --color-amber: var(--tk-amber);
+  --color-amber-dim: var(--tk-amber-dim);
+  --color-on-amber: var(--tk-on-amber);
+  --color-up: var(--tk-up);
+  --color-down: var(--tk-down);
+  --color-graph: var(--tk-graph);
+  --color-graph-soft: var(--tk-graph-soft);
+  --color-oneinch: var(--tk-oneinch);
+  --color-uniswap: var(--tk-uniswap);
+
+  /* Motion — mirrored from @ethonline2026/ux-workflow (its stylesheet is not
+   * imported here, so the tokens the package components reference must be
+   * declared in this theme for Tailwind to emit the utilities). */
+  --animate-pulse-subtle: pulse-subtle 2.4s ease-in-out infinite;
+  --animate-flash-green: flash-green 0.6s ease-out;
+  --animate-flash-red: flash-red 0.6s ease-out;
+  --animate-fade-slide-up: fade-slide-up 0.16s ease-out;
+  --animate-flow-dash: flow-dash 1s linear infinite;
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes flash-green {
+  from { background-color: color-mix(in srgb, var(--tk-up) 35%, transparent); }
+  to { background-color: transparent; }
+}
+
+@keyframes flash-red {
+  from { background-color: color-mix(in srgb, var(--tk-down) 35%, transparent); }
+  to { background-color: transparent; }
+}
+
+@keyframes fade-slide-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flow-dash {
+  to { background-position-x: 16px; }
+}
+
+/* Agent trace accordion (mirrored from @ethonline2026/ux-workflow). */
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height)); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height)); }
+  to { height: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-subtle,
+  .animate-flash-green,
+  .animate-flash-red,
+  .animate-fade-slide-up,
+  .animate-flow-dash,
+  .animate-accordion-down,
+  .animate-accordion-up {
+    animation: none !important;
+  }
+}
+
+:root,
+.dark {
+  --tk-ink: #0a0b0d;
+  --tk-panel: #101214;
+  --tk-panel-2: #14171a;
+  --tk-edge: #1e2126;
+  --tk-edge-2: #2a2e35;
+  --tk-fg: #e8eaed;
+  --tk-fg-dim: #9ba1ab;
+  --tk-fg-faint: #5f6670;
+  --tk-amber: #ffb300;
+  --tk-amber-dim: #b37f00;
+  --tk-on-amber: #0a0b0d;
+  --tk-up: #16c784;
+  --tk-down: #ea3943;
+  --tk-graph: #6747ee;
+  --tk-graph-soft: #a292f5;
+  --tk-oneinch: #12aab5;
+  --tk-uniswap: #ff007a;
+  color-scheme: dark;
+}
+
+.light {
+  --tk-ink: #f6f7f8;
+  --tk-panel: #ffffff;
+  --tk-panel-2: #eef0f2;
+  --tk-edge: #e3e6ea;
+  --tk-edge-2: #d3d7dd;
+  --tk-fg: #17191d;
+  --tk-fg-dim: #4b525c;
+  --tk-fg-faint: #8a919c;
+  --tk-amber: #a16207;
+  --tk-amber-dim: #854d0e;
+  --tk-on-amber: #ffffff;
+  --tk-up: #0e9f6e;
+  --tk-down: #e02424;
+  --tk-graph: #6747ee;
+  --tk-graph-soft: #5b43d6;
+  --tk-oneinch: #0e7f8a;
+  --tk-uniswap: #d6006e;
+  color-scheme: light;
+}
+
+/* Terminal viewports keep the dark palette in both themes. */
+.term {
+  --tk-panel: #101214;
+  --tk-panel-2: #14171a;
+  --tk-edge: #1e2126;
+  --tk-edge-2: #2a2e35;
+  --tk-fg: #e8eaed;
+  --tk-fg-dim: #9ba1ab;
+  --tk-fg-faint: #5f6670;
+  --tk-amber: #ffb300;
+  --tk-amber-dim: #b37f00;
+  --tk-up: #16c784;
+  --tk-down: #ea3943;
+  background: var(--tk-panel);
+  color: var(--tk-fg);
+  color-scheme: dark;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-line {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html,
+body {
+  background: var(--tk-ink);
+  color: var(--tk-fg);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--tk-amber) 30%, transparent);
+}
+
+.ticker-mask {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--tk-edge-2);
+}
+::-webkit-scrollbar-track {
+  background: var(--tk-ink);
+}
+
+/* React Flow — Terminal Noir overrides (var-based, theme-aware) */
+.react-flow__attribution {
+  display: none;
+}
+.react-flow__edge-path {
+  stroke-width: 1.5;
+}
+.react-flow__handle {
+  width: 7px;
+  height: 7px;
+  background: var(--tk-ink);
+  border: 1.5px solid var(--tk-amber-dim);
+}
+.react-flow__controls-button {
+  background: var(--tk-panel) !important;
+  border-bottom: 1px solid var(--tk-edge) !important;
+  fill: var(--tk-fg-dim) !important;
+}
