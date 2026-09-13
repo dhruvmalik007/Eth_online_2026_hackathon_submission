@@ -1,0 +1,43 @@
+{
+  "name": "@ethonline2026/oneinch-aqua",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "1inch Aqua + SwapVM execution layer: SwapVM program builders, a custom flight instruction, and the adapters that map them onto the Agentic EMS execution domain.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./port": {
+      "types": "./dist/src/port.d.ts",
+      "import": "./dist/src/port.js",
+      "default": "./dist/src/port.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@ethonline2026/execution-domain": "workspace:*",
+    "viem": "^2.56.3",
+    "zod": "^4.5.4",
+    "@ethonline2026/order-execution-layer": "workspace:*"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "eslint": "^9.39.1",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  }
+}
