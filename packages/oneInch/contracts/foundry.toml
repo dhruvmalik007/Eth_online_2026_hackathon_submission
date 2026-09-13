@@ -1,0 +1,60 @@
+# Foundry configuration for the Aqua / SwapVM contracts.
+#
+# Mirrors 1inch/swap-vm's own foundry.toml where it matters: the same solc
+# version, the same optimizer settings, and via_ir on. A redeployment of a
+# modified SwapVM has to compile under the same pipeline as the original, or the
+# bytecode differs in ways nobody has reviewed.
+#
+# ── Vendor pins ──────────────────────────────────────────────────────────────
+# The versions come from 1inch/swap-vm's own package.json, so the vendored tree is
+# what upstream actually compiles against:
+#
+#   @1inch/aqua             github:1inch/aqua              tag 1.0.0
+#   @1inch/solidity-utils   6.9.10
+#   @openzeppelin/contracts 5.4.0
+#   forge-std               github:foundry-rs/forge-std    v1.11.0
+#   @1inch/swap-vm          no npm release — pinned by commit, see lib.lock
+#
+# `@1inch/swap-vm` and `@1inch/aqua` return 404 from the npm registry despite the
+# npm badges in their READMEs, which is why they are fetched from source. The
+# remappings they live behind are in `remappings.txt` (which must be pure
+# `key=value` — it rejects comments).
+
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+# 0.8.30 is what SwapVM and Aqua both pin. Their sources declare `^0.8.27` and
+# `0.8.30` respectively, so a lower version cannot compile the tree.
+solc_version = "0.8.30"
+optimizer = true
+optimizer_runs = 700
+via_ir = true
+# Transient storage (EIP-1153) backs AquaApp's reentrancy locks, so Cancun is the
+# floor rather than a preference.
+evm_version = "cancun"
+#  for the pinned config constants;  for the fork scenarios' facts, which
+# the TypeScript harness folds into the committed evidence artifact.
+fs_permissions = [
+    { access = "read", path = "./config" },
+    { access = "read-write", path = "./out/evidence" },
+]
+verbosity = 2
+
+[profile.default.fuzz]
+runs = 256
+
+# The fork profile exists so a scenario can run against a pinned block without
+# changing the default profile — the fuzz count and verbosity that suit a local
+# suite are wrong for a run that spends an RPC budget.
+[profile.fork]
+verbosity = 2
+fuzz = { runs = 32 }
+
+[fmt]
+line_length = 120
+tab_width = 4
+bracket_spacing = true
+int_types = "long"

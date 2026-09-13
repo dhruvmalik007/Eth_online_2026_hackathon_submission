@@ -11,7 +11,9 @@
     "test": "vitest run",
     "dev": "vercel dev",
     "deploy": "vercel deploy --prod",
-    "verify:live": "tsx scripts/verify-live.ts"
+    "verify:live": "tsx scripts/verify-live.ts",
+    "postinstall": "node -e \"const fs=require('fs'),p=require('path');const E=/^(?:import\\s|export\\s+\\{)/m;function store(){let d=process.cwd();for(let i=0;i<6;i++){const c=p.join(d,'node_modules','.pnpm');if(fs.existsSync(c))return c;const u=p.dirname(d);if(u===d)break;d=u}return null}function esm(d,n){if(n>4)return 0;let e;try{e=fs.readdirSync(d,{withFileTypes:true})}catch{return 0}for(const x of e){const f=p.join(d,x.name);if(x.isDirectory()){if(x.name==='node_modules')continue;if(esm(f,n+1))return 1}else if(x.name.endsWith('.js')&&!x.name.endsWith('.cjs')){try{if(E.test(fs.readFileSync(f,'utf8')))return 1}catch{}}}return 0}function bs(d){let e;try{e=fs.readdirSync(d,{withFileTypes:true})}catch{return []}const o=[];for(const x of e){if(x.name.startsWith('@')&&x.isDirectory()){for(const y of fs.readdirSync(p.join(d,x.name)))o.push(p.join(d,x.name,y))}else o.push(p.join(d,x.name))}return o}const st=store();if(!st){console.log('[patch-vendored-esm] no pnpm store found; nothing to do');process.exit(0)}let n=0;for(const s of bs(st)){for(const k of bs(p.join(s,'node_modules'))){const v=p.join(k,'dist','node_modules','.pnpm');if(!fs.existsSync(v))continue;for(const dp of bs(v)){for(const dir of bs(p.join(dp,'node_modules'))){const mf=p.join(dir,'package.json');if(fs.existsSync(mf)||!esm(dir,0))continue;fs.writeFileSync(mf,JSON.stringify({type:'module'})+String.fromCharCode(10));n++}}}}console.log('[patch-vendored-esm] fixed '+n)\"",
+    "dev:local": "tsx scripts/serve-local.ts"
   },
   "dependencies": {
     "@ethonline2026/langchain-agent": "workspace:*",

@@ -10,6 +10,7 @@
  *        Standard        = higher threshold, ~13–19 min, near-free.
  */
 import { createPublicClient, createWalletClient, http, parseAbi, type Address, type PublicClient, type WalletClient } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { ARC_TOKEN_MESSENGER_V2, irisBaseUrl, type ArcNetwork } from "./chains.js";
 
 const TOKEN_MESSENGER_V2_ABI = parseAbi([
@@ -29,14 +30,26 @@ const ERC20_ABI = parseAbi([
 export interface CctpOptions {
   /** EOA that signs the burn (agent wallet). */
   account: Address;
+  /**
+   * Private key for `account`. A plain address cannot sign: viem falls back to the node's
+   * `eth_sendTransaction`, which no public RPC exposes, so a burn silently cannot be broadcast.
+   * Supply this (or pass a viem `Account`) to sign locally.
+   */
+  sourcePrivateKey?: `0x${string}`;
   /** RPC for the SOURCE chain (where USDC is burned). */
   sourceRpcUrl: string;
   /** Source chain USDC address. */
   sourceUsdc: Address;
   /** Source chain CCTP V2 TokenMessenger. */
   sourceTokenMessengerV2: Address;
-  /** Source USDC decimals — 6 on most spokes, 18 on Arc (config-driven). */
+  /** Source USDC decimals — 6 on every deployment checked, Arc included. */
   sourceUsdcDecimals?: number;
+  /**
+   * Source chain id. Defaults to Arc's when the source messenger is Arc's, otherwise it must be
+   * supplied: viem compares this against the RPC's reported chainId and rejects a mismatch, so a
+   * placeholder of 0 fails against every real chain.
+   */
+  sourceChainId?: number;
   /** True when the SOURCE chain is Arc — forces minFinalityThreshold 2000
    *  (arc-node#110: threshold 1000 attests never progress past pending on Arc). */
   sourceIsArc?: boolean;
@@ -65,14 +78,32 @@ export interface AttestedMessage {
 
 export class CctpV2 {
   private readonly walletClient: WalletClient;
+  /** Local signing account. An `Address` here would make viem call the node's eth_sendTransaction. */
+  private readonly signer: ReturnType<typeof privateKeyToAccount> | Address;
   private readonly publicClient: PublicClient;
   private readonly irisBase: string;
-  private readonly sourceChain = { id: 0, name: "cctp-source", nativeCurrency: { name: "Native", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [""] } } } as const;
+  private readonly sourceChain: {
+    id: number;
+    name: string;
+    nativeCurrency: { name: string; symbol: string; decimals: number };
+    rpcUrls: { default: { http: string[] } };
+  };
 
   constructor(private readonly opts: CctpOptions) {
-    // NOTE: the SOURCE chain client is built from opts.sourceRpcUrl (spoke side).
-    const sourceChain = { ...this.sourceChain, rpcUrls: { default: { http: [opts.sourceRpcUrl] } } };
-    this.walletClient = createWalletClient({ account: opts.account, chain: this.sourceChain, transport: http(opts.sourceRpcUrl) });
+    // viem checks this against the RPC's chainId. Defaulting to Arc when the messenger is Arc's
+    // keeps the common path working; any other source must declare its id.
+    const isArcSource = opts.sourceTokenMessengerV2.toLowerCase() === ARC_TOKEN_MESSENGER_V2.toLowerCase();
+    const id = opts.sourceChainId ?? (isArcSource ? 5042002 : 0);
+    this.sourceChain = {
+      id,
+      name: isArcSource ? "arc-testnet" : `cctp-source-${id}`,
+      nativeCurrency: { name: "Native", symbol: "ETH", decimals: 18 },
+      rpcUrls: { default: { http: [opts.sourceRpcUrl] } },
+    };
+    // Sign locally when given a key. Falling back to the bare address keeps the read paths working
+    // (balanceOf, approve-checks) while making an un-signable write fail loudly rather than silently.
+    this.signer = opts.sourcePrivateKey ? privateKeyToAccount(opts.sourcePrivateKey) : opts.account;
+    this.walletClient = createWalletClient({ account: this.signer, chain: this.sourceChain, transport: http(opts.sourceRpcUrl) });
     this.publicClient = createPublicClient({ chain: this.sourceChain, transport: http(opts.sourceRpcUrl) });
     this.irisBase = (opts.irisApiUrl ?? irisBaseUrl(opts.network)).replace(/\/$/, "");
   }
@@ -87,7 +118,7 @@ export class CctpV2 {
     });
     if (current >= amount) return;
     const hash = await this.walletClient.writeContract({
-      account: this.opts.account,
+      account: this.signer,
       address: this.opts.sourceUsdc,
       abi: ERC20_ABI,
       chain: this.sourceChain,
@@ -116,7 +147,7 @@ export class CctpV2 {
     await this.approve(amountRaw);
 
     const hash = await this.walletClient.writeContract({
-      account: this.opts.account,
+      account: this.signer,
       address: this.opts.sourceTokenMessengerV2,
       abi: TOKEN_MESSENGER_V2_ABI,
       chain: this.sourceChain,
@@ -162,7 +193,7 @@ export class CctpV2 {
       ({ id: 0, name: "cctp-destination", nativeCurrency: { name: "Native", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [destinationRpcUrl] } } } as const);
     const destPublic = createPublicClient({ transport: http(destinationRpcUrl) });
     const destWallet = createWalletClient({
-      account: this.opts.account,
+      account: this.signer,
       chain: destChain,
       transport: http(destinationRpcUrl),
     });

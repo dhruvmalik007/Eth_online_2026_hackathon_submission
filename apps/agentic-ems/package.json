@@ -1,0 +1,42 @@
+{
+  "name": "agentic-ems-landing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ethonline2026/ux-workflow": "workspace:*",
+    "@privy-io/react-auth": "^3.42.0",
+    "@reactor-models/fast-h3": "^1.0.2",
+    "@reactor-team/js-sdk": "^3.0.0",
+    "@reactor-team/ui": "^1.4.1",
+    "@xyflow/react": "^12.3.5",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "google-auth-library": "^11.0.2",
+    "hls.js": "^1.6.0",
+    "lucide-react": "^0.469.0",
+    "next": "^15.5.0",
+    "permissionless": "^0.2.57",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "recharts": "^3.0.0",
+    "tailwind-merge": "^2.6.0",
+    "viem": "^2.56.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.7"
+  }
+}

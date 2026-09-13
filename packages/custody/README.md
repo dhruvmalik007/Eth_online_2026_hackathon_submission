@@ -145,12 +145,42 @@ Configure both via `CUSTODY_SAFE_OWNERS` with the matching
 
 | Module | Responsibility |
 |---|---|
-| `SafeClient` | Safe proposals, EIP-712 digest, deployment request |
-| `LedgerSignerAdapter` | Device-backed owner signing (never holds a key) |
+| `SafeClient` | Safe proposals, EIP-712 typed data, deployment request |
+| `LedgerSignerAdapter` | Device-backed owner signing on Ledger **DMK** (never holds a key) |
 | `PolicyGate` | Pre-proposal policy enforcement and daily spend limits |
 | `ScopedCapability` | Ring-encrypted agent capabilities (proposer role) |
 | `KeyRingClient` | Encrypted key storage |
 | `CustodyLog` | Append-only audit trail |
+
+---
+
+## Signing on the Ledger (DMK)
+
+The signer runs on Ledger's **Device Management Kit**, not the legacy
+`hw-app-eth`. Two reasons that matter:
+
+- **One kit covers every EVM chain.** The chain id is part of the payload rather
+  than a per-chain device app, so `SignerEthBuilder` serves all EVM chains.
+- **The device can show intent.** The legacy SDK could only sign a Safe as two
+  opaque hashes; DMK is given the **complete typed data**, so the screen can
+  decode what is being authorised.
+
+```ts
+const dmk = createNodeDmk();
+const sessionId = await connectFirstDevice(dmk);
+const ledger = new LedgerSignerAdapter({ dmk, sessionId, originToken });
+const client = new SafeClient({ publicClient, ledger });
+```
+
+**Clear Signing needs an `originToken`** from Ledger. Without it the device
+falls back to raw hex — it is a Ledger-side registration, not something this
+package can provision. `ledger.clearSigningEnabled` reports which mode you are
+in. The token is a constructor argument, not an environment variable: this
+package's rule is that no secrets pass through env.
+
+`awaitDeviceAction` is exported because it is the piece most likely to be got
+wrong: a device action emits **many** states, so `firstValueFrom` resolves on
+`NotStarted` and reports success before anyone has approved anything.
 
 ---
 
@@ -170,14 +200,13 @@ device attached. It honours `ETHEREUM_SEPOLIA_RPC_URL`.
 
 ## Known gaps
 
-- **The signer is not DMK.** `LedgerSignerAdapter` uses `@ledgerhq/hw-app-eth`
-  (the legacy SDK) although this package's own docstrings reference the DMK
-  skill. Migrating to `@ledgerhq/device-management-kit` and its chain signer
-  kits — with pre-flight device gates and Clear Signing — is a separate piece of
-  work.
-- **`cli demo` and `cli safe deploy` are advertised but unimplemented.**
-  `package.json` declares a `demo` script and `env.ts` tells you to run
-  `cli safe deploy`; neither exists in the CLI's switch.
-- **Live signing is unverified end-to-end.** No device is available in CI, so
-  `signWithLedger` → `attachSignature` is type-checked and unit-tested but has
-  not been exercised against hardware.
+- **Live signing is unverified end-to-end.** No device is available here, so the
+  device paths are type-checked and the pure logic is unit-tested, but nothing
+  has been exercised against hardware. It is also not on the critical path: the
+  account model is a Privy embedded EOA reached through SSO, so Ledger signing
+  is an optional, stricter path rather than the default.
+- **Clear Signing requires a Ledger `originToken`** (see above). Without one the
+  device displays raw hex.
+- **A Safe has a single threshold**, so "one signature normally, device required
+  above $X" cannot be expressed by ownership alone — that needs a Safe guard or
+  module.

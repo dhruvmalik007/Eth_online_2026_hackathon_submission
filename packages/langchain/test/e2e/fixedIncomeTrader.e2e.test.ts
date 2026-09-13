@@ -8,9 +8,16 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..', '..', '..', '..');
 const envPath = path.join(repoRoot, '.env');
-for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
-  const m = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
-  if (m && !process.env[m[1]!]) process.env[m[1]!] = m[2]!;
+// ─── Load root .env when present (GATEWAY_API_KEY lives in repo root, not in
+// packages/langchain). It is gitignored, so a clean checkout has none — and
+// reading it unconditionally crashed this file before the skip guard below
+// could run, failing `pnpm test` on a fresh clone with ENOENT rather than
+// skipping.
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+    const m = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
+    if (m && !process.env[m[1]!]) process.env[m[1]!] = m[2]!;
+  }
 }
 
 const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY;

@@ -27,6 +27,11 @@ from risk_pipeline.sources.defillama_mm import (
     parse_market_maker_page,
 )
 from risk_pipeline.sources.discourse import parse_discourse_payload
+from risk_pipeline.sources.incidents import (
+    _resolve_aliases,
+    _subject_index,
+    parse_incident_feed,
+)
 from risk_pipeline.sources.l2beat import parse_chain_page
 
 SCRAPER_ROOT = Path(__file__).resolve().parents[1]
@@ -100,6 +105,31 @@ def main() -> int:
             fetched_at=FETCHED_AT,
         )
         written.append(_write("market-maker-detail.json", detail.model_dump_json(by_alias=True)))
+
+    # Security incidents — the cyber family.
+    #
+    # Emitted as the *rows* the `security_incidents` table accepts rather than as
+    # the published feed wrapper, because the row contract is the one that already
+    # exists on the TypeScript side (`SecurityIncidentRowSchema`) and therefore the
+    # one that can silently drift. The collector's whole purpose is to fill that
+    # table, so this is the boundary worth pinning.
+    incidents_fixture = SOURCE_FIXTURES / "defillama_hacks.json"
+    if incidents_fixture.exists():
+        index = _subject_index(roster)
+        index.update(_resolve_aliases(index))
+        incidents, _skipped = parse_incident_feed(
+            incidents_fixture.read_text(encoding="utf-8"),
+            source_url="https://api.llama.fi/hacks",
+            index=index,
+        )
+        written.append(
+            _write(
+                "security-incidents.json",
+                "[\n"
+                + ",\n".join(record.model_dump_json(by_alias=True) for record in incidents)
+                + "\n]",
+            )
+        )
 
     # Manifest — assembled by hand here because it is a run artifact rather than
     # a parse result, but the shape is the contract the TypeScript side reads.

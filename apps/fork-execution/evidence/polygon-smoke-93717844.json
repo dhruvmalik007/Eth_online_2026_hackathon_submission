@@ -1,0 +1,118 @@
+{
+  "schema": "fork-evidence/1",
+  "scenario": "smoke",
+  "chain": "polygon",
+  "chainId": 137,
+  "rpcHost": "polygon-mainnet.g.alchemy.com",
+  "forkBlock": null,
+  "observedBlockNumber": 93717844,
+  "generatedAt": "2026-09-13T06:43:26.856Z",
+  "checks": [
+    {
+      "name": "chainId",
+      "ok": true,
+      "detail": "local node reports 137, registry expects 137"
+    },
+    {
+      "name": "code:tokens.usdc",
+      "ok": true,
+      "detail": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359 has 1852 bytes of code"
+    },
+    {
+      "name": "code:tokens.weth",
+      "ok": true,
+      "detail": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619 has 12443 bytes of code"
+    },
+    {
+      "name": "code:permit2",
+      "ok": true,
+      "detail": "0x000000000022D473030F116dDEE9F6B43aC78BA3 has 9152 bytes of code"
+    },
+    {
+      "name": "code:aqua",
+      "ok": true,
+      "detail": "0x1111113ccf1426a8e30e2bff5e005d929bf6a90a has 5619 bytes of code"
+    },
+    {
+      "name": "code:aquaSwapVmRouter",
+      "ok": true,
+      "detail": "0x111111338c5091e8440b67b168bae16a668ac0de has 20541 bytes of code"
+    },
+    {
+      "name": "code:uniswapV4.poolManager",
+      "ok": true,
+      "detail": "0x67366782805870060151383f4bbff9dab53e5cd6 has 24009 bytes of code"
+    },
+    {
+      "name": "code:uniswapV4.positionManager",
+      "ok": true,
+      "detail": "0x1ec2ebf4f37e7363fdfe3551602425af0b3ceef9 has 23877 bytes of code"
+    },
+    {
+      "name": "code:morpho.vaultV2Factory",
+      "ok": true,
+      "detail": "0xC11a53eE9B1eCc7a068D8e40F8F17926584F97Cf has 23124 bytes of code"
+    },
+    {
+      "name": "code:morpho.morphoRegistry",
+      "ok": true,
+      "detail": "0xb70a43821d2707fA9d0EDd9511CC499F468Ba564 has 1377 bytes of code"
+    },
+    {
+      "name": "code:morpho.marketV1AdapterV2Factory",
+      "ok": true,
+      "detail": "0xc0006f52B38625C283dd2f972dD9B779A5851Dd0 has 13633 bytes of code"
+    },
+    {
+      "name": "code:morpho.blue",
+      "ok": true,
+      "detail": "0x1bF0c2541F820E775182832f06c0B7Fc27A25f67 has 15582 bytes of code"
+    },
+    {
+      "name": "code:morpho.vaults[0]",
+      "ok": true,
+      "detail": "0x781FB7F6d845E3bE129289833b04d43Aa8558c42 has 19689 bytes of code"
+    },
+    {
+      "name": "code:aave.pool",
+      "ok": true,
+      "detail": "0x794a61358D6845594F94dc1DB02A252b5b4814aD has 2400 bytes of code"
+    },
+    {
+      "name": "code:aave.addressesProvider",
+      "ok": true,
+      "detail": "0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb has 9846 bytes of code"
+    },
+    {
+      "name": "code:aave.oracle",
+      "ok": true,
+      "detail": "0xb023e699F5a33916Ea823A16485e259257cA8Bd1 has 3405 bytes of code"
+    },
+    {
+      "name": "code:aave.uiPoolDataProvider",
+      "ok": true,
+      "detail": "0x66E1aBdb06e7363a618D65a910c540dfED23754f has 10339 bytes of code"
+    },
+    {
+      "name": "token:usdc",
+      "ok": true,
+      "detail": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359 reports symbol=\"USDC\" decimals=6; registry expects symbol=\"USDC\" decimals=6"
+    },
+    {
+      "name": "token:weth",
+      "ok": true,
+      "detail": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619 reports symbol=\"WETH\" decimals=18; registry expects symbol=\"WETH\" decimals=18"
+    },
+    {
+      "name": "vault:0:Compound USDC",
+      "ok": true,
+      "detail": "0x781FB7F6d845E3bE129289833b04d43Aa8558c42 holds 930886843927 of 0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359; one share = 1040563"
+    },
+    {
+      "name": "aqua:deterministic",
+      "ok": true,
+      "detail": "Aqua is 0x1111113ccf1426a8e30e2bff5e005d929bf6a90a on Polygon, matching the value on the other chain"
+    }
+  ],
+  "txs": []
+}

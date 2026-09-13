@@ -1,0 +1,36 @@
+{
+  "name": "@ethonline2026/execution",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Per-user strategy execution service: simulate, rank, sign, broadcast and track DeFi strategy lifecycle events.",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "start": "node dist/src/main.js",
+    "dev": "tsx src/main.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@ethonline2026/execution-domain": "workspace:*",
+    "@ethonline2026/oneinch-aqua": "workspace:*",
+    "@ethonline2026/order-execution-layer": "workspace:*",
+    "@ethonline2026/timeseries": "workspace:*",
+    "@privy-io/node": "^0.34.0",
+    "fastify": "^5.2.1",
+    "viem": "^2.56.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "eslint": "^9.39.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  }
+}

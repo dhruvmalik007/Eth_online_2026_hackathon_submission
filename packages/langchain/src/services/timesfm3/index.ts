@@ -24,3 +24,4 @@ export {
 export { backtestForecast } from './backtest.js';
 export type { BacktestScore } from './backtest.js';
 export { perStepChangeCovariate, pastCovariatesAligned } from './covariates.js';
+export * from './provenance.js';

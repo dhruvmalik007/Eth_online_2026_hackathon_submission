@@ -54,6 +54,36 @@ export { TimeseriesClient, type StoreCoverage } from './client.js';
 
 export { RiskHistoryRepository, type RiskHistoryWriteResult } from './riskHistory.js';
 
+// ─── Execution history ────────────────────────────────────────────────────────
+
+export {
+  ExecutionRepository,
+  ExecutionEventRowSchema,
+  ExecutionStepRowSchema,
+} from './executionHistory.js';
+export type {
+  ExecutionEventRow,
+  ExecutionStepRow,
+  RunSummary,
+} from './executionHistory.js';
+
+// ─── Execution write buffer (T1.3) ────────────────────────────────────────────
+
+export { ExecutionEventBuffer } from './eventBuffer.js';
+export type { EventBufferOptions, EventSinkRepository, FlushResult } from './eventBuffer.js';
+
+// ─── Execution planning (sessions + strategies) ───────────────────────────────
+
+export { SessionRepository, StrategyRepository } from './strategyRepository.js';
+export type { SessionRow, StrategyRow } from './strategyRepository.js';
+export { SESSION_AGENTS, SESSION_STATUSES, STRATEGY_STATUSES } from './strategyRepository.js';
+
+// ─── Dashboard read model ─────────────────────────────────────────────────────
+
+export { ExecutionReadModel } from './executionReadModel.js';
+export type { DashboardOverview, FeeActualRow, PositionRow } from './executionReadModel.js';
+export { toRunSummary, toStepRow } from './executionHistory.js';
+
 // ─── Ledgers ──────────────────────────────────────────────────────────────────
 
 export {
@@ -180,3 +210,9 @@ export {
 // ─── Wire coercion helpers (shared by adapters) ───────────────────────────────
 
 export { asNumber, asDate, asString, asStringArray, asJsonObject } from './wire.js';
+export {
+  AgentMandateRepository,
+  InvalidMandateError,
+  type AgentMandate,
+  type AgentMandateInput,
+} from "./mandateRepository.js";

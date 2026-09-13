@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-09-10T11:36:54.577Z",
+  "fetched": {
+    "strategy-forecasts": {
+      "lido": {
+        "file": "data/forecasts/lido_forecast.json",
+        "currentTvl": 23919911373,
+        "historyPoints": 2092
+      },
+      "rocket-pool": {
+        "file": "data/forecasts/rocketpool_forecast.json",
+        "currentTvl": 1290275593,
+        "historyPoints": 1806
+      },
+      "polymarket": {
+        "file": "data/forecasts/polymarket_forecast.json",
+        "currentTvl": 353928608,
+        "historyPoints": 1782
+      },
+      "hyperliquid": {
+        "file": "data/forecasts/hyperliquid_forecast.json",
+        "currentTvl": 6806505652,
+        "historyPoints": 1191
+      },
+      "uniswap": {
+        "file": "data/forecasts/uniswap_forecast.json",
+        "currentTvl": 3853155741,
+        "historyPoints": 2870
+      }
+    }
+  },
+  "errors": [
+    {
+      "slug": "uniswap",
+      "error": "https://api.llama.fi/protocol/uniswap → HTTP 524"
+    }
+  ],
+  "outputs": {
+    "taxonomy": "data/defillama_metrics/defillama_metrics_taxonomy.json",
+    "rawProtocols": "data/defillama_raw_protocols.json",
+    "sections": "data/defillama_metrics/sections",
+    "strategyForecasts": "data/forecasts/"
+  },
+  "notes": [
+    "browser /metrics page scrape returned 0 links this run (SPA grid not detected); taxonomy fully covered by API path",
+    "strategy-forecast gap-fill (lido, rocket-pool, polymarket, hyperliquid, uniswap) via api.llama.fi protocol endpoint; 30d projection derived client of realized deltas",
+    "strategy-forecast gap-fill (lido, rocket-pool, polymarket, hyperliquid, uniswap) via api.llama.fi protocol endpoint; 30d projection derived client of realized deltas",
+    "strategy-forecast gap-fill (lido, rocket-pool, polymarket, hyperliquid, uniswap) via api.llama.fi protocol endpoint; 30d projection derived client of realized deltas"
+  ]
+}

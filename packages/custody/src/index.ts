@@ -1,4 +1,10 @@
-/** Public exports for @ethonline2026/custody. */
+/**
+ * Public exports for `@ethonline2026/custody`.
+ *
+ * Ledger/DMK is NOT here — it lives at `@ethonline2026/custody/ledger`, because
+ * the DMK's ESM build cannot be resolved by plain Node and would break any
+ * `node dist/…` entrypoint that merely wanted the intent envelope.
+ */
 
 export {
   loadEnv,
@@ -28,9 +34,9 @@ export type { ScopedCapabilityOptions } from "./ring/ScopedCapability.js";
 export { SafeClient } from "./safe/SafeClient.js";
 export type {
   PredictedSafeConfig,
+  ProposeIntentContext,
   SafeClientOptions,
   SafeDeploymentRequest,
-  SafeEip712Digest,
   SafeLeg,
   SafeOwnerSource,
   SafeProposal,
@@ -40,9 +46,66 @@ export type {
   SignedSafeTransaction,
 } from "./safe/SafeClient.js";
 
+export { LocalKeySigner } from "./safe/LocalKeySigner.js";
+export type { LocalKeySignerOptions } from "./safe/LocalKeySigner.js";
 export {
-  LedgerSignerAdapter,
-  encodeDeviceSignature,
-  DEFAULT_DERIVATION_PATH,
-} from "./safe/LedgerSignerAdapter.js";
-export type { LedgerSignerAdapterOptions } from "./safe/LedgerSignerAdapter.js";
+  PrivyWalletSigner,
+  PrivySdkTransport,
+  normalizeAuthorizationKey,
+} from "./safe/PrivyWalletSigner.js";
+export type {
+  PrivySigningTransport,
+  PrivyWalletSignerOptions,
+} from "./safe/PrivyWalletSigner.js";
+export { SAFE_SIGNER_KINDS, SafeSignerError, redactSignerDetail } from "./safe/SafeTypedDataSigner.js";
+export type {
+  SafeSignerKind,
+  SafeTypedDataSigner,
+  SignerFailureOutcome,
+} from "./safe/SafeTypedDataSigner.js";
+export {
+  encodeSignature,
+  normalizeRecoveryId,
+  splitSignature,
+  toSafeSignature,
+} from "./safe/signature.js";
+export type { SplitSignature } from "./safe/signature.js";
+
+/** The EIP-712 shape every signer speaks. */
+export type { Eip712Domain, Eip712Field, Eip712TypedData } from "./eip712.js";
+export { toViemDomain, toViemTypedData, withoutDomainType } from "./safe/viemEip712.js";
+
+// The signing-intent standard.
+export {
+  SIGNING_INTENT_KINDS,
+  SIGNING_INTENT_VERSION,
+  SIGNING_SCHEMES,
+  SafeLegSchema,
+  SigningIntentDisplaySchema,
+  SigningIntentPolicySchema,
+  SigningIntentProvenanceSchema,
+  SigningIntentSchema,
+  SigningSchemeSchema,
+  buildSigningIntent,
+  canonicalJson,
+  digestIntent,
+  verifySigningIntent,
+} from "./intent/index.js";
+export type {
+  BuildSigningIntentInput,
+  SigningIntent,
+  SigningIntentInput,
+} from "./intent/index.js";
+
+// Ledger (DMK) is intentionally NOT exported here — see the header. Import it
+// from `@ethonline2026/custody/ledger` when a device is actually involved.
+export {
+  SWAP_VM_ORDER_TYPE,
+  SWAP_VM_ORDER_TYPEHASH,
+  SWAP_VM_ORDER_TYPES,
+  hashSwapVmOrder,
+  orderTypehashMatchesSource,
+  swapVmOrderTypedData,
+  type SwapVmDomain,
+  type SwapVmOrder,
+} from "./safe/swapVmOrder.js";

@@ -1,0 +1,98 @@
+{
+  "schema": "fork-evidence/1",
+  "scenario": "smoke",
+  "chain": "optimism",
+  "chainId": 10,
+  "rpcHost": "opt-mainnet.g.alchemy.com",
+  "forkBlock": null,
+  "observedBlockNumber": 156838189,
+  "generatedAt": "2026-09-13T04:52:43.480Z",
+  "checks": [
+    {
+      "name": "chainId",
+      "ok": true,
+      "detail": "local node reports 10, registry expects 10"
+    },
+    {
+      "name": "code:tokens.usdc",
+      "ok": true,
+      "detail": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85 has 1852 bytes of code"
+    },
+    {
+      "name": "code:tokens.weth",
+      "ok": true,
+      "detail": "0x4200000000000000000000000000000000000006 has 2041 bytes of code"
+    },
+    {
+      "name": "code:permit2",
+      "ok": true,
+      "detail": "0x000000000022D473030F116dDEE9F6B43aC78BA3 has 9152 bytes of code"
+    },
+    {
+      "name": "code:aqua",
+      "ok": true,
+      "detail": "0x1111113ccf1426a8e30e2bff5e005d929bf6a90a has 5619 bytes of code"
+    },
+    {
+      "name": "code:aquaSwapVmRouter",
+      "ok": true,
+      "detail": "0x111111338c5091e8440b67b168bae16a668ac0de has 20541 bytes of code"
+    },
+    {
+      "name": "code:uniswapV4.poolManager",
+      "ok": true,
+      "detail": "0x9a13f98cb987694c9f086b1f5eb990eea8264ec3 has 24009 bytes of code"
+    },
+    {
+      "name": "code:uniswapV4.positionManager",
+      "ok": true,
+      "detail": "0x3c3ea4b57a46241e54610e5f022e5c45859a1017 has 23877 bytes of code"
+    },
+    {
+      "name": "code:morpho.vaultV2Factory",
+      "ok": true,
+      "detail": "0x6128b680b277Bf4Df80DFE9D8c55A498660870ef has 23124 bytes of code"
+    },
+    {
+      "name": "code:morpho.morphoRegistry",
+      "ok": true,
+      "detail": "0xD1346be260cd22Eab9E6163010b0D5CbfAAAD32b has 1377 bytes of code"
+    },
+    {
+      "name": "code:morpho.marketV1AdapterV2Factory",
+      "ok": true,
+      "detail": "0x71B299bDb52b6396429cd1E11c418324502CB434 has 13633 bytes of code"
+    },
+    {
+      "name": "code:morpho.blue",
+      "ok": true,
+      "detail": "0xce95AfbB8EA029495c66020883F87aaE8864AF92 has 15582 bytes of code"
+    },
+    {
+      "name": "code:morpho.vaults[0]",
+      "ok": true,
+      "detail": "0xC30ce6A5758786e0F640cC5f881Dd96e9a1C5C59 has 19689 bytes of code"
+    },
+    {
+      "name": "token:usdc",
+      "ok": true,
+      "detail": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85 reports symbol=\"USDC\" decimals=6; registry expects symbol=\"USDC\" decimals=6"
+    },
+    {
+      "name": "token:weth",
+      "ok": true,
+      "detail": "0x4200000000000000000000000000000000000006 reports symbol=\"WETH\" decimals=18; registry expects symbol=\"WETH\" decimals=18"
+    },
+    {
+      "name": "vault:0:Gauntlet USDC Prime",
+      "ok": true,
+      "detail": "0xC30ce6A5758786e0F640cC5f881Dd96e9a1C5C59 holds 834182547451 of 0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85; one share = 1027122"
+    },
+    {
+      "name": "aqua:deterministic",
+      "ok": true,
+      "detail": "Aqua is 0x1111113ccf1426a8e30e2bff5e005d929bf6a90a on OP Mainnet, matching the value on the other chain"
+    }
+  ],
+  "txs": []
+}

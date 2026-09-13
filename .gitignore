@@ -16,6 +16,18 @@ eggs/
 .eggs/
 lib/
 lib64/
+# The Python template above ignores `lib/` for build output, but that pattern
+# matches ANY directory named `lib` — including TS source. It silently hid
+# `packages/ux-workflow/src/lib/`, which meant a fresh clone could not build and
+# Cloud Build could not build (the source upload follows ignore rules).
+# A negation must re-include the directory before its contents, or git never
+# descends into it.
+!packages/*/src/lib/
+!packages/*/src/lib/**
+# Same for app-level source: apps/agentic-ems/lib is application code, not a
+# build directory, and was being hidden by the same `lib/` rule.
+!apps/*/lib/
+!apps/*/lib/**
 parts/
 sdist/
 var/
@@ -25,6 +37,10 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+node_modules
+.env
+
 
 # PyInstaller
 #   Usually these files are written by a python script from a template
@@ -203,6 +219,11 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+## turborepo cache
+
+.turbo
+
+**/node_modules
 # Ruff stuff:
 .ruff_cache/
 
@@ -216,3 +237,45 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+archive
+
+.agents
+
+# Vercel CLI state: build output plus pulled environment files. Never commit.
+.vercel
+
+# Local database credentials — never commit.
+# These are already ignored per-package (packages/timeseries/.gitignore), so
+# nothing is currently at risk; this root rule is defence in depth so a package
+# restructure, a renamed copy, or a lost .gitignore cannot leak a live DSN.
+*-creds.md
+
+# Next.js build output. The app-level .gitignore covers apps/agentic-ems, but a
+# fresh clone must not pick up a stray .next from any other location.
+.next/
+
+# macOS metadata and stray scratch files.
+.DS_Store
+--full-page
+
+# Generated media stays out of history; heavy assets live in archive/ (ignored).
+*.mov
+*.mp4
+# Foundry build output and dependency cache (packages/*/contracts).
+# `lib/` is already covered globally above; these are the compiler outputs that
+# must never enter history.
+packages/*/contracts/out/
+packages/*/contracts/cache/
+packages/*/contracts/broadcast/
+
+# Scratch data dumps — regenerable, not part of the deliverable
+data/*.batch.jsonl
+data/higgsfield_trigger_text.txt
+
+# lib/ is a Python-template ignore; these TypeScript lib dirs are source, not build output.
+!apps/*/app/lib/
+!apps/*/app/lib/**
+!packages/*/scripts/lib/
+!packages/*/scripts/lib/**

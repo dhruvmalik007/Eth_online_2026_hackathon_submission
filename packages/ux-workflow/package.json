@@ -1,0 +1,59 @@
+{
+  "name": "@ethonline2026/ux-workflow",
+  "version": "0.1.0",
+  "description": "Shared UI component library for the Agentic EMS trading desk — Terminal Noir design system built on real shadcn/ui components and Vercel AI SDK.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@ai-sdk/react": "^2.0.0",
+    "@radix-ui/react-accordion": "^1.2.20",
+    "@radix-ui/react-avatar": "^1.1.0",
+    "@radix-ui/react-collapsible": "^1.1.20",
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-hover-card": "^1.1.23",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-progress": "^1.1.0",
+    "@radix-ui/react-scroll-area": "^1.2.0",
+    "@radix-ui/react-select": "^2.1.0",
+    "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slider": "^1.2.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-tooltip": "^1.1.0",
+    "@tanstack/react-table": "^8.20.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.469.0",
+    "recharts": "^3.0.0",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.9.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

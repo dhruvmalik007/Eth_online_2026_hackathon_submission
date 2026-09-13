@@ -131,6 +131,9 @@ describe('migrate', () => {
       'protocol_governance_history',
       'market_maker_metrics',
       'security_incidents',
+      // Execution history: the append-only trace and the position series.
+      'exec_events',
+      'exec_position_snapshots',
     ];
     for (const table of compressed) {
       expect(

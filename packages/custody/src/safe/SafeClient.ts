@@ -16,27 +16,37 @@
  *
  * ## Modes
  *
- * - **dry** — no device. Build proposals and calldata (`buildProposal`),
- *   never sign. This is the package default and the mode an integrating app
- *   starts in.
- * - **live** — a Ledger-backed owner signs the EIP-712 digest on-device.
+ * - **dry** — no signer. Build proposals, calldata and signing intents
+ *   (`buildProposal`, `proposeIntent`), never sign. This is the package default
+ *   and the mode an integrating app starts in.
+ * - **live** — a {@link SafeTypedDataSigner} signs the EIP-712 digest. That
+ *   signer may be a Privy server wallet (`PrivyWalletSigner`), a local key
+ *   (`LocalKeySigner`, gated and test-only) or a Ledger device
+ *   (`LedgerSignerAdapter`).
  *
- * The two modes are distinguished by the type: you supply either `ledger`
- * (live) or `ownerAddress` (dry), and supplying both — or neither — is a
- * compile error.
+ * The modes are distinguished by the type: you supply `signer`, `ledger`, or
+ * `ownerAddress`, and supplying two — or none — is a compile error.
  *
  * @remarks
- * protocol-kit builds and encodes the transaction; the signature is produced
- * on-device by `LedgerSignerAdapter`. Only signature bytes ever reach the host
- * process. No private key is read, stored or passed anywhere in this file.
+ * protocol-kit builds and encodes the transaction; the signature comes from a
+ * signer. Only signature bytes ever reach the host process. No private key is
+ * read, stored or passed anywhere in this file.
  */
 import Safe, {
   EthSafeSignature,
   generateTypedData,
   getSafeProxyFactoryContract,
 } from "@safe-global/protocol-kit";
-import { hashDomain, type PublicClient } from "viem";
-import { LedgerSignerAdapter } from "./LedgerSignerAdapter.js";
+import type { PublicClient } from "viem";
+import type { Eip712TypedData } from "../eip712.js";
+import { buildSigningIntent } from "../intent/IntentBuilder.js";
+import type { SigningIntent, SigningIntentInput } from "../intent/SigningIntent.js";
+// Type-only on purpose. `LedgerSignerAdapter` is used solely in the
+// `SafeOwnerSource` union, and importing it as a value would pull the Ledger DMK
+// into every consumer of this module — whose ESM build Node cannot resolve
+// (`ERR_UNSUPPORTED_DIR_IMPORT`), breaking any plain-`node` entrypoint.
+import type { LedgerSignerAdapter } from "./LedgerSignerAdapter.js";
+import type { SafeTypedDataSigner } from "./SafeTypedDataSigner.js";
 import { toLowerAddress } from "../utils/address.js";
 
 /**
@@ -113,10 +123,30 @@ export interface PredictedSafeConfig {
  *
  * A discriminated union so "exactly one source" is enforced by the compiler
  * rather than by a runtime check.
+ *
+ * Three sources, because the owner is a role rather than a device:
+ *  - `signer` — any {@link SafeTypedDataSigner}: a Privy server wallet, a local
+ *    key, or a future custodian. This is the general case.
+ *  - `ledger` — kept as its own variant so existing hardware integrations do not
+ *    change; `LedgerSignerAdapter` also satisfies the signer port.
+ *  - `ownerAddress` — dry: identify an owner and build proposals, never sign.
  */
 export type SafeOwnerSource =
-  | { readonly ledger: LedgerSignerAdapter; readonly ownerAddress?: never }
-  | { readonly ledger?: never; readonly ownerAddress: `0x${string}` };
+  | {
+      readonly ledger: LedgerSignerAdapter;
+      readonly signer?: never;
+      readonly ownerAddress?: never;
+    }
+  | {
+      readonly signer: SafeTypedDataSigner;
+      readonly ledger?: never;
+      readonly ownerAddress?: never;
+    }
+  | {
+      readonly ledger?: never;
+      readonly signer?: never;
+      readonly ownerAddress: `0x${string}`;
+    };
 
 export type SafeClientOptions = {
   /** viem public client for the chain; also the SDK's RPC provider. */
@@ -133,18 +163,19 @@ export type SafeClientOptions = {
   readonly nonce?: number;
 } & SafeOwnerSource;
 
-/** The two 32-byte hashes that make up the EIP-712 payload a Safe owner signs. */
-export interface SafeEip712Digest {
-  readonly domainSeparator: string;
-  /** The Safe transaction hash — the EIP-712 struct hash the Safe verifies. */
-  readonly messageHash: string;
-}
-
 /** A Safe transaction signed by an owner. */
-export interface SignedSafeTransaction extends SafeEip712Digest {
+export interface SignedSafeTransaction {
   readonly tx: SafeTransaction;
   /** Canonical owner signature bytes, `0x<r><s><v>`. */
   readonly signature: string;
+  /**
+   * The exact payload that was signed.
+   *
+   * Kept on the result so a caller can audit, re-derive or independently verify
+   * what was authorised — and so the human-readable intent survives past the
+   * signing step.
+   */
+  readonly typedData: Eip712TypedData;
 }
 
 /**
@@ -161,6 +192,24 @@ export interface SafeProposal {
   readonly nonce: number;
   /** The legs it batches, echoed back so a caller can audit the intent. */
   readonly legs: readonly SafeLeg[];
+}
+
+/**
+ * Everything `proposeIntent` needs that is not derivable from the chain.
+ *
+ * The display fields are required: an intent whose human-readable sentence is
+ * missing cannot be safely approved by anyone, so it is not optional.
+ */
+export interface ProposeIntentContext {
+  readonly intentId: string;
+  /** Correlates with `CustodyEvent.requestId`. */
+  readonly requestId: string;
+  readonly agentId: string;
+  readonly kind?: SigningIntentInput["kind"];
+  readonly display: SigningIntentInput["display"];
+  readonly policy?: SigningIntentInput["policy"];
+  readonly provenance?: SigningIntentInput["provenance"];
+  readonly createdAt?: string;
 }
 
 /**
@@ -194,22 +243,37 @@ export class SafeClient {
     }
   }
 
-  /** `live` when a device-backed owner was supplied, otherwise `dry`. */
+  /** `live` when an owner signer was supplied, otherwise `dry`. */
   get mode(): "dry" | "live" {
-    return this.opts.ledger !== undefined ? "live" : "dry";
+    return this.opts.ledger !== undefined || this.opts.signer !== undefined ? "live" : "dry";
+  }
+
+  /**
+   * The owner signer, when one can sign at all.
+   *
+   * `ledger` is not special-cased beyond this line: it satisfies the same port,
+   * so every downstream call site is signer-agnostic.
+   */
+  private resolveSigner(): SafeTypedDataSigner | undefined {
+    if (this.opts.signer !== undefined) return this.opts.signer;
+    if (this.opts.ledger !== undefined) return this.opts.ledger;
+    return undefined;
   }
 
   /**
    * The owner the SDK is configured with.
    *
-   * In live mode this comes from the device, so no key material is involved.
+   * In live mode this comes from the custodian (Privy) or the device (Ledger), so
+   * no key material is involved.
    */
   async ownerAddress(): Promise<`0x${string}`> {
     if (this.cachedOwner !== null) return this.cachedOwner;
     this.cachedOwner =
       this.opts.ledger !== undefined
         ? await this.opts.ledger.address()
-        : this.opts.ownerAddress;
+        : this.opts.signer !== undefined
+          ? await this.opts.signer.address()
+          : this.opts.ownerAddress;
     return this.cachedOwner;
   }
 
@@ -271,8 +335,16 @@ export class SafeClient {
     options?: SafeTransactionOptions,
   ): Promise<SafeTransaction> {
     const sdk = await this.safe();
-    const props: CreateTransactionProps = { transactions: [...transactions] };
-    const resolvedOptions = options ?? this.defaultOptions();
+    const props: CreateTransactionProps = {
+      transactions: [...transactions],
+      // `onlyCalls` sits beside `transactions`, NOT inside `options` — protocol-kit
+      // destructures it at the top level and defaults it to `true`, which throws on
+      // any `operation: 1` leg. A batch containing MultiSend (or a v4 position flow)
+      // legitimately needs DELEGATECALL, so the flag is derived from the legs rather
+      // than left at a default that cannot express them.
+      ...(hasDelegateCall(transactions) ? { onlyCalls: false } : {}),
+    };
+    const resolvedOptions = options ?? this.nonceOptions();
     if (resolvedOptions !== undefined) props.options = resolvedOptions;
     return sdk.createTransaction(props);
   }
@@ -282,76 +354,146 @@ export class SafeClient {
    *
    * Returns the Safe tx hash an owner must sign plus the `execTransaction`
    * calldata, so an integrating app can show the user exactly what is being
-   * authorised before a device is ever involved.
+   * authorised before any signer is ever involved.
    */
   async buildProposal(
     transactions: readonly SafeLeg[],
     options?: SafeTransactionOptions,
   ): Promise<SafeProposal> {
-    const sdk = await this.safe();
     const tx = await this.createTransaction(transactions, options);
+    return await this.proposalFrom(tx, transactions);
+  }
+
+  /** The proposal view of an already-built transaction. Shared by `buildProposal` and `proposeIntent`. */
+  private async proposalFrom(
+    tx: SafeTransaction,
+    legs: readonly SafeLeg[],
+  ): Promise<SafeProposal> {
+    const sdk = await this.safe();
     return {
       safeAddress: await this.address(),
       safeTxHash: await sdk.getTransactionHash(tx),
       calldata: await sdk.getEncodedTransaction(tx),
       nonce: tx.data.nonce,
-      legs: [...transactions],
+      legs: [...legs],
     };
   }
 
   /**
-   * The EIP-712 payload split into the two 32-byte hashes a Ledger signs.
+   * Build the full, signable intent for a batch of legs.
    *
-   * The struct hash comes from the SDK's `getTransactionHash` rather than
-   * being re-hashed here, so it is exactly what the Safe contract verifies.
+   * Composes the proposal, the EIP-712 payload and the versioned envelope in one
+   * call so the three cannot drift apart — a mismatch between what is displayed,
+   * what is hashed and what is signed is the failure mode this whole path exists
+   * to prevent.
+   *
+   * Pure with respect to keys: nothing is signed here.
    */
-  async eip712Digest(tx: SafeTransaction): Promise<SafeEip712Digest> {
+  async proposeIntent(
+    legs: readonly SafeLeg[],
+    context: ProposeIntentContext,
+  ): Promise<SigningIntent> {
+    const tx = await this.createTransaction(legs);
+    const proposal = await this.proposalFrom(tx, legs);
+    const typedData = await this.safeTypedData(tx);
+
+    return buildSigningIntent({
+      intentId: context.intentId,
+      requestId: context.requestId,
+      agentId: context.agentId,
+      createdAt: context.createdAt ?? new Date().toISOString(),
+      chain: `eip155:${this.chainId}`,
+      chainId: this.chainId,
+      account: proposal.safeAddress,
+      kind: context.kind ?? "safe-batch",
+      signing: {
+        scheme: "safe-typed-data",
+        safeAddress: proposal.safeAddress,
+        safeTxHash: proposal.safeTxHash,
+        safeNonce: proposal.nonce,
+        typedData,
+      },
+      display: context.display,
+      authorized: {
+        legs: [...proposal.legs],
+        calldata: proposal.calldata,
+        nonce: proposal.nonce,
+      },
+      ...(context.policy === undefined ? {} : { policy: context.policy }),
+      ...(context.provenance === undefined ? {} : { provenance: context.provenance }),
+    });
+  }
+
+  /**
+   * The complete Safe EIP-712 payload, in the shape the device signs.
+   *
+   * Derived from protocol-kit's own typed data rather than assembled here, so
+   * it is exactly what the Safe contract verifies — including protocol-kit's
+   * rule that `chainId` appears in the domain only from Safe 1.3.0 onward.
+   *
+   * Sent whole rather than as two hashes so the device can decode and display
+   * the intent instead of opaque bytes.
+   */
+  async safeTypedData(tx: SafeTransaction): Promise<Eip712TypedData> {
     const sdk = await this.safe();
-    const typedData = generateTypedData({
+    const generated = generateTypedData({
       safeAddress: await sdk.getAddress(),
       safeVersion: sdk.getContractVersion(),
       chainId: BigInt(this.chainId),
       data: tx.data,
     });
+
+    const types: Record<string, Array<{ name: string; type: string }>> = {};
+    for (const [name, fields] of Object.entries(generated.types)) {
+      types[name] = fields.map((field: { name: string; type: string }) => ({
+        name: field.name,
+        type: field.type,
+      }));
+    }
+
     return {
-      /**
-       * Bridge, not a conversion: protocol-kit declares `domain.chainId` as
-       * `string | number` and its `types` as a closed shape, while viem's
-       * `hashDomain` takes `number | bigint` and an open `TypedData`. At
-       * runtime the objects are exactly the EIP-712 payload viem hashes.
-       *
-       * Kept as the SDK's own output rather than mirroring the domain by hand
-       * because protocol-kit varies it by Safe version — `chainId` is present
-       * only from 1.3.0 — and getting that subtly wrong would produce
-       * signatures that fail on-device, where nothing here could catch it.
-       */
-      domainSeparator: hashDomain({
-        domain: typedData.domain,
-        types: typedData.types,
-      } as unknown as Parameters<typeof hashDomain>[0]),
-      messageHash: await sdk.getTransactionHash(tx),
+      domain: {
+        // The device takes a number, and every real chain id fits one easily.
+        ...(generated.domain.chainId !== undefined
+          ? { chainId: Number(generated.domain.chainId) }
+          : {}),
+        ...(generated.domain.verifyingContract !== undefined
+          ? { verifyingContract: generated.domain.verifyingContract }
+          : {}),
+      },
+      types,
+      primaryType: generated.primaryType,
+      message: generated.message,
     };
   }
 
   /**
-   * Sign a Safe transaction on the Ledger. The human approves on the device —
-   * this is the irreversible-action gate.
+   * Sign a Safe transaction with the configured owner signer.
    *
-   * @throws if the client is in dry mode, where there is no device.
+   * Whichever signer is in play, the human (or the custodian's policy) is the
+   * gate: this is the irreversible-action step and it is never automatic.
+   *
+   * @throws if the client is in dry mode, where there is no signer.
    */
-  async signWithLedger(tx: SafeTransaction): Promise<SignedSafeTransaction> {
-    if (this.opts.ledger === undefined) {
+  async signWithSigner(tx: SafeTransaction): Promise<SignedSafeTransaction> {
+    const signer = this.resolveSigner();
+    if (signer === undefined) {
       throw new Error(
         "SafeClient is in dry mode and has no device to sign with. " +
-          "Construct it with `ledger` to sign, or use `buildProposal` instead.",
+          "Construct it with `signer` (or `ledger`) to sign, or use `buildProposal` instead.",
       );
     }
-    const digest = await this.eip712Digest(tx);
-    const signature = await this.opts.ledger.signSafeDigest(
-      digest.domainSeparator,
-      digest.messageHash,
-    );
-    return { tx, signature, ...digest };
+    const typedData = await this.safeTypedData(tx);
+    const signature = await signer.signTypedData(typedData);
+    return { tx, signature, typedData };
+  }
+
+  /**
+   * Alias for {@link signWithSigner}, kept because it names the Safe context and
+   * existing callers use it.
+   */
+  async signWithLedger(tx: SafeTransaction): Promise<SignedSafeTransaction> {
+    return await this.signWithSigner(tx);
   }
 
   /**
@@ -390,8 +532,13 @@ export class SafeClient {
     };
   }
 
-  /** The configured nonce, when the caller supplied one. */
-  private defaultOptions(): SafeTransactionOptions | undefined {
+  /** The configured nonce, when the caller supplied one (a counterfactual Safe cannot read it). */
+  private nonceOptions(): SafeTransactionOptions | undefined {
     return this.opts.nonce !== undefined ? { nonce: this.opts.nonce } : undefined;
   }
+}
+
+/** Whether any leg is a DELEGATECALL (`operation: 1`). */
+function hasDelegateCall(legs: readonly SafeLeg[]): boolean {
+  return legs.some((leg) => (leg.operation ?? 0) === 1);
 }
