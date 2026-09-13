@@ -1,0 +1,279 @@
+{
+  "$schema": "internal://bridges-test-scenarios/v1",
+  "_readme": [
+    "Source of truth for the testnet bridge tests. Read by `scripts/testnet.ts`.",
+    "",
+    "WHY MOST VALUES ARE OMITTED: almost nothing here needs to be hardcoded.",
+    "  - CCTP's quote API takes only *domain ids*, never contract addresses.",
+    "  - LI.FI takes chain ids and token addresses, and resolves tokens itself",
+    "    via `getTokens(chainId)`.",
+    "  - Only LayerZero needs a contract address (the OApp being called), because",
+    "    the fee belongs to that OApp rather than to LayerZero globally.",
+    "So this file carries identifiers and endpoints, and the harness resolves",
+    "the rest. Hardcoded addresses would be values that silently rot.",
+    "",
+    "`wallet.name` is the human label shown in logs (the 'contact name'), so a",
+    "pending transfer can be discussed without quoting a hex string.",
+    "",
+    "`results` is WRITTEN BY THE HARNESS, not by hand. A run records the tx",
+    "hashes it produced so a re-run can resume polling a transfer already in",
+    "flight instead of sending a second one."
+  ],
+  "chains": {
+    "sepolia": {
+      "label": "Ethereum Sepolia",
+      "chainId": 11155111,
+      "cctpDomain": 0,
+      "lzEid": 40161,
+      "rpcEnv": "ETHEREUM_RPC_URL",
+      "bridgeChain": "EthereumSepolia"
+    },
+    "base-sepolia": {
+      "label": "Base Sepolia",
+      "chainId": 84532,
+      "cctpDomain": 6,
+      "lzEid": 40245,
+      "rpcEnv": "BASE_RPC_URL",
+      "bridgeChain": "BaseSepolia"
+    },
+    "polygon-amoy": {
+      "label": "Polygon Amoy",
+      "chainId": 80002,
+      "cctpDomain": 7,
+      "lzEid": 40267,
+      "rpcEnv": "POLYGON_RPC_URL",
+      "bridgeChain": "PolygonAmoy"
+    },
+    "polygon": {
+      "label": "Polygon PoS",
+      "network": "mainnet",
+      "chainId": 137,
+      "cctpDomain": 7,
+      "lzEid": 30109,
+      "rpcEnv": "POLYGON_RPC_URL",
+      "bridgeChain": "Polygon"
+    },
+    "base": {
+      "label": "Base",
+      "network": "mainnet",
+      "chainId": 8453,
+      "cctpDomain": 6,
+      "lzEid": 30184,
+      "rpcEnv": "BASE_RPC_URL",
+      "bridgeChain": "Base"
+    },
+    "ethereum": {
+      "label": "Ethereum",
+      "network": "mainnet",
+      "chainId": 1,
+      "cctpDomain": 0,
+      "lzEid": 30101,
+      "rpcEnv": "ETHEREUM_RPC_URL",
+      "bridgeChain": "Ethereum"
+    },
+    "arbitrum": {
+      "label": "Arbitrum One",
+      "network": "mainnet",
+      "chainId": 42161,
+      "cctpDomain": 3,
+      "lzEid": 30110,
+      "rpcEnv": "ARBITRUM_RPC_URL",
+      "bridgeChain": "Arbitrum"
+    },
+    "arc-testnet": {
+      "label": "Arc Testnet",
+      "network": "testnet",
+      "chainId": 0,
+      "cctpDomain": 26,
+      "lzEid": 0,
+      "rpcEnv": "ARC_RPC_URL",
+      "_note": "Gas token is USDC, not ETH — see feeTokenDecimals when quoting FROM Arc."
+    }
+  },
+  "wallets": {
+    "source": {
+      "name": "treasury",
+      "envKey": "TEST_SOURCE_PRIVATE_KEY",
+      "_note": "The funded EOA that sends. Needs testnet gas AND testnet USDC."
+    },
+    "destination": {
+      "name": "landing",
+      "envKey": "TEST_DESTINATION_PRIVATE_KEY",
+      "_note": "Where the bridge lands. May be the same key; a distinct one proves the destination is genuinely reachable."
+    }
+  },
+  "apis": {
+    "layerzeroScan": {
+      "testnet": "https://scan-testnet.layerzero-api.com/v1",
+      "_note": "Keyless. The fee itself comes from an on-chain quote, not from here."
+    },
+    "circleQuote": {
+      "sandbox": "https://iris-api-sandbox.circle.com",
+      "production": "https://iris-api.circle.com",
+      "_note": "Use sandbox for testnet domains. The published reference shows no auth header on the quote endpoint."
+    },
+    "lifi": {
+      "_note": "Keyed via LIFI_API_KEY. Base URL is the SDK's own default."
+    }
+  },
+  "amounts": {
+    "_note": "Small and identical across scenarios so the three fees are comparable. USDC has 6 decimals.",
+    "usdc": "1000000",
+    "usdcLabel": "1.00 USDC"
+  },
+  "scenarios": [
+    {
+      "id": "LZ-polygon-to-base",
+      "adapter": "layerzero",
+      "from": "polygon",
+      "to": "base",
+      "receiveGas": 200000,
+      "_expect": "Endpoint-form quote. No OApp needed."
+    },
+    {
+      "id": "ARC-cctp-sepolia-to-arc",
+      "adapter": "circle-cctp",
+      "from": "sepolia",
+      "to": "arc-testnet",
+      "speed": "FAST",
+      "_expect": "Chain A -> Arc (domain 26)."
+    },
+    {
+      "id": "MAINNET-lifi-bridge-polygon-to-base",
+      "adapter": "lifi",
+      "from": "polygon",
+      "to": "base",
+      "fromToken": "usdc-polygon",
+      "toToken": "usdc-base",
+      "amount": "1500000"
+    },
+    {
+      "id": "MAINNET-lifi-swap-polygon-usdc-to-weth",
+      "adapter": "lifi",
+      "from": "polygon",
+      "to": "polygon",
+      "fromToken": "usdc-polygon",
+      "toToken": "weth-polygon",
+      "amount": "1500000"
+    }
+  ],
+  "missingConfig": [
+    {
+      "for": "layerzero",
+      "value": "oappByChainId",
+      "why": "The LayerZero fee is read from the OApp being called, which is specific to the integration. No default exists.",
+      "youProvide": "An OApp (or OFT) address on Sepolia that exposes quote(uint32,bytes,bytes,bool)."
+    }
+  ],
+  "results": {
+    "cctp-sepolia-to-base": {
+      "at": "2026-09-12T12:23:14.212Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "lifi-sepolia-to-base": {
+      "at": "2026-09-12T12:23:18.604Z",
+      "ok": false,
+      "detail": "upstream_error"
+    },
+    "layerzero-sepolia-to-base": {
+      "at": "2026-09-12T12:23:18.604Z",
+      "ok": false,
+      "detail": "skipped"
+    },
+    "cctp-base-to-amoy": {
+      "at": "2026-09-12T12:23:19.059Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "MAINNET-cctp-polygon-to-base": {
+      "at": "2026-09-12T12:32:14.681Z",
+      "ok": false,
+      "detail": "upstream_error"
+    },
+    "MAINNET-lifi-polygon-to-base": {
+      "at": "2026-09-12T12:32:38.880Z",
+      "ok": false,
+      "detail": "upstream_error"
+    },
+    "MAINNET-layerzero-polygon-to-base": {
+      "at": "2026-09-12T12:32:18.525Z",
+      "ok": false,
+      "detail": "skipped"
+    },
+    "MAINNET-cctp-polygon-to-ethereum": {
+      "at": "2026-09-12T12:32:34.128Z",
+      "ok": false,
+      "detail": "upstream_error"
+    },
+    "MAINNET-cctp-polygon-to-arbitrum": {
+      "at": "2026-09-12T12:32:34.508Z",
+      "ok": false,
+      "detail": "upstream_error"
+    },
+    "MAINNET-cctp-ethereum-to-polygon": {
+      "at": "2026-09-12T12:39:46.811Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "MAINNET-cctp-base-to-polygon": {
+      "at": "2026-09-12T12:39:47.239Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "MAINNET-cctp-polygon-to-base-SLOW": {
+      "at": "2026-09-12T12:39:47.240Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "LIFI-bridge-polygon-to-base": {
+      "at": "2026-09-12T12:40:33.488Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "LIFI-swap-on-polygon-usdc-to-weth": {
+      "at": "2026-09-12T12:40:34.479Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "ARC-cctp-sepolia-to-arc": {
+      "at": "2026-09-12T13:24:15.160Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "ARC-cctp-basesep-to-arc": {
+      "at": "2026-09-12T12:48:24.939Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "ARC-cctp-arc-to-sepolia": {
+      "at": "2026-09-12T12:48:25.208Z",
+      "ok": false,
+      "detail": "upstream_error"
+    },
+    "LZ-polygon-to-base": {
+      "at": "2026-09-12T13:24:14.696Z",
+      "ok": true,
+      "detail": "quoted",
+      "guid": "0x015dab302f560ad56854fe794346cc5b4d30fb67901af9834465b1bad56068e6"
+    },
+    "MAINNET-lifi-bridge-polygon-to-base": {
+      "at": "2026-09-12T13:24:17.596Z",
+      "ok": true,
+      "detail": "quoted"
+    },
+    "MAINNET-lifi-swap-polygon-usdc-to-weth": {
+      "at": "2026-09-12T13:24:19.046Z",
+      "ok": true,
+      "detail": "quoted"
+    }
+  },
+  "tokens": {
+    "arc-usdc": "0x3600000000000000000000000000000000000000",
+    "sepolia-usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    "basesep-usdc": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "usdc-polygon": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+    "weth-polygon": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+    "usdc-base": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+  }
+}
