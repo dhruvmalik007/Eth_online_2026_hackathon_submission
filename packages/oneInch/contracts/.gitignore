@@ -1,0 +1,6 @@
+# Vendored Foundry dependencies. Pinned by contracts/lib.lock, fetched by
+# `pnpm contracts:install` — not committed, because they are upstream trees.
+lib/
+out/
+cache/
+broadcast/
