@@ -259,3 +259,9 @@ archive
 # Generated media stays out of history; heavy assets live in archive/ (ignored).
 *.mov
 *.mp4
+# Foundry build output and dependency cache (packages/*/contracts).
+# `lib/` is already covered globally above; these are the compiler outputs that
+# must never enter history.
+packages/*/contracts/out/
+packages/*/contracts/cache/
+packages/*/contracts/broadcast/
