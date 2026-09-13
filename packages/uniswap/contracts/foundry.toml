@@ -1,0 +1,15 @@
+# The Uniswap package's own Foundry project.
+#
+# Deliberately separate from `packages/oneInch/contracts`. That project vendors Aqua and SwapVM to
+# compile our SwapVM instruction and router; this one needs nothing but forge-std, because every
+# v4 type it touches — `PoolKey`, `StateView` — is a stable ABI rather than a dependency. Sharing one
+# Foundry project would mean a Uniswap test that cannot run until a 1inch toolchain is installed.
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+solc_version = "0.8.30"
+optimizer = true
+optimizer_runs = 700
+libs = ["lib"]
+fs_permissions = [{ access = "read", path = "./config" }]
