@@ -4,12 +4,15 @@ import { varsForService } from "./catalog.js";
 import { renderExample } from "./example.js";
 import { buildManifest } from "./manifest.js";
 import { formatReport, resolveEnvironment, validateEnv, type EnvSource } from "./load.js";
+import { SYNC_TARGETS, renderSyncScript, syncPlan, type SyncTarget } from "./sync.js";
 import { ENVIRONMENTS, SERVICES, type Environment, type Service } from "./types.js";
 
-const USAGE = `ems-env — validate and document the Agentic EMS environment
+const USAGE = `ems-env — validate, document and inject the Agentic EMS environment
 
   ems-env check   --env <local|staging|production> [--service <name>] [--file .env] [--strict]
   ems-env example [--env <local|staging|production>] [--service <name>]
+  ems-env sync    --target <dotenv|vercel|gcloud|github> --env <name>
+                  [--file .env.staging] [--service <name>] [--secrets-only] [--dry-run]
   ems-env manifest
   ems-env list
 
@@ -84,9 +87,37 @@ function run(argv: readonly string[]): number {
 
   if (command === "list") {
     for (const service of SERVICES) {
-      const specs = varsForService(service);
-      process.stdout.write(`${service.padEnd(16)} ${specs.length} variables\n`);
+      process.stdout.write(`${service.padEnd(16)} ${varsForService(service).length} variables\n`);
     }
+    return 0;
+  }
+
+  if (command === "sync") {
+    const target = flags.get("target");
+    if (target === undefined || !(SYNC_TARGETS as readonly string[]).includes(target)) {
+      process.stderr.write(`--target must be one of ${SYNC_TARGETS.join(", ")}\n`);
+      return 2;
+    }
+    const environment = asEnvironment(flags.get("env")) ?? "local";
+    const secretsOnly = flags.get("secrets-only") === "true";
+    const service = flags.get("service");
+
+    if (flags.get("dry-run") === "true") {
+      const plan = syncPlan({ ...(service === undefined ? {} : { service }), secretsOnly });
+      process.stdout.write(plan.join("\n") + "\n");
+      return 0;
+    }
+
+    const project = flags.get("project");
+    process.stdout.write(
+      renderSyncScript({
+        target: target as SyncTarget,
+        environment,
+        file: flags.get("file") ?? `.env.${environment}`,
+        secretsOnly,
+        ...(project === undefined ? {} : { project }),
+      }),
+    );
     return 0;
   }
 
@@ -97,6 +128,7 @@ function run(argv: readonly string[]): number {
     const environment = asEnvironment(flags.get("env")) ?? resolveEnvironment(source);
     const requested = asService(flags.get("service"));
     const services: readonly Service[] = requested === undefined ? SERVICES : [requested];
+
     let failed = false;
     for (const service of services) {
       const report = validateEnv({
@@ -105,12 +137,14 @@ function run(argv: readonly string[]): number {
         source,
         reportUnknown: file !== undefined && flags.get("strict") === "true",
       });
-      const required = report.issues.filter((issue) => issue.kind !== "unknown").length;
-      if (!report.ok && required > 0) {
+      const blocking = report.issues.filter((issue) => issue.kind !== "unknown").length;
+      if (!report.ok && blocking > 0) {
         process.stderr.write(`${formatReport(report)}\n`);
         failed = true;
       } else {
-        process.stdout.write(`ok  ${service} (${environment}) — ${Object.keys(report.values).length} resolved\n`);
+        process.stdout.write(
+          `ok  ${service} (${environment}) — ${Object.keys(report.values).length} resolved\n`,
+        );
       }
     }
     return failed ? 1 : 0;

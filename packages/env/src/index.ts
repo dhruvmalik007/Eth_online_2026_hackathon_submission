@@ -14,6 +14,16 @@ export {
   type EnvSource,
   type ValidateOptions,
 } from "./load.js";
+export {
+  CLIENT_PREFIX,
+  createClientEnv,
+  createEnv,
+  exposureOf,
+  zodSchemaFor,
+  type CreateEnvOptions,
+  type SchemaOptions,
+} from "./schema.js";
+export { SECRET_NAMES, SYNC_TARGETS, renderSyncScript, syncPlan, type SyncOptions, type SyncTarget } from "./sync.js";
 export { buildManifest, type EnvManifest, type EnvManifestEntry } from "./manifest.js";
 export { isSecretName, redactRecord } from "./redact.js";
 export * from "./types.js";

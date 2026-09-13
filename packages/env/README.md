@@ -40,3 +40,55 @@ the catalog stays the single description. `.env.example` is generated, so never 
 - A required variable is required to be *explicit*: a default does not satisfy it, because a production
   deployment that silently fell back to a development default is the failure this package exists to
   prevent.
+
+## Architecture
+
+```
+catalog.ts   the specification — one entry per variable: services, required-in, secret, format
+   │
+   ├─ schema.ts   zod schemas derived from the catalog  →  createEnv() / createClientEnv()
+   ├─ load.ts     the same rules, reported as a list of issues → the CLI's `check`
+   ├─ example.ts  .env.example           (generated, asserted in sync by a test)
+   ├─ manifest.ts env.manifest.json      (the CI contract)
+   └─ sync.ts     per-platform push scripts (Vercel · GCP Secret Manager · GitHub · dotenv)
+```
+
+The design follows **`@t3-oss/env-core`** where it is right — a `createEnv` that returns a validated,
+typed object, and a hard client/server boundary — but the field list comes from the **catalog**, not
+from a schema hand-written in each app. That is the one difference that matters here: t3-env has no
+catalog, so names, secret flags and per-environment requirements would live only in application
+source, and the docs, the CI manifest and the platform sync would have nothing to read from. Here
+zod is the engine and the catalog is the specification, so a variable is described once and every
+consumer is generated from that description.
+
+Two t3-env rules are adopted unchanged:
+
+1. **A client variable is identified by its framework prefix** (`NEXT_PUBLIC_`), never by a list
+   someone maintains by hand.
+2. **A secret may not carry a client prefix.** `createClientEnv` throws if the catalog ever marks a
+   client variable secret — the failure it prevents is a credential in a browser bundle, which code
+   review does not reliably catch.
+
+### Injection
+
+`createEnv({ service })` is the call a service makes at boot: "give me what I need, validated" —
+defaults applied, secrets typed as available, every problem reported at once. Because the catalog
+knows which names a service needs *per environment*, the same call drives filling them in:
+
+```bash
+pnpm env check --env staging --service execution      # what is missing or malformed
+pnpm env sync  --target vercel --env staging --file .env.staging --dry-run   # names only
+pnpm env sync  --target gcloud --env production --project agentic-ems --file .env.production
+```
+
+`sync` emits a script that **reads the values file and pipes each value straight into the platform
+CLI**. It never prints a value — a sync tool that echoes secrets writes them into shell history, CI
+logs and scrollback, and that convenience is not worth the cost. `gcloud` updates a version when the
+secret exists (Secret Manager secrets are immutable) and creates it when it does not.
+
+### Adding a variable
+
+1. Add it to `ENV_CATALOG`.
+2. Regenerate: `pnpm env example > .env.example` (a test fails if it is out of date).
+3. Read it through `createEnv`, never as a bare `process.env` lookup — `test/drift.test.ts` fails the
+   build if you do.
