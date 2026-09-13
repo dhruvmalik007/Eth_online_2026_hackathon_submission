@@ -10,23 +10,42 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
-    }
+    },
+    "./ledger": {
+      "types": "./dist/ledger.d.ts",
+      "import": "./dist/ledger.js",
+      "default": "./dist/ledger.js"
+    },
+    "./intent": {
+      "types": "./dist/intent/index.d.ts",
+      "import": "./dist/intent/index.js",
+      "default": "./dist/intent/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.scripts.json --noEmit",
     "test": "vitest run",
     "clean": "rm -rf dist",
     "cli": "tsx src/cli.ts",
     "smoke:dry": "tsx scripts/smoke-dry.ts",
+    "e2e:local-signer": "tsx scripts/e2e-local-signer.ts",
+    "e2e:privy": "tsx scripts/e2e-privy.ts",
+    "privy:resolve": "tsx scripts/privy-resolve.ts",
+    "privy:create-wallet": "tsx scripts/privy-create-wallet.ts",
     "demo": "tsx src/cli.ts demo"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-eth": "^6.42.0",
-    "@ledgerhq/hw-transport-node-hid-singleton": "^6.35.0",
+    "@ledgerhq/context-module": "^2.5.0",
+    "@ledgerhq/device-management-kit": "^1.9.0",
+    "@ledgerhq/device-signer-kit-ethereum": "^1.18.0",
+    "@ledgerhq/device-transport-kit-node-hid": "^1.0.1",
+    "@privy-io/node": "^0.34.0",
     "@safe-global/api-kit": "^2.5.11",
     "@safe-global/protocol-kit": "^6.1.2",
     "dotenv": "^17.4.2",
+    "rxjs": "^7.8.2",
     "viem": "^2.56.3",
     "zod": "^4.5.4"
   },
