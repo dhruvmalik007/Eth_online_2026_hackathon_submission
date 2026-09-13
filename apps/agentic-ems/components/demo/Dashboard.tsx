@@ -24,14 +24,24 @@ import { DashboardExecutions } from "./DashboardExecutions";
 
 const fmtB = (v: number) => `$${(v / 1e9).toFixed(2)}B`;
 
-// Static yield curve (2s10s inversion-style, demo props from Metric Lock vocabulary)
+// A prop, and labelled as one.
+//
+// These numbers are not a yield curve anyone observed: they are a fixed shape chosen to look like
+// one. The caption used to say "sparklines: llama yields", which asserted a live source this data
+// never came from — and a prop wearing a real feed's name is worse than an unlabelled prop, because
+// the whole point of naming a source is that a reader can go and check it.
+//
+// See the `note` on the widget: it states what this is.
 const YIELD_CURVE = [1, 2, 3, 5, 7, 10, 20, 30].map((t, i) => ({
   tenor: `${t}Y`,
   onchain: [4.6, 4.4, 4.35, 4.3, 4.28, 4.32, 4.4, 4.5][i],
   tradfi: [4.62, 4.4, 4.3, 4.27, 4.3, 4.38, 4.52, 4.61][i],
 }));
 
-// Black-Scholes long-call payoff + premium breakeven (premium 0.4355 per Metric Lock)
+// A Black-Scholes-shaped long-call payoff, with the premium held fixed for the demo.
+//
+// The shape is the real formula; the input is not a live quote. Labelled as such below rather than
+// given a source.
 const PAYOFF = Array.from({ length: 61 }, (_, i) => {
   const s = 80 + i * 2;
   return { spot: s, pnl: Math.max(0, s - 110) * 100, premium: 0.4355 * 1000 };
@@ -50,6 +60,22 @@ export function Dashboard({
 }) {
   const risk = "balanced" as RiskProfile;
   const alloc = React.useMemo(() => allocationsFor(risk), [risk]);
+
+  /**
+   * Concentration, computed from the allocation the donut actually renders.
+   *
+   * The caption used to assert a fixed "HII 0.18" beside a chart whose data comes from the risk
+   * profile — a constant printed next to a variable, which is the shape of a number that stops being
+   * true the moment anyone changes the input, and nobody would notice. It is cheap to derive
+   * (`Σ share²`) and deriving it means the panel cannot disagree with itself.
+   *
+   * Shown as `HHI` — the index's actual name — not the transposed `HII`.
+   */
+  const hhi = React.useMemo(() => {
+    const total = alloc.reduce((sum, entry) => sum + entry.pct, 0);
+    if (total <= 0) return null;
+    return alloc.reduce((sum, entry) => sum + (entry.pct / total) ** 2, 0);
+  }, [alloc]);
   const [selected, setSelected] = React.useState(STRATEGIES[0].id);
 
   const weightedApy = alloc.reduce((sum, { strategy, pct }) => sum + (strategy.apy * pct) / 100, 0);
@@ -117,7 +143,7 @@ export function Dashboard({
 
         {/* Allocation donut */}
         <section className="border border-edge-2 bg-panel lg:col-span-4">
-          <WidgetHeader title="Allocation by strategy" note="HII 0.18 · HHI pass" />
+          <WidgetHeader title="Allocation by strategy" note={hhi === null ? "concentration unavailable" : `HHI ${hhi.toFixed(3)} · ${hhi < 0.25 ? "diversified" : "concentrated"}`} />
           <div className="h-56 p-2">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -208,7 +234,7 @@ export function Dashboard({
 
         {/* Yield curve */}
         <section className="border border-edge-2 bg-panel lg:col-span-6">
-          <WidgetHeader title="Yield curve · on-chain vs TradFi" note="sparklines: llama yields" />
+          <WidgetHeader title="Yield curve · on-chain vs TradFi" note="illustrative shape · not a live feed" />
           <div className="h-52 p-2">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={YIELD_CURVE} margin={{ top: 8, right: 12, bottom: 0, left: -14 }}>
@@ -225,7 +251,7 @@ export function Dashboard({
 
         {/* Option risk curve */}
         <section className="border border-edge-2 bg-panel lg:col-span-6">
-          <WidgetHeader title="Option risk curve · hedged perps overlay" note="BSM premium 0.4355" />
+          <WidgetHeader title="Option risk curve · hedged perps overlay" note="illustrative payoff · premium fixed" />
           <div className="h-52 p-2">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={PAYOFF} margin={{ top: 8, right: 12, bottom: 0, left: -14 }}>
