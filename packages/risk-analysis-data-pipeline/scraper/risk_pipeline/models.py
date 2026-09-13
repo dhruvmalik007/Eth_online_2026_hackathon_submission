@@ -31,6 +31,9 @@ __all__ = [
     "ExitWindowDimension",
     "GovernanceScores",
     "GovernanceSource",
+    "IncidentFeed",
+    "IncidentSeverity",
+    "IncidentSubjectKind",
     "Manifest",
     "ManifestSource",
     "ManifestTemporal",
@@ -52,6 +55,7 @@ __all__ = [
     "ProposerFailureDimension",
     "ProtocolGovernanceProfile",
     "Provenance",
+    "SecurityIncident",
     "SequencerFailureDimension",
     "SourceState",
     "StateValidationDimension",
@@ -450,6 +454,83 @@ class MarketMakerSummary(_Contract):
     provenance: Provenance
 
 
+# ── Security incidents (DefiLlama hacks) ─────────────────────────────────────
+
+
+class IncidentSeverity(StrEnum):
+    """How damaging an incident was, on the four-level scale the table allows."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class IncidentSubjectKind(StrEnum):
+    """What kind of thing an incident happened to.
+
+    Mirrors the ``security_incidents_subject_kind_check`` constraint, so an
+    invalid value fails when the model is constructed rather than at the
+    database boundary.
+    """
+
+    CHAIN = "chain"
+    PROTOCOL = "protocol"
+    MARKET_MAKER = "market_maker"
+
+
+class SecurityIncident(_Contract):
+    """One exploit, hack or security failure attributed to a roster subject.
+
+    Mirrors the ``security_incidents`` table in ``@ethonline2026/timeseries``,
+    which already exists alongside its zod row schema. **No migration is needed
+    to store these** — only a producer, which is what this model enables.
+
+    ``amount_usd`` is ``None``, never ``0``, when the feed states no figure: a
+    fabricated zero would read as "this incident cost nothing", which is a
+    different and false claim.
+
+    ``severity`` is **derived, not sourced**. DeFiLlama publishes no severity, so
+    it is computed from the disclosed amount against an explicit, documented
+    threshold (``classify.severity_for_amount``). ``raw`` retains the upstream
+    record verbatim, so the derivation can always be audited against what the
+    feed actually said — the same retained-raw rule every other classifier here
+    follows.
+
+    ``occurred_at`` is an ISO-8601 string because JSON has no date type. The
+    timeseries row schema types it ``z.date()``; that is a DB-row contract, and
+    the conversion belongs at the boundary, not in the wire format.
+    """
+
+    occurred_at: str
+    incident_id: str
+    subject: str
+    subject_kind: IncidentSubjectKind
+    incident_kind: str
+    severity: IncidentSeverity
+    amount_usd: float | None = None
+    summary: str
+    source_url: str | None = None
+    raw: dict[str, object]
+
+
+class IncidentFeed(_Contract):
+    """Every incident attributed to one subject.
+
+    Published to ``risk/incidents/{subject}.json`` — one snapshot per subject
+    rather than per incident, mirroring the chain and protocol snapshots. The
+    subject is the unit a risk reader asks about, and a file per incident would
+    scatter hundreds of single-record documents through the store with no way to
+    fetch "this protocol's incident history" in one read.
+    """
+
+    schema_version: str
+    subject: str
+    subject_kind: IncidentSubjectKind
+    incidents: list[SecurityIncident]
+    provenance: Provenance
+
+
 # ── Manifest ─────────────────────────────────────────────────────────────────
 
 
@@ -470,6 +551,11 @@ class ManifestTemporal(_Contract):
     chain_risk_history: int = Field(ge=0)
     protocol_governance_history: int = Field(ge=0)
     market_maker_metrics: int = Field(ge=0)
+    # Added with the incident collector. The table has existed since v0.1.0 with
+    # no producer, so its count was previously unrepresentable in the manifest.
+    # Defaulted to 0 rather than required so this lands as an additive change: a
+    # sweep that selects no incident source legitimately writes none.
+    security_incidents: int = Field(default=0, ge=0)
     embeddings: int = Field(ge=0)
 
 
