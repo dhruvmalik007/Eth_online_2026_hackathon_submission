@@ -60,3 +60,22 @@ def market_makers_html(fixtures_dir: Path) -> str:
         The captured page body.
     """
     return (fixtures_dir / "defillama_market_makers.txt").read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="session")
+def defillama_hacks_json(fixtures_dir: Path) -> str:
+    """The DeFiLlama security-incident feed, trimmed to the cases that matter.
+
+    The live feed is 345 KB of 1,268 records, almost all concerning projects this
+    pipeline does not track. This fixture keeps the records that exercise the
+    parser: every incident attributable to a roster subject, plus the five
+    look-alike names that must *not* be attributed, plus an incident whose amount
+    is zero. Trimmed so the suite stays fast and the traps stay visible.
+
+    Args:
+        fixtures_dir: The fixtures directory.
+
+    Returns:
+        The captured JSON body.
+    """
+    return (fixtures_dir / "defillama_hacks.json").read_text(encoding="utf-8")

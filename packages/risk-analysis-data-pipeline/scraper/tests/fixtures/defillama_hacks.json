@@ -1,0 +1,417 @@
+[
+ {
+  "date": 1663459200,
+  "name": "GMX V1 Perps",
+  "classification": "Market Manipulation",
+  "technique": "Stale Price Arbitrage",
+  "amount": 565000,
+  "chain": [
+   "Arbitrum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "337",
+  "parentProtocolId": "parent#gmx",
+  "language": "Solidity"
+ },
+ {
+  "date": 1611705600,
+  "name": "SushiSwap",
+  "classification": "Protocol Logic",
+  "technique": "Swap Logic Flaw",
+  "amount": 103842,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "119",
+  "parentProtocolId": "parent#sushi",
+  "language": "Solidity"
+ },
+ {
+  "date": 1721692800,
+  "name": "dYdX V3",
+  "classification": "Frontend & Infrastructure",
+  "technique": "DNS Hijack",
+  "amount": 31000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "144",
+  "parentProtocolId": "parent#dydx",
+  "language": null
+ },
+ {
+  "date": 1699315200,
+  "name": "Curve Finance MEV Bot",
+  "classification": "Access Control",
+  "technique": "Improper Access Control",
+  "amount": 2000000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": "Solidity"
+ },
+ {
+  "date": 1660003200,
+  "name": "Curve DEX",
+  "classification": "Frontend & Infrastructure",
+  "technique": "DNS Hijack",
+  "amount": 575000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": 575000,
+  "defillamaId": "3",
+  "parentProtocolId": "parent#curve-finance",
+  "language": null
+ },
+ {
+  "date": 1772409600,
+  "name": "Curve LlamaLend",
+  "classification": "Token & Share Accounting",
+  "technique": "Donation Attack",
+  "amount": 240000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "4321",
+  "parentProtocolId": "parent#curve-finance",
+  "language": "Solidity"
+ },
+ {
+  "date": 1752019200,
+  "name": "GMX V1 Perps",
+  "classification": "Reentrancy",
+  "technique": "Reentrancy",
+  "amount": 42000000,
+  "chain": [
+   "Arbitrum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": 40000000,
+  "defillamaId": "337",
+  "parentProtocolId": "parent#gmx",
+  "language": "Solidity"
+ },
+ {
+  "date": 1657497600,
+  "name": "Uniswap (Phishing Attack)",
+  "classification": "Social Engineering",
+  "technique": "Phishing",
+  "amount": 8000000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": null
+ },
+ {
+  "date": 1632873600,
+  "name": "Compound V2",
+  "classification": "Token & Share Accounting",
+  "technique": "Arithmetic Error",
+  "amount": 147000000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "114",
+  "parentProtocolId": "parent#compound-finance",
+  "language": "Solidity"
+ },
+ {
+  "date": 1686787200,
+  "name": "Hyperliquid",
+  "classification": "Market Manipulation",
+  "technique": "Risk Parameter Abuse",
+  "amount": 37000,
+  "chain": [
+   "Arbitrum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "2862",
+  "language": null
+ },
+ {
+  "date": 1615766400,
+  "name": "PancakeSwap / Cream Finance",
+  "classification": "Frontend & Infrastructure",
+  "technique": "DNS Hijack",
+  "amount": null,
+  "chain": [
+   "BSC",
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": null
+ },
+ {
+  "date": 1618185600,
+  "name": "PancakeSwap",
+  "classification": "Access Control",
+  "technique": "Improper Access Control",
+  "amount": 1800000,
+  "chain": [
+   "BSC"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": "Solidity"
+ },
+ {
+  "date": 1700265600,
+  "name": "dYdX V3",
+  "classification": "Market Manipulation",
+  "technique": "Risk Parameter Abuse",
+  "amount": 9000000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "144",
+  "parentProtocolId": "parent#dydx",
+  "language": null
+ },
+ {
+  "date": 1681084800,
+  "name": "SushiSwap",
+  "classification": "Input Validation",
+  "technique": "Missing Input Validation",
+  "amount": 3300000,
+  "chain": [
+   "Ethereum",
+   "Arbitrum",
+   "Optimism",
+   "BSC"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": 3300000,
+  "defillamaId": null,
+  "language": "Solidity"
+ },
+ {
+  "date": 1724803200,
+  "name": "Aave",
+  "classification": "Access Control",
+  "technique": "Arbitrary External Call",
+  "amount": 56000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "1",
+  "language": "Solidity"
+ },
+ {
+  "date": 1773273600,
+  "name": "Aave V3",
+  "classification": "Oracle Manipulation",
+  "technique": "Oracle Misconfiguration",
+  "amount": 862000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": 862000,
+  "defillamaId": "1599",
+  "parentProtocolId": "parent#aave",
+  "language": "Solidity"
+ },
+ {
+  "date": 1587168000,
+  "name": "Uniswap V1",
+  "classification": "Reentrancy",
+  "technique": "Reentrancy",
+  "amount": 220000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "2196",
+  "parentProtocolId": "parent#uniswap",
+  "language": "Solidity"
+ },
+ {
+  "date": 1690675200,
+  "name": "Curve DEX",
+  "classification": "Reentrancy",
+  "technique": "Vyper Compiler Bug",
+  "amount": 61700000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "3",
+  "parentProtocolId": "parent#curve-finance",
+  "language": "Vyper"
+ },
+ {
+  "date": 1606694400,
+  "name": "SushiSwap",
+  "classification": "Access Control",
+  "technique": "Improper Access Control",
+  "amount": 15000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "119",
+  "parentProtocolId": "parent#sushi",
+  "language": "Solidity"
+ },
+ {
+  "date": 1606867200,
+  "name": "Compounder Finance",
+  "classification": "Rugpull",
+  "technique": "Admin Drain",
+  "amount": 12464316,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": "Solidity"
+ },
+ {
+  "date": 1711065600,
+  "name": "Super Sushi Samurai",
+  "classification": "Token & Share Accounting",
+  "technique": "Infinite Mint",
+  "amount": 4800000,
+  "chain": [
+   "Blast"
+  ],
+  "bridgeHack": false,
+  "targetType": "Gaming",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": "Solidity"
+ },
+ {
+  "date": 1728864000,
+  "name": "LeadBlock's Morpho Blue Market",
+  "classification": "Oracle Manipulation",
+  "technique": "Oracle Misconfiguration",
+  "amount": 250000,
+  "chain": [
+   "Ethereum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": "Solidity"
+ },
+ {
+  "date": 1785974400,
+  "name": "Hyperliquid Malaysia",
+  "classification": "Key Compromise",
+  "technique": "Private Key Compromised",
+  "amount": null,
+  "chain": [
+   "Solana"
+  ],
+  "bridgeHack": false,
+  "targetType": "Wallet",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": null,
+  "language": "Rust"
+ },
+ {
+  "date": 1769904000,
+  "name": "CrossCurve",
+  "classification": "Bridge & Cross-Chain",
+  "technique": "Cross-Chain Message Spoofing",
+  "amount": 3000000,
+  "chain": null,
+  "bridgeHack": true,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "5146",
+  "language": null
+ },
+ {
+  "date": 1663459200,
+  "name": "GMX V1 Perps",
+  "classification": "Market Manipulation",
+  "technique": "Stale Price Arbitrage",
+  "amount": 0,
+  "chain": [
+   "Arbitrum"
+  ],
+  "bridgeHack": false,
+  "targetType": "DeFi Protocol",
+  "source": "",
+  "returnedFunds": null,
+  "defillamaId": "337",
+  "parentProtocolId": "parent#gmx",
+  "language": "Solidity"
+ }
+]
