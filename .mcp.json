@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "subgraph": {
+      "transport": "stdio",
+      "enabled": true,
+      "command": "bash",
+      "args": [
+        "the-graph/mcp-subgraph-loader.sh"
+      ],
+      "env": {
+        "AUTH_HEADER": "Bearer ${GATEWAY_API_KEY}"
+      }
+    },
+    "privy-docs": {
+      "transport": "http",
+      "enabled": true,
+      "url": "https://docs.privy.io/mcp"
+    },
+    "circle": {
+      "transport": "http",
+      "enabled": true,
+      "url": "https://api.circle.com/v1/codegen/mcp"
+    }
+  }
+}
