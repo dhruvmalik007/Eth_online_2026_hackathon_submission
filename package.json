@@ -16,7 +16,11 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "dev": "turbo run dev",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "env:check": "pnpm --filter @ethonline2026/env exec node dist/cli.js check --env local",
+    "env:check:staging": "pnpm --filter @ethonline2026/env exec node dist/cli.js check --env staging --strict --file .env.staging",
+    "env:example": "pnpm --filter @ethonline2026/env exec node dist/cli.js example",
+    "env:manifest": "pnpm --filter @ethonline2026/env exec node dist/cli.js manifest"
   },
   "devDependencies": {
     "turbo": "^2.3.0"
