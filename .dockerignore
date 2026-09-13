@@ -1,0 +1,46 @@
+.git
+.gitignore
+**/node_modules
+**/dist
+**/.turbo
+**/.next
+**/coverage
+**/.venv
+**/__pycache__
+**/.DS_Store
+*.log
+.vercel
+.archive
+# ANCHORED with a leading slash. An unanchored `data` matches ANY directory named
+# `data` at any depth, including `packages/ux-workflow/src/data/`, which is
+# TypeScript source. Same reason for the others below.
+/archive
+/data
+/docs
+/packages/reactor-video
+/--full-page
+/impeccable-context
+
+# ---------------------------------------------------------------------------
+# SECRETS — must never enter an image.
+#
+# The Dockerfile copies `packages/` wholesale (the pnpm workspace needs every
+# manifest), and this repo has REAL credentials committed in `packages/*/.env`
+# files. Without these rules they would be baked into an image pushed to
+# Artifact Registry.
+#
+# Verified after every build with:
+#   docker run --rm <image> find / -name '.env*'   # must print nothing
+# ---------------------------------------------------------------------------
+.env
+.env.*
+**/.env
+**/.env.*
+**/.env.local
+**/.env.production.local
+**/.env.preview.local
+.custody
+**/custody-audit.jsonl
+*.pem
+*.key
+*.p8
