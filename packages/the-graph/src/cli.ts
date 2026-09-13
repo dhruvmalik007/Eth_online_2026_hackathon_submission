@@ -320,7 +320,7 @@ async function main(): Promise<void> {
       return cmdTestData(args);
     default:
       console.log(
-        'graph-fno — commands: health | query <file> | extract-fno [--protocol 0x..] [--pool 0x..] [--out f.json] | deltas --since-block N | dry-run --network sepolia | wallet-status | list-protocols [--category lending|dex|prediction|perpetual] | test-data --category <cat>',
+        'graph-fno — commands: health | query <file> | extract-fno [--protocol 0x..] [--pool 0x..] [--out f.json] | deltas --since-block N | dry-run --network sepolia | wallet-status | list-protocols [--category lending|dex|perpetual|prediction|liquid-staking] | test-data --category <cat>',
       );
   }
 }

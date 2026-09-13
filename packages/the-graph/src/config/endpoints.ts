@@ -1,4 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
+import { findMessariDeployment, messariRegistry } from '../registry/messariRegistry.js';
 import type { Env, TestnetChain } from './env.js';
 
 /**
@@ -7,8 +8,29 @@ import type { Env, TestnetChain } from './env.js';
  *  studio   — your own testnet subgraphs on Subgraph Studio (free tier, 3k q/day dev URL)
  *  network  — decentralized-network curated deployments via gateway.thegraph.com (needs GATEWAY_API_KEY)
  *
- * Supports multi-category DeFi data: Lending, Perpetuals, DEX, Prediction Markets
+ * Supports multi-category DeFi data: Lending, Perpetuals, DEX, Liquid Staking,
+ * Prediction Markets.
  */
+
+/**
+ * The categories a fixed-income agent reads data from.
+ *
+ * Defined here, in the lower layer, so `EndpointRef` and the registry agree on one
+ * union rather than two that can drift. Five categories: four are backed by Messari's
+ * standardized subgraphs (see `messariRegistry`), and prediction markets are not a
+ * Messari schema, so they come from Polymarket's own deployment.
+ *
+ * `liquid-staking` is the fifth and the reason this list grew: staking yield is a
+ * fixed-income leg the mandate allocates to, and it was previously unrepresentable —
+ * a protocol like Lido could not be named as belonging to any category this package
+ * knew about.
+ */
+export type ProtocolCategory =
+  | 'lending'
+  | 'perpetual'
+  | 'dex'
+  | 'prediction'
+  | 'liquid-staking';
 
 export const STUDIO_BASE = 'https://api.studio.thegraph.com/query';
 
@@ -41,7 +63,7 @@ export interface EndpointRef {
   readonly url: string;
   readonly tier: 'studio' | 'network';
   readonly requiresAuth: boolean;
-  readonly category: 'lending' | 'perpetual' | 'dex' | 'prediction';
+  readonly category: ProtocolCategory;
   readonly protocol: string;
   readonly network: string;
 }
@@ -65,6 +87,21 @@ export function studioEndpoint(env: Env, chain: TestnetChain): string {
       throw new Error(`No Studio endpoint registered for ${chain} yet. Add it to src/config/env.ts + .env.`);
   }
 }
+
+/**
+ * Liquid staking, curated to the protocols the mandate actually allocates to.
+ *
+ * Sourced from the Messari registry rather than transcribed, so a rotation of the
+ * upstream deployment is picked up by regenerating rather than by editing a constant.
+ *
+ * The registry carries 25 liquid-staking deployments; only these two are wired here.
+ * `healthReport()` probes every curated ref, so curating the set keeps a status check
+ * bounded. The rest stay reachable through `SubgraphRegistry.clientFor`.
+ */
+const CURATED_LIQUID_STAKING: readonly { readonly protocol: string; readonly network: string }[] = [
+  { protocol: 'lido', network: 'ethereum' },
+  { protocol: 'rocket-pool', network: 'ethereum' },
+];
 
 /**
  * Resolve all configured endpoints from environment.
@@ -149,6 +186,23 @@ export function resolveEndpoints(env: Env): EndpointRef[] {
       protocol: 'polymarket',
       network: 'polygon',
     });
+
+    // --- Liquid Staking ---
+    for (const { protocol, network } of CURATED_LIQUID_STAKING) {
+      const deployment = findMessariDeployment(protocol, network);
+      // Skip rather than push a ref with an empty URL: a deployment missing from the
+      // registry is a regeneration problem, and a broken ref would look like an outage.
+      if (deployment === null) continue;
+      refs.push({
+        name: `lsd:${deployment.protocol}:${deployment.network}`,
+        url: networkEndpoint(deployment.queryId),
+        tier: 'network',
+        requiresAuth: true,
+        category: 'liquid-staking',
+        protocol: deployment.protocol,
+        network: deployment.network,
+      });
+    }
   }
 
   return refs;
@@ -166,6 +220,30 @@ export function getEndpointsByCategory(refs: EndpointRef[], category: EndpointRe
  */
 export function getEndpointsByProtocol(refs: EndpointRef[], protocol: string): EndpointRef[] {
   return refs.filter((r) => r.protocol === protocol);
+}
+
+/**
+ * Messari's standardized deployments, projected into endpoint refs.
+ *
+ * Deliberately **not** merged into `resolveEndpoints`. That list feeds
+ * `healthReport()`, which probes every ref in turn — folding 197 deployments into it
+ * would turn a status check into 197 network calls and a two-minute wait. Messari
+ * coverage is resolved on demand instead, by name, via
+ * `SubgraphRegistry.clientFor(...)`.
+ *
+ * Returns empty without `GATEWAY_API_KEY`, because every one of these requires auth.
+ */
+export function resolveMessariEndpoints(env: Env): EndpointRef[] {
+  if (!env.GATEWAY_API_KEY) return [];
+  return messariRegistry.deployments.map((deployment) => ({
+    name: `messari:${deployment.protocol}:${deployment.network}`,
+    url: networkEndpoint(deployment.queryId),
+    tier: 'network' as const,
+    requiresAuth: true,
+    category: deployment.category,
+    protocol: deployment.protocol,
+    network: deployment.network,
+  }));
 }
 
 export function makeClient(endpoint: EndpointRef, env: Env): GraphQLClient {
