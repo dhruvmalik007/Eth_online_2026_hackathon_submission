@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { buildManifest, renderExample } from "../src/index.js";
 
 describe("renderExample", () => {
@@ -17,6 +19,14 @@ describe("renderExample", () => {
 
   it("is deterministic", () => {
     expect(renderExample({ service: "execution" })).toBe(renderExample({ service: "execution" }));
+  });
+});
+
+describe("the committed root .env.example", () => {
+  it("is exactly what the generator produces, so it cannot drift", () => {
+    const repoRoot = join(dirname(new URL(import.meta.url).pathname), "..", "..", "..");
+    const committed = readFileSync(join(repoRoot, ".env.example"), "utf8");
+    expect(committed).toBe(renderExample({ environment: "local" }));
   });
 });
 

@@ -243,6 +243,42 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("RISK_SOURCE_TIMEOUT_S", ["risk"], "Per-source fetch timeout.", { format: "number", default: "30" }),
   v("RISK_MAX_PAGES", ["risk"], "Page cap per source.", { format: "number", default: "20" }),
   v("RISK_HEADLESS", ["risk"], "Run the browser scraper headless.", { format: "flag", default: "true" }),
+  // ── Arc mainnet (read by packages/arc alongside the testnet block above) ─────────────────────
+  v("ARC_MAINNET_CHAIN_ID", ["arc"], "Chain id for Arc mainnet.", { format: "number" }),
+  v("ARC_MAINNET_RPC_URL", ["arc"], "Arc mainnet RPC.", { format: "url", secret: true }),
+  v("ARC_MAINNET_USDC", ["arc"], "USDC address on Arc mainnet."),
+  v("ARC_MAINNET_CCTP_DOMAIN", ["arc"], "CCTP domain id for Arc mainnet.", { format: "number" }),
+  v("ARC_MAINNET_MESSAGE_TRANSMITTER_V2", ["arc"], "CCTP v2 message transmitter on Arc mainnet."),
+  v("ARC_MAINNET_TOKEN_MESSENGER_V2", ["arc"], "CCTP v2 token messenger on Arc mainnet."),
+  v("ARC_TESTNET_CHAIN_ID", ["arc"], "Chain id for the Arc testnet.", { format: "number" }),
+  v("ARC_TESTNET_MESSAGE_TRANSMITTER_V2", ["arc"], "CCTP v2 message transmitter on the Arc testnet."),
+  v("ARC_AGENT_WALLET", ["langchain"], "Agent wallet address used by the Arc settlement pipeline."),
+
+  // ── Token addresses used by the cross-chain pipeline ─────────────────────────────────────────
+  v("ETHEREUM_SEPOLIA_USDC", ["langchain"], "USDC address on Ethereum Sepolia."),
+  v("ETHEREUM_SEPOLIA_TOKEN_MESSENGER", ["langchain"], "CCTP token messenger on Ethereum Sepolia."),
+  v("ARBITRUM_USDC", ["langchain"], "USDC address on Arbitrum."),
+  v("OPTIMISM_USDC", ["langchain"], "USDC address on Optimism."),
+  v("POLYGON_USDC", ["langchain"], "USDC address on Polygon."),
+
+  // ── Venue + UniV4 addresses used by the agent tools ──────────────────────────────────────────
+  v("ONEINCH_API_KEY", ["langchain"], "1inch API key for the Aqua routing tools.", { secret: true }),
+  v("V4_POSITION_MANAGER", ["langchain"], "Uniswap v4 position manager address."),
+  v("V4_RECIPIENT", ["langchain"], "Recipient address for Uniswap v4 positions."),
+  v("SWAP_SENDER", ["langchain"], "Sender address used when building swap calls."),
+
+  // ── Service URLs used by scripts and verification ────────────────────────────────────────────
+  v("INFERENCE_URL", ["inference"], "Base URL of the inference service, used by its scripts.", { format: "url" }),
+  v("SETTLEMENT_RPC_URL", ["inference"], "RPC used by the settlement verification script.", { format: "url", secret: true }),
+  v("INDEXER_URL", ["indexer"], "Base URL of a deployed indexer, used by the verification script.", { format: "url" }),
+
+  // ── Privy keys used by the custody scripts ───────────────────────────────────────────────────
+  v("PRIVY_KEY_ID", ["custody"], "Privy key id for the server-side signing scripts."),
+  v("PRIVY_PRIVATE_KEY", ["custody"], "Privy authorization private key used by the scripts.", { secret: true }),
+  v("PRIVY_SECRET", ["custody"], "Privy app secret used by the scripts.", { secret: true }),
+
+  // ── LangChain convention ─────────────────────────────────────────────────────────────────────
+  v("LANGCHAIN_TRACING_V2", ["langchain", "inference", "indexer"], "LangChain's own tracing switch; complements LANGSMITH_TRACING.", { format: "flag", default: "false" }),
 ];
 
 /** Look a variable up by name. */
@@ -259,3 +295,22 @@ export function varsForService(service: Service): readonly EnvVarSpec[] {
 export function requiredFor(service: Service, environment: Environment): readonly EnvVarSpec[] {
   return varsForService(service).filter((spec) => spec.requiredIn.includes(environment));
 }
+
+/**
+ * Variables this workspace may read but does not own.
+ *
+ * Read from the environment by the OS, the shell, or the agent harness — not part of our
+ * configuration, and not something a deployment sets on our behalf. Kept as an explicit list so the
+ * drift check can distinguish "someone read a system variable" from "someone invented a
+ * configuration key the catalog does not know about".
+ */
+export const EXTERNAL_ENV_ALLOWLIST: readonly string[] = [
+  "PATH",
+  "HOME",
+  "PWD",
+  "SHELL",
+  "TMPDIR",
+  "USER",
+  "NODE_ENV",
+  "COMMANDCODE_SCRATCHPAD",
+];
