@@ -1,3 +1,4 @@
+import { serverEnv } from "@/lib/env";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -63,13 +64,13 @@ Reply with ONLY this JSON, nothing else:
 The "scenes" array must hold exactly {sceneCount} entries.`;
 
 function config() {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = serverEnv().OPENAI_API_KEY;
   return {
     apiKey,
     baseUrl: (
-      process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"
+      serverEnv().OPENAI_BASE_URL || "https://api.openai.com/v1"
     ).replace(/\/$/, ""),
-    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    model: serverEnv().OPENAI_MODEL || "gpt-4o-mini",
   };
 }
 

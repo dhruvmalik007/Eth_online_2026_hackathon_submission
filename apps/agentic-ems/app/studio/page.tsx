@@ -1,3 +1,4 @@
+import { serverEnv } from "@/lib/env";
 import type { Metadata } from "next";
 import { FastH3App } from "../FastH3App";
 import { SetupRequired } from "../SetupRequired";
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function StudioPage() {
-  return process.env.REACTOR_API_KEY ? <FastH3App /> : <SetupRequired />;
+  return serverEnv().REACTOR_API_KEY ? <FastH3App /> : <SetupRequired />;
 }
