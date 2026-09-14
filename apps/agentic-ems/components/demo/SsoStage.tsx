@@ -214,13 +214,27 @@ function SsoStageInner() {
               {waitExpired && !hasSmartAccount && (
                 <div className="mt-4 border border-down/50 bg-down/5 p-3">
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-down">
-                    Smart account not provisioned
+                    {hasEmbedded ? "Smart account not provisioned" : "Embedded wallet not created"}
                   </p>
-                  <p className="mt-1.5 text-[11px] leading-relaxed text-fg-dim">
-                    Privy created your embedded wallet, but no smart account yet. Enable{" "}
-                    <span className="text-fg">Smart wallets → type “Safe”</span> with Base, Polygon and
-                    Optimism networks in the Privy dashboard, then retry.
-                  </p>
+                  {/* Which of the two is missing decides which dashboard page is wrong, and they are
+                      different pages. Asserting "Privy created your embedded wallet" without checking
+                      sends the reader to fix Smart wallets when the embedded wallet never existed —
+                      and a Safe is owned by the embedded signer, so that setting alone cannot help. */}
+                  {hasEmbedded ? (
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-fg-dim">
+                      Your embedded wallet exists, but no smart account was created for it. Enable{" "}
+                      <span className="text-fg">Smart wallets → type “Safe”</span> with Base, Polygon and
+                      Optimism networks in the Privy dashboard, then retry.
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-fg-dim">
+                      No embedded wallet was created, so there is no signer for a smart account to be
+                      owned by. Turn on wallet creation at login under{" "}
+                      <span className="text-fg">Configuration → Embedded wallets</span> in the Privy
+                      dashboard, then retry. Smart wallets is a separate setting, and enabling it alone
+                      cannot create the account.
+                    </p>
+                  )}
                   <button
                     onClick={reset}
                     className="mt-3 border border-edge-2 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-fg-dim hover:border-amber/60 hover:text-amber"
