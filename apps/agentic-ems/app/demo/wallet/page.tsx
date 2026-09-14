@@ -29,6 +29,7 @@ export default function WalletSessionPage(): React.JSX.Element {
   const [notice, setNotice] = useState<string | null>(null);
   const [sessions, setSessions] = useState<readonly SessionSummary[]>([]);
   const [requests, setRequests] = useState<readonly WalletRequest[]>([]);
+  const [userId, setUserId] = useState("did:privy:demo");
   const bridgeRef = useRef<WalletBridge | null>(null);
   const projectId = clientEnv.NEXT_PUBLIC_REOWN_PROJECT_ID ?? "";
 
@@ -95,7 +96,7 @@ export default function WalletSessionPage(): React.JSX.Element {
     try {
       const response = await fetch(`${EXECUTION_URL}/wallet/sign`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-user-id": userId },
         body: JSON.stringify({ method: request.method, chainId: request.chainId, params: request.params }),
       });
       const body = (await response.json()) as { result?: unknown; error?: { message?: string } };
@@ -107,7 +108,7 @@ export default function WalletSessionPage(): React.JSX.Element {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Signing failed.");
     }
-  }, []);
+  }, [userId]);
 
   const onReject = useCallback(async (request: WalletRequest): Promise<void> => {
     const bridge = bridgeRef.current;
@@ -127,6 +128,10 @@ export default function WalletSessionPage(): React.JSX.Element {
       <dl className="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
         <dt className="text-neutral-400">Account</dt>
         <dd className="font-mono break-all">{address ?? "not configured"}</dd>
+        <dt className="text-neutral-400">Identity</dt>
+        <dd>
+          <input value={userId} onChange={(event) => setUserId(event.target.value)} aria-label="User id" className="w-full rounded border border-neutral-700 bg-transparent px-2 py-1 font-mono text-xs" />
+        </dd>
         <dt className="text-neutral-400">Relay</dt>
         <dd>{projectId.length > 0 ? "project configured" : "NEXT_PUBLIC_REOWN_PROJECT_ID missing"}</dd>
       </dl>
