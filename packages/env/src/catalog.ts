@@ -193,7 +193,9 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   // ── indexer / web ────────────────────────────────────────────────────────────────────────────
   v("NEXT_PUBLIC_INDEXER_URL", ["agentic-ems"], "Indexer base URL used by the browser.", { format: "url" }),
   v("NEXT_PUBLIC_EXECUTION_URL", ["agentic-ems"], "Execution service base URL used by the browser.", { format: "url" }),
-  v("NEXT_PUBLIC_PRIVY_APP_ID", ["agentic-ems"], "Privy App ID exposed to the browser."),
+  v("NEXT_PUBLIC_PRIVY_APP_ID", ["agentic-ems"], "Privy App ID exposed to the browser.", {
+    requiredIn: ["staging", "production"],
+  }),
   v("REACTOR_API_KEY", ["agentic-ems"], "Reactor video API key for the studio.", { secret: true }),
   v("OPENAI_API_KEY", ["agentic-ems"], "OpenAI key for the upsampling route.", { secret: true }),
   v("OPENAI_BASE_URL", ["agentic-ems"], "OpenAI-compatible base URL.", { format: "url" }),

@@ -31,6 +31,20 @@ export const SECRET_NAMES: readonly string[] = ENV_CATALOG.filter((spec) => spec
   (spec) => spec.name,
 );
 
+/**
+ * Vercel's own lane names, which are not ours.
+ *
+ * This repo has `staging`; Vercel does not. A pull request deploys to *Preview*, and passing `staging`
+ * through is not a harmless no-op — the CLI answers "custom environment ids that do not exist: staging"
+ * and exits non-zero, so under the generated script's `set -e` the loop dies on the first variable and a
+ * sync that appears to have run injects nothing at all.
+ */
+export const VERCEL_ENVIRONMENTS: Readonly<Record<Environment, string>> = {
+  local: "development",
+  staging: "preview",
+  production: "production",
+};
+
 function header(options: SyncOptions): string {
   return [
     "#!/usr/bin/env bash",
@@ -60,9 +74,14 @@ function body(options: SyncOptions): string {
   switch (options.target) {
     case "dotenv":
       return "  printf '%s=%s\\n' \"$key\" \"$value\"";
-    case "vercel":
-      // `vercel env add` reads the value from stdin; --force overwrites an existing key.
-      return `  printf '%s' "$value" | vercel env add "$key" ${options.environment} --force`;
+    case "vercel": {
+      // `vercel env add` reads the value from stdin, so no value reaches the command line or history.
+      // --force overwrites an existing key. The empty third argument is the git branch: it is the only
+      // spelling of "all Preview branches" that does not open a prompt, and a sync run from CI must
+      // never wait for one — without it the CLI reports `git_branch_required` and exits 1.
+      const environment = VERCEL_ENVIRONMENTS[options.environment];
+      return `  printf '%s' "$value" | vercel env add "$key" ${environment} "" --force --yes --non-interactive`;
+    }
     case "gcloud":
       // Update the version when the secret exists, create it when it does not. `versions add` is the
       // only way to change a value: Secret Manager secrets are immutable.
