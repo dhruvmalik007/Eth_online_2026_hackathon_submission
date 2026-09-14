@@ -86,7 +86,7 @@ export interface MandateReadResult {
  */
 export async function fetchMandate(
   agent: string = DEFAULT_AGENT_ID,
-  options: { readonly baseUrl?: string | undefined; readonly userId?: string } = {},
+  options: { readonly baseUrl?: string | undefined; readonly accessToken?: string } = {},
 ): Promise<MandateReadResult> {
   const baseUrl = options.baseUrl ?? executionBaseUrl();
   if (baseUrl === undefined) {
@@ -102,7 +102,7 @@ export async function fetchMandate(
 
   try {
     const response = await fetch(`${baseUrl}/mandates/${encodeURIComponent(agent)}`, {
-      headers: options.userId === undefined ? {} : { "x-user-id": options.userId },
+      headers: options.accessToken === undefined ? {} : { authorization: `Bearer ${options.accessToken}` },
     });
     if (!response.ok) {
       return {
@@ -149,7 +149,7 @@ export async function fetchMandate(
 export async function saveMandate(
   agent: string,
   mandate: AgentMandate,
-  options: { readonly baseUrl?: string | undefined; readonly userId?: string } = {},
+  options: { readonly baseUrl?: string | undefined; readonly accessToken?: string } = {},
 ): Promise<{ readonly ok: boolean; readonly detail: string }> {
   if (!Number.isFinite(mandate.maxSpendUsd) || mandate.maxSpendUsd <= 0) {
     return { ok: false, detail: "The maximum spend must be a positive amount." };
@@ -168,7 +168,7 @@ export async function saveMandate(
       method: "PUT",
       headers: {
         "content-type": "application/json",
-        ...(options.userId === undefined ? {} : { "x-user-id": options.userId }),
+        ...(options.accessToken === undefined ? {} : { authorization: `Bearer ${options.accessToken}` }),
       },
       body: JSON.stringify(mandate),
     });

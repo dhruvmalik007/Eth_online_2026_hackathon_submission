@@ -115,14 +115,18 @@ describe("hashesFromSteps", () => {
 });
 
 describe("fetchBridgeProgress", () => {
-  it("sends the development authenticator's header", async () => {
+  it("presents the token as a bearer credential and names no identity itself", async () => {
     const fetchImpl = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
         new Response(JSON.stringify({ count: 0, bridges: [] }), { status: 200 }),
     );
-    await fetchBridgeProgress({ baseUrl: "https://x.test", userId: "u1", fetchImpl });
+    await fetchBridgeProgress({ baseUrl: "https://x.test", accessToken: "t1", fetchImpl });
     const [, init] = fetchImpl.mock.calls[0] as [string, RequestInit];
-    expect((init.headers as Record<string, string>)["x-user-id"]).toBe("u1");
+    const headers = init.headers as Record<string, string>;
+    expect(headers["authorization"]).toBe("Bearer t1");
+    // The identity must not travel as a header the caller chooses — that is the whole point of
+    // handing over a token the service verifies instead.
+    expect(headers["x-user-id"]).toBeUndefined();
   });
 
   it("parses the bridges envelope", async () => {
@@ -130,7 +134,7 @@ describe("fetchBridgeProgress", () => {
     const fetchImpl = vi.fn(async () => new Response(JSON.stringify(body), { status: 200 }));
     const steps = await fetchBridgeProgress({
       baseUrl: "https://x.test/",
-      userId: "u1",
+      accessToken: "t1",
       fetchImpl,
     });
     expect(steps).toHaveLength(1);
@@ -140,7 +144,7 @@ describe("fetchBridgeProgress", () => {
   it("names the status when the service refuses", async () => {
     const fetchImpl = vi.fn(async () => new Response("nope", { status: 503 }));
     await expect(
-      fetchBridgeProgress({ baseUrl: "https://x.test", userId: "u1", fetchImpl }),
+      fetchBridgeProgress({ baseUrl: "https://x.test", accessToken: "t1", fetchImpl }),
     ).rejects.toThrow(/503/);
   });
 
@@ -148,7 +152,7 @@ describe("fetchBridgeProgress", () => {
     // An unreadable row must not become a half-rendered tracking row.
     const body = { count: 2, bridges: [{ nope: true }, { ...step({ dstTxHash: "0xbbb" }) }] };
     const fetchImpl = vi.fn(async () => new Response(JSON.stringify(body), { status: 200 }));
-    const steps = await fetchBridgeProgress({ baseUrl: "https://x.test", userId: "u1", fetchImpl });
+    const steps = await fetchBridgeProgress({ baseUrl: "https://x.test", accessToken: "t1", fetchImpl });
     expect(steps).toHaveLength(1);
   });
 });

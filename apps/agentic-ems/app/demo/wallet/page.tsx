@@ -18,6 +18,7 @@ import {
   type WalletRequest,
 } from "@/lib/walletconnect/bridge";
 import { parsePairingUri } from "@/lib/walletconnect/protocol";
+import { usePrivyAccessToken } from "@/components/privy-provider";
 
 const EXECUTION_URL = (process.env.NEXT_PUBLIC_EXECUTION_URL ?? "").replace(/\/$/, "");
 
@@ -28,8 +29,15 @@ export default function WalletSessionPage(): React.JSX.Element {
   const [notice, setNotice] = useState<string | null>(null);
   const [sessions, setSessions] = useState<readonly SessionSummary[]>([]);
   const [requests, setRequests] = useState<readonly WalletRequest[]>([]);
-  const [userId, setUserId] = useState("did:privy:demo");
   const bridgeRef = useRef<WalletBridge | null>(null);
+  /**
+   * The execution service verifies this and reads the identity from the verified claims.
+   *
+   * It replaces a free-text field, defaulting to `did:privy:demo`, that was sent as `x-user-id` — the
+   * header the service's *development* authenticator reads and explicitly refuses in `live` mode. So
+   * this page was choosing its own identity and the choice was editable in the DOM.
+   */
+  const getAccessToken = usePrivyAccessToken();
   const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID ?? "";
 
   // The account offered to a dapp is the execution service's signer — the same address that does our
@@ -93,9 +101,14 @@ export default function WalletSessionPage(): React.JSX.Element {
     if (bridge === null) return;
     setError(null);
     try {
+      const accessToken = await getAccessToken();
+      if (accessToken === null) {
+        setError("Sign in from /demo before approving — the execution service verifies the signer.");
+        return;
+      }
       const response = await fetch(`${EXECUTION_URL}/wallet/sign`, {
         method: "POST",
-        headers: { "content-type": "application/json", "x-user-id": userId },
+        headers: { "content-type": "application/json", authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ method: request.method, chainId: request.chainId, params: request.params }),
       });
       const body = (await response.json()) as { result?: unknown; error?: { message?: string } };
@@ -107,7 +120,7 @@ export default function WalletSessionPage(): React.JSX.Element {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Signing failed.");
     }
-  }, [userId]);
+  }, [getAccessToken]);
 
   const onReject = useCallback(async (request: WalletRequest): Promise<void> => {
     const bridge = bridgeRef.current;
@@ -128,8 +141,9 @@ export default function WalletSessionPage(): React.JSX.Element {
         <dt className="text-neutral-400">Account</dt>
         <dd className="font-mono break-all">{address ?? "not configured"}</dd>
         <dt className="text-neutral-400">Identity</dt>
-        <dd>
-          <input value={userId} onChange={(event) => setUserId(event.target.value)} aria-label="User id" className="w-full rounded border border-neutral-700 bg-transparent px-2 py-1 font-mono text-xs" />
+        <dd className="text-neutral-400">
+          Taken from the Privy token this page presents, not from anything on the page — sign in
+          from <span className="font-mono text-xs">/demo</span> first.
         </dd>
         <dt className="text-neutral-400">Relay</dt>
         <dd>{projectId.length > 0 ? "project configured" : "NEXT_PUBLIC_REOWN_PROJECT_ID missing"}</dd>

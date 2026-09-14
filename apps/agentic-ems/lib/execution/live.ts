@@ -123,8 +123,15 @@ export function hashesFromSteps(
 
 export interface LiveReaderOptions {
   readonly baseUrl: string;
-  /** The service's development authenticator reads `x-user-id`. */
-  readonly userId: string;
+  /**
+   * The caller's Privy access token.
+   *
+   * The execution service verifies this and takes the identity from the verified claims. It replaces
+   * a `userId` option that sent the identity as a plain request header: that header is the service's
+   * *development* authenticator, which it refuses to run in `live` mode precisely because it lets
+   * the caller name itself — so asking for one here handed the browser the choice.
+   */
+  readonly accessToken: string;
   readonly fetchImpl?: typeof fetch;
 }
 
@@ -152,7 +159,7 @@ async function getSteps(
 ): Promise<RecordedStep[]> {
   const fetchImpl = options.fetchImpl ?? fetch;
   const response = await fetchImpl(`${options.baseUrl.replace(/\/+$/, "")}${path}`, {
-    headers: { "x-user-id": options.userId, accept: "application/json" },
+    headers: { authorization: `Bearer ${options.accessToken}`, accept: "application/json" },
     cache: "no-store",
   });
   if (!response.ok) {
