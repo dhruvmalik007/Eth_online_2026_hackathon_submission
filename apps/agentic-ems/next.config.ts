@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
   // workspace root, so letting Next guess slows tracing and emits a warning.
   outputFileTracingRoot: path.join(__dirname, "../../"),
 
+  // The framework and its version are not information a caller needs, and it is the first thing a
+  // scanner looks for. One line, no downside.
+  poweredByHeader: false,
+
   experimental: {
     optimizePackageImports: [
       "recharts",
