@@ -285,6 +285,12 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("NEXT_PUBLIC_ARC_RPC_URL", ["agentic-ems"], "Arc RPC endpoint exposed to the browser.", {
     format: "url",
   }),
+  // WalletConnect / Reown. The project id is public by design: it ships in every dapp client bundle
+  // that offers WalletConnect, so committing it leaks nothing. It is NOT a secret, and it must never
+  // be confused with the Privy authorization key, which signs our server requests and stays server-side.
+  v("NEXT_PUBLIC_REOWN_PROJECT_ID", ["agentic-ems"], "WalletConnect project id from Reown (public, not a secret).", {
+    example: "your-reown-project-id",
+  }),
 ];
 
 /** Look a variable up by name. */
