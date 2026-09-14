@@ -2,6 +2,10 @@ node_modules/
 .vercel/
 .env
 .env.local
+# `.env` alone does not match `.env.staging` or `.env.production`, which is what the env sync
+# tooling reads and writes here. The indexer is the one Vercel app holding a real credential
+# (`GOOGLE_SERVICE_ACCOUNT_KEY`), so an unignored values file is the file that matters most.
+.env.*
+!.env.example
 *.log
 .DS_Store
-.vercel
