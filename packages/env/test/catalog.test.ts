@@ -27,6 +27,17 @@ describe("ENV_CATALOG", () => {
     expect(specFor("EMS_ENV")?.default).toBe("local");
   });
 
+  it("requires the browser credentials a deployment cannot function without", () => {
+    // Both are public identifiers that ship in the client bundle. Absent, the app does not fail to
+    // build — it renders "not configured" at the point a user tries to sign in, which is why an
+    // undeclared one sat unnoticed on a live preview. Requiring them moves that to `env check`,
+    // which runs before the deploy rather than after it.
+    for (const name of ["NEXT_PUBLIC_PRIVY_APP_ID", "NEXT_PUBLIC_REOWN_PROJECT_ID"]) {
+      expect(specFor(name)?.requiredIn, name).toEqual(["staging", "production"]);
+      expect(specFor(name)?.secret, name).toBe(false);
+    }
+  });
+
   it("requires a database DSN and Redis in production for the services that use them", () => {
     expect(requiredFor("timeseries", "production").map((spec) => spec.name)).toContain(
       "TIMESERIES_DATABASE_URL",

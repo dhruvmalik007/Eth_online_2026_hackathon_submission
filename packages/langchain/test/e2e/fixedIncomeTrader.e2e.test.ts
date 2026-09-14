@@ -40,7 +40,7 @@ describe('E2E: Fixed-income trader on Uniswap v4 mainnet (Vertex AI + deep agent
     if (!hasGateway) return;
     const { ChatVertexAI } = await import('@langchain/google-vertexai');
     model = new ChatVertexAI({
-      model: process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-flash-lite',
+      model: process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-flash',
       temperature: 0.1,
       // flash-lite free tier throttles hard under parallel test load; without a
       // healthy retry budget the 429s surface as the cryptic

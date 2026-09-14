@@ -143,7 +143,7 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("GOOGLE_CLOUD_LOCATION", ["inference", "indexer", "langchain", "risk"], "GCP region for Vertex AI.", { default: "us-central1" }),
   v("GOOGLE_SERVICE_ACCOUNT_KEY", ["inference", "indexer", "risk", "agentic-ems"], "Service-account JSON, materialised to a 0600 file at boot.", { secret: true, format: "json" }),
   v("GOOGLE_APPLICATION_CREDENTIALS", ["indexer"], "Path to the materialised service-account file.", { format: "path" }),
-  v("VERTEX_AI_MODEL", ["inference", "indexer", "langchain"], "Vertex generative model id.", { default: "gemini-2.5-pro" }),
+  v("VERTEX_AI_MODEL", ["inference", "indexer", "langchain"], "Vertex generative model id.", { default: "gemini-2.5-flash" }),
   v("VERTEX_AI_TEMPERATURE", ["inference", "langchain"], "Sampling temperature.", { format: "number" }),
   v("VERTEX_EMBEDDING_MODEL", ["inference", "indexer", "timeseries", "langchain", "risk"], "Vertex embedding model id.", { default: "text-embedding-005" }),
   v("LANGCHAIN_MODEL_PARSER", ["inference"], "Model used for the parsing role.", { default: "gemini-2.5-flash" }),
@@ -193,7 +193,9 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   // ── indexer / web ────────────────────────────────────────────────────────────────────────────
   v("NEXT_PUBLIC_INDEXER_URL", ["agentic-ems"], "Indexer base URL used by the browser.", { format: "url" }),
   v("NEXT_PUBLIC_EXECUTION_URL", ["agentic-ems"], "Execution service base URL used by the browser.", { format: "url" }),
-  v("NEXT_PUBLIC_PRIVY_APP_ID", ["agentic-ems"], "Privy App ID exposed to the browser."),
+  v("NEXT_PUBLIC_PRIVY_APP_ID", ["agentic-ems"], "Privy App ID exposed to the browser.", {
+    requiredIn: ["staging", "production"],
+  }),
   v("REACTOR_API_KEY", ["agentic-ems"], "Reactor video API key for the studio.", { secret: true }),
   v("OPENAI_API_KEY", ["agentic-ems"], "OpenAI key for the upsampling route.", { secret: true }),
   v("OPENAI_BASE_URL", ["agentic-ems"], "OpenAI-compatible base URL.", { format: "url" }),
@@ -289,7 +291,7 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   // that offers WalletConnect, so committing it leaks nothing. It is NOT a secret, and it must never
   // be confused with the Privy authorization key, which signs our server requests and stays server-side.
   v("NEXT_PUBLIC_REOWN_PROJECT_ID", ["agentic-ems"], "WalletConnect project id from Reown (public, not a secret).", {
-    example: "your-reown-project-id",
+    requiredIn: ["staging", "production"], example: "your-reown-project-id",
   }),
 ];
 

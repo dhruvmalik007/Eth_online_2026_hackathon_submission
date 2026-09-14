@@ -3,7 +3,9 @@
 import * as React from "react";
 import { ArrowRight, CircleCheck } from "lucide-react";
 import { useDemo } from "@/lib/demo/state";
-import { allocationsFor, DATA_AGENTS, RISK_TRACES, STRATEGIES, TOTAL_BALANCE } from "@/lib/demo/data";
+import { allocationsFor, DATA_AGENTS, RISK_TRACES, STRATEGIES } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
+import { formatAllocUsd, formatUsd } from "@/lib/portfolio/nav";
 import { AgentTraceGroup } from "@ethonline2026/ux-workflow";
 import { buildSpecialistSteps } from "@/lib/agent-traces";
 import { fetchForecast } from "@/lib/demo/forecast-client";
@@ -57,10 +59,11 @@ const TRACE_TEMPLATES: Record<string, string[]> = {
 const SYNTHESIS = (risk: string) =>
   `Synthesis complete. I ran the lending, staking, prediction, perps, and LP specialists in parallel and their forecasts agree on one point: funding stress is low and the q10–q90 bands are tight, so the ${risk} allocation tilts toward carry. Proposal below is ready for your per-agent approval — every number traces to DeFiLlama data and a TimesFM-3 forecast with provenance.`;
 
-export function SimulationStage({ onNext }: { onNext?: () => void } = {}) {
+export function SimulationStage({ onNext }: { onNext?: () => void }) {
   const { state, dispatch } = useDemo();
   const risk = state.answers?.risk ?? "balanced";
-  const alloc = React.useMemo(() => allocationsFor(risk), [risk]);
+  const { nav } = useNav();
+  const alloc = React.useMemo(() => allocationsFor(risk, nav.pricedUsd), [risk, nav.pricedUsd]);
 
   const [phase, setPhase] = React.useState<Phase>("orchestrator");
   const [agents, setAgents] = React.useState<Record<string, SubagentState>>({});
@@ -282,7 +285,7 @@ export function SimulationStage({ onNext }: { onNext?: () => void } = {}) {
             <div className="border border-amber/50 bg-panel" style={{ animation: "hero-line 0.5s ease-out both" }}>
               <div className="flex items-center justify-between border-b border-edge px-4 py-2.5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber">
-                  allocation proposal · ${TOTAL_BALANCE.toLocaleString("en-US")} · {risk} profile
+                  allocation proposal · {formatUsd(nav.pricedUsd)} · {risk} profile
                 </p>
                 <span className="font-mono text-[10px] text-fg-faint">provenance: llama + timesfm-3</span>
               </div>
@@ -306,7 +309,7 @@ export function SimulationStage({ onNext }: { onNext?: () => void } = {}) {
                       </td>
                       <td className="px-4 py-2.5 text-fg-dim">{strategy.agentName}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums text-fg">{p}%</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-amber">${usd.toLocaleString("en-US")}</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums text-amber">{formatAllocUsd(usd)}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums text-up">{strategy.apy.toFixed(1)}%</td>
                       <td className="px-4 py-2.5 text-right tabular-nums text-fg-dim">{strategy.var95}</td>
                     </tr>

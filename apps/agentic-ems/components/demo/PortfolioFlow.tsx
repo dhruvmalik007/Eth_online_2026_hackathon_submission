@@ -8,7 +8,8 @@ import type {
   LiquidityFlowLegendItem,
   LiquidityFlowNode,
 } from "@ethonline2026/ux-workflow";
-import { allocationsFor, TOTAL_BALANCE } from "@/lib/demo/data";
+import { allocationsFor } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
 import type { RiskProfile } from "@/lib/demo/data";
 
 /**
@@ -51,14 +52,15 @@ export function PortfolioFlow({
   onNodeSelect,
   className,
 }: PortfolioFlowProps) {
+  const { nav } = useNav();
   const { nodes, edges, legend, strategyIds } = React.useMemo(() => {
-    const alloc = allocationsFor(risk);
+    const alloc = allocationsFor(risk, nav.pricedUsd);
 
     const flowNodes: LiquidityFlowNode[] = [
       {
         id: "nav",
         label: "Portfolio NAV",
-        value: TOTAL_BALANCE,
+        value: nav.pricedUsd,
         accent: "faint",
         badge: "nav",
         column: 0,
@@ -72,7 +74,7 @@ export function PortfolioFlow({
       ...alloc.map(({ strategy, pct, usd }) => ({
         id: strategy.id,
         label: strategy.label,
-        value: usd,
+        value: usd ?? 0,
         accent: ACCENT_BY_HEX[strategy.color] ?? "faint",
         badge: "position",
         pct,
@@ -90,7 +92,7 @@ export function PortfolioFlow({
     const flowEdges: LiquidityFlowEdge[] = alloc.map(({ strategy, usd }) => ({
       from: "nav",
       to: strategy.id,
-      value: usd,
+      value: usd ?? 0,
       accent: ACCENT_BY_HEX[strategy.color] ?? "faint",
       label: `Portfolio NAV → ${strategy.label}`,
     }));
@@ -106,7 +108,7 @@ export function PortfolioFlow({
       legend: flowLegend,
       strategyIds: new Set(alloc.map(({ strategy }) => strategy.id)),
     };
-  }, [risk]);
+  }, [risk, nav.pricedUsd]);
 
   // The NAV root is not a position: only forward real strategy ids so consumers
   // selecting on a node can safely assume the id exists in their strategy list.

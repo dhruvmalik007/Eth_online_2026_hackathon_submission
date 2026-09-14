@@ -16,7 +16,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { allocationsFor, AGENT_UPDATES, STRATEGIES, TICKER, TOTAL_BALANCE } from "@/lib/demo/data";
+import { allocationsFor, AGENT_UPDATES, STRATEGIES, TICKER } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
+import { formatAllocUsd, formatUsd } from "@/lib/portfolio/nav";
 import type { ForecastPayload, RiskProfile } from "@/lib/demo/data";
 import { ForecastFan } from "./ForecastFan";
 import { PortfolioFlow } from "./PortfolioFlow";
@@ -59,7 +61,8 @@ export function Dashboard({
   payloads?: Record<string, ForecastPayload>;
 }) {
   const risk = "balanced" as RiskProfile;
-  const alloc = React.useMemo(() => allocationsFor(risk), [risk]);
+  const { nav } = useNav();
+  const alloc = React.useMemo(() => allocationsFor(risk, nav.pricedUsd), [risk, nav.pricedUsd]);
 
   /**
    * Concentration, computed from the allocation the donut actually renders.
@@ -95,8 +98,8 @@ export function Dashboard({
               portfolio-demo-001 · live
             </p>
             <p className="font-mono text-lg font-semibold tabular-nums text-fg">
-              ${TOTAL_BALANCE.toLocaleString("en-US")}
-              <span className="ml-2 text-xs font-normal text-up">+$342 (+0.34%) today</span>
+              {formatUsd(nav.pricedUsd)}
+              <span className="ml-2 text-xs font-normal text-fg-faint">{nav.unpriced > 0 ? `+${nav.unpriced} unpriced` : "live"}</span>
             </p>
           </div>
         </div>
@@ -125,7 +128,7 @@ export function Dashboard({
       <main className="grid gap-3 p-3 lg:grid-cols-12">
         {/* KPI row */}
         {[
-          { label: "NAV (USDC)", value: `$${TOTAL_BALANCE.toLocaleString("en-US")}`, cls: "text-fg" },
+          { label: "NAV (USD)", value: formatUsd(nav.pricedUsd), cls: "text-fg" },
           { label: "Blended APY (est)", value: `${weightedApy.toFixed(2)}%`, cls: "text-up" },
           { label: "Portfolio VaR95 (1d)", value: "$1,847", cls: "text-amber" },
           { label: "Duration-equivalent", value: "0.14y", cls: "text-fg" },
@@ -167,7 +170,7 @@ export function Dashboard({
             {alloc.map(({ strategy, pct, usd }) => (
               <p key={strategy.id} className="flex items-center gap-1.5 text-fg-dim">
                 <span className="size-1.5 rounded-full" style={{ background: strategy.color }} />
-                {strategy.label.split(" ")[0]} · {pct}% · ${usd.toLocaleString("en-US")}
+                {strategy.label.split(" ")[0]} · {pct}% · {formatAllocUsd(usd)}
               </p>
             ))}
           </div>
@@ -224,7 +227,7 @@ export function Dashboard({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-[10px] tabular-nums text-up">${usd.toLocaleString("en-US")}</p>
+                  <p className="font-mono text-[10px] tabular-nums text-up">{formatAllocUsd(usd)}</p>
                   <p className="font-mono text-[9px] text-fg-faint">{["proposing", "idle", "monitoring", "proposing", "idle"][i]}</p>
                 </div>
               </div>

@@ -2,17 +2,30 @@ import { ArrowRight, FileText } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Dict } from "@/lib/i18n";
+import type { LandingStats } from "@/lib/live/subgraph-stats";
 
-const BOOT_LINES = [
-  { t: "$ agentic-ems --init", cls: "text-fg-dim" },
-  { t: "✓ 5 subgraph endpoints healthy (gateway.thegraph.com)", cls: "text-up" },
-  { t: "✓ standardized lending schema: aave-v3 × eth/arb/opt", cls: "text-up" },
-  { t: "✓ uniswap v4: 131,148 pools · $654B cumulative volume", cls: "text-up" },
-  { t: "✓ quant function table: vega · lvr · η · var loaded", cls: "text-up" },
-  { t: "→ agent awaiting mandate _", cls: "text-amber" },
-];
+const BOOT_TONE = {
+  dim: "text-fg-dim",
+  ok: "text-up",
+  warn: "text-amber",
+} as const;
 
-export function Hero({ t }: { t: Dict }) {
+const METRIC_TONE = {
+  up: "text-up",
+  down: "text-down",
+  fg: "text-fg",
+} as const;
+
+/**
+ * The hero, with its numbers passed in.
+ *
+ * Nothing numeric is written in this file: the tiles, the boot log and the terminal readout all come
+ * from {@link LandingStats}, which counts them from the subgraph registry. They used to be literals
+ * here — `5` subgraphs, `3` chains, `7` quant tools, `12.1%` net APY — and every one of them was
+ * wrong in the direction of looking better than the system is.
+ */
+export function Hero({ t, stats }: { t: Dict; stats: LandingStats }) {
+  const labels = [t.hero.stat1k, t.hero.stat2k, t.hero.stat3k];
 
   return (
     <section id="top" className="relative overflow-hidden border-b border-edge">
@@ -56,14 +69,10 @@ export function Hero({ t }: { t: Dict }) {
             </div>
 
             <dl className="mt-12 grid max-w-lg grid-cols-3 gap-px border border-edge bg-edge">
-              {[
-                { k: t.hero.stat1k, v: t.hero.stat1v, s: t.hero.stat1s },
-                { k: t.hero.stat2k, v: t.hero.stat2v, s: t.hero.stat2s },
-                { k: t.hero.stat3k, v: t.hero.stat3v, s: t.hero.stat3s },
-              ].map((s) => (
-                <div key={s.k} className="bg-panel px-4 py-3">
+              {stats.stats.map((s, i) => (
+                <div key={labels[i]} className="bg-panel px-4 py-3">
                   <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg-faint">
-                    {s.k}
+                    {labels[i]}
                   </dt>
                   <dd className="mt-1 font-mono text-2xl font-semibold text-amber">{s.v}</dd>
                   <dd className="font-mono text-[10px] text-fg-faint">{s.s}</dd>
@@ -87,10 +96,10 @@ export function Hero({ t }: { t: Dict }) {
                 <p className="font-mono text-[10px] text-fg-faint">tty0</p>
               </div>
               <div className="space-y-2 p-5 font-mono text-[13px] leading-relaxed">
-                {BOOT_LINES.map((l, i) => (
+                {stats.bootLines.map((l, i) => (
                   <p
                     key={i}
-                    className={l.cls}
+                    className={BOOT_TONE[l.tone]}
                     style={{
                       animation: "hero-line 0.4s ease-out both",
                       animationDelay: `${0.35 + i * 0.45}s`,
@@ -104,15 +113,10 @@ export function Hero({ t }: { t: Dict }) {
                 </p>
               </div>
               <div className="grid grid-cols-2 border-t border-edge font-mono text-xs md:grid-cols-4">
-                {[
-                  { k: "NET APY", v: "12.1%", cls: "text-up" },
-                  { k: "VEGA/VOL-PT", v: "−0.38", cls: "text-down" },
-                  { k: "DURATION", v: "4.2", cls: "text-fg" },
-                  { k: "VAR95", v: "$212K", cls: "text-fg" },
-                ].map((s) => (
+                {stats.terminal.map((s) => (
                   <div key={s.k} className="border-r border-edge px-4 py-3 last:border-r-0">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-fg-faint">{s.k}</p>
-                    <p className={`mt-0.5 text-lg font-semibold ${s.cls}`}>{s.v}</p>
+                    <p className={`mt-0.5 text-lg font-semibold ${METRIC_TONE[s.tone]}`}>{s.v}</p>
                   </div>
                 ))}
               </div>
