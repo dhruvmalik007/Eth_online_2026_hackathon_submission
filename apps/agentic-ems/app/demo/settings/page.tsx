@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { DemoProvider } from "@/lib/demo/state";
 import { useDemo } from "@/lib/demo/state";
 import { allocationsFor } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
+import { formatAllocUsd } from "@/lib/portfolio/nav";
 import {
   DEFAULT_AGENT_ID,
   fetchMandate,
@@ -60,7 +62,8 @@ function SettingsBody() {
   const { state, dispatch } = useDemo();
   const router = useRouter();
   const risk = state.answers?.risk ?? "balanced";
-  const alloc = allocationsFor(risk);
+  const { nav } = useNav();
+  const alloc = allocationsFor(risk, nav.pricedUsd);
 
   return (
     <div className="space-y-4">
@@ -131,7 +134,7 @@ function SettingsBody() {
               <span className="size-2 rounded-full" style={{ background: strategy.color }} />
               <span className="flex-1 text-sm text-fg">{strategy.agentName}</span>
               <span className="font-mono text-xs tabular-nums text-fg-dim">{pct}%</span>
-              <span className="w-24 text-right font-mono text-xs tabular-nums text-amber">${usd.toLocaleString("en-US")}</span>
+              <span className="w-24 text-right font-mono text-xs tabular-nums text-amber">{formatAllocUsd(usd)}</span>
             </div>
           ))}
         </div>

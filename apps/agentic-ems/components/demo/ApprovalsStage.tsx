@@ -4,11 +4,14 @@ import * as React from "react";
 import { Check, X } from "lucide-react";
 import { useDemo } from "@/lib/demo/state";
 import { allocationsFor } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
+import { formatAllocUsd } from "@/lib/portfolio/nav";
 
 export function ApprovalsStage({ onNext }: { onNext?: () => void }) {
   const { state, dispatch } = useDemo();
   const risk = state.answers?.risk ?? "balanced";
-  const alloc = React.useMemo(() => allocationsFor(risk), [risk]);
+  const { nav } = useNav();
+  const alloc = React.useMemo(() => allocationsFor(risk, nav.pricedUsd), [risk, nav.pricedUsd]);
   const approved = new Set(state.approved);
   const [rejected, setRejected] = React.useState<Set<string>>(new Set());
   const allApproved = approved.size === alloc.length;
@@ -47,7 +50,7 @@ export function ApprovalsStage({ onNext }: { onNext?: () => void }) {
                       <p className="text-sm font-medium text-fg">
                         Grant <span className="text-amber">{strategy.agentName}</span> authority to deploy{" "}
                         <span className="font-mono tabular-nums text-amber">
-                          ${usd.toLocaleString("en-US")}
+                          {formatAllocUsd(usd)}
                         </span>{" "}
                         <span className="font-mono text-xs text-fg-dim">({pct}%)</span>
                       </p>
@@ -80,13 +83,13 @@ export function ApprovalsStage({ onNext }: { onNext?: () => void }) {
                 </div>
                 {isRejected && !isApproved && (
                   <p className="mt-2 font-mono text-[10px] text-down">
-                    rejected — ${usd.toLocaleString("en-US")} stays unallocated
+                    rejected — {formatAllocUsd(usd)} stays unallocated
                   </p>
                 )}
                 {isApproved && (
                   <p className="mt-2 font-mono text-[10px] text-fg-faint">
-                    policygate: per-tx ≤ ${(usd / 2).toLocaleString("en-US")} · daily ≤ $
-                    {usd.toLocaleString("en-US")} · recipients: {strategy.protocols[0].toLowerCase()}-vaults
+                    policygate: per-tx ≤ {formatAllocUsd(usd === null ? null : usd / 2)} · daily ≤
+                    {formatAllocUsd(usd)} · recipients: {strategy.protocols[0].toLowerCase()}-vaults
                   </p>
                 )}
               </div>
@@ -99,7 +102,7 @@ export function ApprovalsStage({ onNext }: { onNext?: () => void }) {
             {approved.size}/{alloc.length} approved · $
             {alloc
               .filter(({ strategy }) => approved.has(strategy.id))
-              .reduce((sum, { usd }) => sum + usd, 0)
+              .reduce((sum, { usd }) => sum + (usd ?? 0), 0)
               .toLocaleString("en-US")}{" "}
             of $100,000 provisioned
           </p>

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { fetchForecast } from "@/lib/demo/forecast-client";
 import { AGENT_UPDATES, allocationsFor, STRATEGIES } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
+import { formatAllocUsd, formatUsd } from "@/lib/portfolio/nav";
 import type { ForecastPayload, RiskProfile } from "@/lib/demo/data";
 import { ForecastFan } from "./ForecastFan";
 
@@ -18,7 +20,8 @@ const TIP = {
 /** Compact portfolio view rendered inline in the chat once agents deploy. */
 export function MiniPortfolio() {
   const risk = "balanced" as RiskProfile;
-  const alloc = React.useMemo(() => allocationsFor(risk), [risk]);
+  const { nav } = useNav();
+  const alloc = React.useMemo(() => allocationsFor(risk, nav.pricedUsd), [risk, nav.pricedUsd]);
   const [payloads, setPayloads] = React.useState<Record<string, ForecastPayload>>({});
   const [selected, setSelected] = React.useState(STRATEGIES[0].id);
 
@@ -57,7 +60,7 @@ export function MiniPortfolio() {
         {/* Allocation */}
         <div className="bg-panel">
           <p className="px-3 pt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-fg-faint">
-            allocation · $100,000 USDC
+            allocation · {formatUsd(nav.pricedUsd)} USDC
           </p>
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
@@ -82,7 +85,7 @@ export function MiniPortfolio() {
             {alloc.map(({ strategy, pct, usd }) => (
               <p key={strategy.id} className="flex items-center gap-1 text-fg-dim">
                 <span className="size-1.5 rounded-full" style={{ background: strategy.color }} />
-                {strategy.label.split(" ")[0]} · {pct}% · ${usd.toLocaleString("en-US")}
+                {strategy.label.split(" ")[0]} · {pct}% · {formatAllocUsd(usd)}
               </p>
             ))}
           </div>

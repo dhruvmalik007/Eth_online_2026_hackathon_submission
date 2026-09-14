@@ -4,13 +4,16 @@ import * as React from "react";
 import { CircleCheck, ExternalLink } from "lucide-react";
 import { useDemo } from "@/lib/demo/state";
 import { allocationsFor } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
+import { formatAllocUsd } from "@/lib/portfolio/nav";
 import { executionBaseUrl } from "@/lib/execution/mandates";
 import { fetchBridgeProgress, toMessageTracking, type RecordedStep } from "@/lib/execution/live";
 
 export function ExecutingStage({ onPortfolioLive }: { onPortfolioLive?: () => void }) {
   const { state, dispatch } = useDemo();
   const risk = state.answers?.risk ?? "balanced";
-  const alloc = React.useMemo(() => allocationsFor(risk), [risk]);
+  const { nav } = useNav();
+  const alloc = React.useMemo(() => allocationsFor(risk, nav.pricedUsd), [risk, nav.pricedUsd]);
   const [progress, setProgress] = React.useState<Record<string, number>>(() =>
     Object.fromEntries(alloc.map(({ strategy }) => [strategy.id, 0])),
   );
@@ -162,7 +165,7 @@ const [live, setLive] = React.useState<{ steps: readonly RecordedStep[]; error: 
                     <span className="size-2 rounded-full" style={{ background: strategy.color }} />
                     <p className="text-sm text-fg">{strategy.agentName}</p>
                     <p className="font-mono text-[10px] text-fg-faint">
-                      deploying ${usd.toLocaleString("en-US")}
+                      deploying {formatAllocUsd(usd)}
                     </p>
                   </div>
                   <span
