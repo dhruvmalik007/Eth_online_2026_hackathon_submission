@@ -3,6 +3,14 @@ export { createRpcReader, createViemReader, type WalletReader } from "./reader.j
 export { readAaveV3Supplied, type AaveSuppliedInput } from "./aave.js";
 export { readMorphoVaultPosition, type MorphoVaultInput } from "./morpho.js";
 export { POLYGON_KNOWN_POSITIONS, type KnownPosition } from "./registry.js";
+export {
+  readLiquidity,
+  type ChainLiquidity,
+  type ChainRef,
+  type Holding,
+  type LiquidityPort,
+  type TokenRef,
+} from "./liquidity.js";
 
 import { readAaveV3Supplied } from "./aave.js";
 import { readMorphoVaultPosition } from "./morpho.js";
