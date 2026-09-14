@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@ethonline2026/ux-workflow";
-import { CHAIN_META } from "@/lib/execution/chains";
+import { CHAIN_META, explorerTxUrl } from "@/lib/execution/chains";
+import { parseAmount, shorten } from "@/lib/funding/transfer";
+import { useFundingWallet } from "@/lib/funding/useFundingWallet";
 
 /**
  * Funding the desk's own wallet.
@@ -43,14 +45,16 @@ export function LoadLiquiditySheet({ open, onOpenChange, address }: LoadLiquidit
   const [token, setToken] = React.useState<LoadableToken>(LOADABLE_TOKENS[0]);
   const [amount, setAmount] = React.useState("");
   const [copied, setCopied] = React.useState<"address" | "calldata" | null>(null);
+  const [txHash, setTxHash] = React.useState<string | null>(null);
 
   const chain = CHAIN_META[token.chain];
-  const parsed = Number(amount.replace(/[,\s]/g, ""));
-  const valid = Number.isFinite(parsed) && parsed > 0;
-  // Kept as a string of digits: the port and every contract call take base units as text, so a
-  // float would round a value that is exact.
-  const baseUnits = valid ? BigInt(Math.round(parsed * 10 ** token.decimals)).toString() : "";
-
+  const parsedAmount = parseAmount(amount, token.decimals);
+  const valid = parsedAmount.ok;
+  const baseUnits = parsedAmount.ok ? parsedAmount.base.toString() : "";
+  // One parser for both paths. The inline version this replaced used Math.round(value * 10 ** decimals),
+  // which loses precision above 2^53 and silently sends a different number than was typed. This is
+  // the single place an amount becomes base units, so the copy path and the send path cannot disagree.
+  const funding = useFundingWallet();
   React.useEffect(() => {
     if (!copied) return;
     const timer = setTimeout(() => setCopied(null), 2000);
@@ -82,8 +86,8 @@ export function LoadLiquiditySheet({ open, onOpenChange, address }: LoadLiquidit
           Load liquidity
         </DialogTitle>
         <DialogDescription className="text-xs text-fg-dim">
-          Send {token.symbol} on {chain.label} to the desk wallet. This screen holds no keys and
-          broadcasts nothing — it tells you where the tokens have to land.
+          Send {token.symbol} on {chain.label} to the desk wallet. This screen holds no keys: it
+          either hands you the exact calldata, or asks your own wallet to send it.
         </DialogDescription>
 
         <div className="mt-4 space-y-4">
@@ -157,7 +161,9 @@ export function LoadLiquiditySheet({ open, onOpenChange, address }: LoadLiquidit
               </p>
             ) : (
               <p className="mt-1.5 text-xs text-fg-faint">
-                Enter an amount to see the exact value your tooling should send.
+                {amount.length > 0 && !parsedAmount.ok
+                  ? parsedAmount.reason
+                  : "Enter an amount to see the exact value your tooling should send."}
               </p>
             )}
           </div>
@@ -182,6 +188,56 @@ export function LoadLiquiditySheet({ open, onOpenChange, address }: LoadLiquidit
             </div>
           )}
 
+          <div className="border-t border-edge pt-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg-faint">
+              from your own wallet
+            </p>
+            {funding.address === undefined ? (
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => funding.connect()}
+                  className="border border-amber/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-amber hover:bg-amber/10"
+                >
+                  connect wallet
+                </button>
+                <span className="text-xs text-fg-faint">
+                  Opens the wallet menu — a browser extension, or a hardware wallet through its app.
+                </span>
+              </div>
+            ) : (
+              <div className="mt-1 space-y-2">
+                <p className="font-mono text-[11px] text-fg-dim">connected · {shorten(funding.address)}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!parsedAmount.ok || address === undefined) return;
+                    void funding
+                      .send({
+                        token: { address: token.address, decimals: token.decimals, chain: token.chain },
+                        to: address as `0x${string}`,
+                        base: parsedAmount.base,
+                      })
+                      .then(setTxHash)
+                      .catch(() => undefined);
+                  }}
+                  disabled={!valid || address === undefined}
+                  className="border border-amber/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-amber hover:bg-amber/10 disabled:opacity-40"
+                >
+                  send {token.symbol}
+                </button>
+                {txHash !== null && (
+                  <p className="text-xs text-fg-dim">
+                    sent ·{" "}
+                    <a className="text-amber underline" href={explorerTxUrl(token.chain, txHash)} target="_blank" rel="noreferrer">
+                      view on {chain.label}
+                    </a>
+                  </p>
+                )}
+              </div>
+            )}
+            {funding.error !== null && <p className="mt-1.5 text-xs text-red-400">{funding.error}</p>}
+          </div>
           <div className="border-t border-edge pt-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg-faint">
               if you hold this in a safe
