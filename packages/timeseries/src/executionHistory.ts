@@ -58,6 +58,14 @@ export const ExecutionStepRowSchema = z.object({
   srcTxHash: z.string().nullable(),
   dstTxHash: z.string().nullable(),
   guid: z.string().nullable(),
+  /**
+   * Where this transfer can be verified, when a provider publishes a scan.
+   *
+   * Optional because only a broadcast event carries it: a step row comes from a table with no such
+   * column, and inventing an empty string for it would render an empty link rather than no link.
+   */
+  scanUrl: z.string().nullable().optional(),
+  scanLabel: z.string().nullable().optional(),
   error: z.string().nullable(),
 });
 export type ExecutionStepRow = z.infer<typeof ExecutionStepRowSchema>;
