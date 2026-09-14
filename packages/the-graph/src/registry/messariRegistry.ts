@@ -29,6 +29,7 @@
  */
 import { z } from 'zod';
 import raw from './messari-deployments.json' with { type: 'json' };
+import livenessRaw from './messari-liveness.json' with { type: 'json' };
 
 /** The five categories the fixed-income agents read. Four come from Messari. */
 export const MESSARI_CATEGORIES = ['lending', 'dex', 'perpetual', 'liquid-staking'] as const;
@@ -126,4 +127,134 @@ export function messariNetworksFor(protocol: string): string[] {
 /** Distinct protocols in the registry, optionally within one category. */
 export function listMessariProtocols(category?: MessariCategory): string[] {
   return [...new Set(listMessariDeployments(category).map((deployment) => deployment.protocol))].sort();
+}
+
+/**
+ * The result of probing every registry entry.
+ *
+ * Kept separate from the deployment registry on purpose. That file says which endpoints exist; this
+ * one says which of them answered. The distinction is the whole point: presence is not liveness, and
+ * 88 of 204 entries are dead. A UI that showed the registry size as "subgraphs live" would overstate
+ * the system by roughly double.
+ *
+ * Produced by `scripts/messari-probe.ts`, so `verifiedAt` is the date the endpoints were actually
+ * called rather than the date this file happened to be read.
+ */
+/** One endpoint, as the probe found it. */
+export const MessariProbeEntrySchema = z.object({
+  protocol: z.string().min(1),
+  network: z.string().min(1),
+  category: z.string().min(1),
+  /** The probe's own words, usually including the block height it read. */
+  detail: z.string().min(1),
+});
+export type MessariProbeEntry = z.infer<typeof MessariProbeEntrySchema>;
+
+export type MessariProbeStatus = 'standard' | 'partial' | 'dead';
+
+export const MessariLivenessSchema = z.object({
+  $schema: z.literal('internal://messari-liveness/v1'),
+  probe: z.string().min(1),
+  verifiedAt: z.string().min(1),
+  note: z.string().min(1),
+  counts: z.object({
+    total: z.number().int().nonnegative(),
+    standard: z.number().int().nonnegative(),
+    partial: z.number().int().nonnegative(),
+    dead: z.number().int().nonnegative(),
+  }),
+  byCategory: z.record(
+    z.string(),
+    z.object({
+      standard: z.number().int().nonnegative(),
+      partial: z.number().int().nonnegative(),
+      dead: z.number().int().nonnegative(),
+    }),
+  ),
+  /**
+   * The per-endpoint results themselves, not just the tallies.
+   *
+   * This is what makes the numbers checkable: each entry carries the block the endpoint reported,
+   * so a display can show the evidence rather than assert a conclusion.
+   */
+  standard: z.array(MessariProbeEntrySchema),
+  partial: z.array(MessariProbeEntrySchema),
+  dead: z.array(MessariProbeEntrySchema),
+});
+export type MessariLiveness = z.infer<typeof MessariLivenessSchema>;
+
+export const messariLiveness = MessariLivenessSchema.parse(livenessRaw);
+
+export interface SubgraphStats {
+  readonly liveness: MessariLiveness['counts'] & { readonly verifiedAt: string; readonly probe: string };
+  /** Per category, from the probe — the categories here are the probe's, which include `prediction`. */
+  readonly byCategory: readonly { readonly category: string; readonly standard: number; readonly partial: number; readonly dead: number }[];
+  readonly deployments: { readonly total: number; readonly byCategory: readonly { readonly category: string; readonly count: number }[] };
+  readonly networksByCategory: readonly { readonly category: string; readonly networks: readonly string[] }[];
+}
+
+/**
+ * The registry in the shape a dashboard tile needs.
+ *
+ * Every number is counted from the two files rather than restated, so a regeneration of either one
+ * moves the display without a code change — and a number that cannot be counted cannot be invented
+ * here.
+ *
+ * The dead count is returned alongside the live one deliberately: "108 live" and "108 live, 88 dead"
+ * are different claims about the same system, and only the second one is the truth.
+ */
+export function subgraphStats(): SubgraphStats {
+  const networks = new Map<string, Set<string>>();
+  const perCategory = new Map<string, number>();
+
+  for (const deployment of messariRegistry.deployments) {
+    if (!networks.has(deployment.category)) networks.set(deployment.category, new Set());
+    networks.get(deployment.category)?.add(deployment.network);
+    perCategory.set(deployment.category, (perCategory.get(deployment.category) ?? 0) + 1);
+  }
+
+  return {
+    liveness: { ...messariLiveness.counts, verifiedAt: messariLiveness.verifiedAt, probe: messariLiveness.probe },
+    byCategory: Object.entries(messariLiveness.byCategory)
+      .map(([category, counts]) => ({ category, ...counts }))
+      .sort((left, right) => right.standard - left.standard),
+    deployments: {
+      total: messariRegistry.deployments.length,
+      byCategory: [...perCategory.entries()]
+        .map(([category, count]) => ({ category, count }))
+        .sort((left, right) => right.count - left.count),
+    },
+    networksByCategory: [...networks.entries()]
+      .map(([category, set]) => ({ category, networks: [...set].sort() }))
+      .sort((left, right) => left.category.localeCompare(right.category)),
+  };
+}
+
+/** Distinct networks a category is deployed on. */
+export function messariNetworksIn(category: MessariCategory): string[] {
+  const set = new Set<string>();
+  for (const deployment of messariRegistry.deployments) {
+    if (deployment.category === category) set.add(deployment.network);
+  }
+  return [...set].sort();
+}
+
+/**
+ * The probe's per-endpoint results, tagged with the status they resolved to.
+ *
+ * `standard` means the endpoint answered and implemented the Messari core. `partial` means it
+ * answered but the core query hit a schema difference — a real endpoint that will not serve the
+ * standard query, which is neither alive-for-our-purposes nor dead. `dead` must not be queried.
+ */
+export function messariProbe(): readonly { readonly status: MessariProbeStatus; readonly entry: MessariProbeEntry }[] {
+  const out: { status: MessariProbeStatus; entry: MessariProbeEntry }[] = [];
+  for (const status of ['standard', 'partial', 'dead'] as const) {
+    for (const entry of messariLiveness[status]) out.push({ status, entry });
+  }
+  return out;
+}
+
+/** Every probed endpoint for one protocol, across its networks and statuses. */
+export function messariProbeFor(protocol: string): readonly { readonly status: MessariProbeStatus; readonly entry: MessariProbeEntry }[] {
+  return messariProbe().filter((result) => result.entry.protocol === protocol);
 }

@@ -19,8 +19,15 @@ export {
   listMessariProtocols,
   findMessariDeployment,
   messariNetworksFor,
+  messariLiveness,
+  MessariLivenessSchema,
+  subgraphStats,
+  messariNetworksIn,
+  messariProbe,
+  messariProbeFor,
+  MessariProbeEntrySchema,
 } from './registry/messariRegistry.js';
-export type { MessariCategory, MessariDeployment } from './registry/messariRegistry.js';
+export type { MessariCategory, MessariDeployment, MessariLiveness, MessariProbeEntry, MessariProbeStatus, SubgraphStats } from './registry/messariRegistry.js';
 export { FnoDataExtractor } from './fno/FnoDataExtractor.js';
 export type {
   ProtocolSnapshot,
