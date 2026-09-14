@@ -1,3 +1,4 @@
+import "server-only";
 import { serverEnv } from "@/lib/env";
 /**
  * Server-side client for the inference service.

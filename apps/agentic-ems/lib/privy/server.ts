@@ -1,3 +1,4 @@
+import "server-only";
 import { verifyAccessToken } from "@privy-io/node";
 import { PRIVY_APP_ID } from "@/lib/privy/config";
 import { serverEnv } from "@/lib/env";
