@@ -158,12 +158,18 @@ export function parseTypedData(params: unknown): EvmTypedDataPayload | undefined
  * `eth_accounts`/`eth_chainId` are answered without touching the key at all — a dapp asking which
  * account is connected should not cost a signature.
  */
-export async function executeWalletRequest(signer: EvmSigner, body: WalletRequestBody): Promise<unknown> {
-  if (body.method === "eth_accounts" || body.method === "eth_requestAccounts") {
-    return [await signer.getAddress()];
-  }
+export async function executeWalletRequest(signer: EvmSigner | undefined, body: WalletRequestBody): Promise<unknown> {
+  // Answered before the signer is required: a dapp asking which chain this wallet is on should not
+  // need a key to be bound, or a deployment without one becomes unusable to a dapp for a question
+  // that costs nothing to answer.
   if (body.method === "eth_chainId") {
     return `0x${WALLET_CHAIN_ID.toString(16)}`;
+  }
+  if (signer === undefined) {
+    throw new Error("No signer is bound on this deployment, so there is nothing to sign with.");
+  }
+  if (body.method === "eth_accounts" || body.method === "eth_requestAccounts") {
+    return [await signer.getAddress()];
   }
   if (body.method === "personal_sign") {
     const params = Array.isArray(body.params) ? body.params : [];

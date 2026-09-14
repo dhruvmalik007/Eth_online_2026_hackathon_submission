@@ -370,13 +370,20 @@ export function buildApp(options: AppOptions): FastifyInstance {
       return reply.code(403).send({ error: { message: decision.reason } });
     }
 
-    const signer = runtime.signer;
-    if (signer === undefined) {
-      return reply.code(503).send({ error: { message: "No signer is bound on this deployment, so there is nothing to sign with." } });
+    try {
+      const result = await executeWalletRequest(runtime.signer, {
+        method: body.method,
+        chainId: body.chainId,
+        params: body.params,
+      });
+      return reply.send({ result });
+    } catch (cause) {
+      // A deployment with no key is a configuration state, not a client error: it is reported as
+      // unavailable with the reason, so a dapp shows something truer than "rejected".
+      return reply.code(503).send({
+        error: { message: cause instanceof Error ? cause.message : "The request could not be completed." },
+      });
     }
-
-    const result = await executeWalletRequest(signer, { method: body.method, chainId: body.chainId, params: body.params });
-    return reply.send({ result });
   });
   app.post("/runs/:id/simulate", async (request, reply) => {
     const userId = await authenticator.authenticate(request);
