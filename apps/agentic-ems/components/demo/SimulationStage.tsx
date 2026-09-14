@@ -57,7 +57,7 @@ const TRACE_TEMPLATES: Record<string, string[]> = {
 const SYNTHESIS = (risk: string) =>
   `Synthesis complete. I ran the lending, staking, prediction, perps, and LP specialists in parallel and their forecasts agree on one point: funding stress is low and the q10–q90 bands are tight, so the ${risk} allocation tilts toward carry. Proposal below is ready for your per-agent approval — every number traces to DeFiLlama data and a TimesFM-3 forecast with provenance.`;
 
-export function SimulationStage({ onNext }: { onNext?: () => void } = {}) {
+export function SimulationStage({ onNext }: { onNext?: () => void }) {
   const { state, dispatch } = useDemo();
   const risk = state.answers?.risk ?? "balanced";
   const alloc = React.useMemo(() => allocationsFor(risk), [risk]);

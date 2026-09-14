@@ -5,7 +5,7 @@ import { Check, X } from "lucide-react";
 import { useDemo } from "@/lib/demo/state";
 import { allocationsFor } from "@/lib/demo/data";
 
-export function ApprovalsStage({ onNext }: { onNext?: () => void } = {}) {
+export function ApprovalsStage({ onNext }: { onNext?: () => void }) {
   const { state, dispatch } = useDemo();
   const risk = state.answers?.risk ?? "balanced";
   const alloc = React.useMemo(() => allocationsFor(risk), [risk]);

@@ -7,7 +7,7 @@ import { allocationsFor } from "@/lib/demo/data";
 import { executionBaseUrl } from "@/lib/execution/mandates";
 import { fetchBridgeProgress, toMessageTracking, type RecordedStep } from "@/lib/execution/live";
 
-export function ExecutingStage({ onPortfolioLive }: { onPortfolioLive?: () => void } = {}) {
+export function ExecutingStage({ onPortfolioLive }: { onPortfolioLive?: () => void }) {
   const { state, dispatch } = useDemo();
   const risk = state.answers?.risk ?? "balanced";
   const alloc = React.useMemo(() => allocationsFor(risk), [risk]);
