@@ -1,3 +1,4 @@
+import { currentSession, unauthenticated } from "@/lib/auth/session";
 import { serverEnv } from "@/lib/env";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -75,6 +76,13 @@ function config() {
 }
 
 export async function GET() {
+  // Both handlers require a session. `GET` only answers a boolean, and it is tempting to leave it
+  // open so the composer can decide whether to offer the button before sign-in — but that boolean is
+  // still a fact about the deployment's configuration, and a route layer where one handler is
+  // guarded and its neighbour is not is a route layer nobody reasons about correctly later.
+  const session = await currentSession();
+  if (session === null) return unauthenticated();
+
   return NextResponse.json(
     { enabled: Boolean(config().apiKey) },
     { headers: { "Cache-Control": "private, no-store" } },
@@ -82,6 +90,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Writing scenes spends the deployment's `OPENAI_API_KEY`, so the session is not decoration.
+  const session = await currentSession();
+  if (session === null) return unauthenticated();
+
   const { apiKey, baseUrl, model } = config();
   if (!apiKey) {
     return NextResponse.json(

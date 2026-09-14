@@ -1,3 +1,4 @@
+import { currentSession, unauthenticated } from "@/lib/auth/session";
 import { serverEnv } from "@/lib/env";
 import { NextResponse } from "next/server";
 
@@ -10,7 +11,18 @@ const MAX_SESSIONS = 10;
 // 1h keeps a memoized token — and its session budget — from outliving a visit.
 const TOKEN_LIFETIME_SECONDS = 60 * 60;
 
+/**
+ * Mint a Reactor token.
+ *
+ * The token spends the deployment's Reactor account, and the key that mints it is server-side only,
+ * so this is a billable resource rather than a public convenience. It now requires a session. The
+ * identity is not used for anything here — only *that* there is one — because the token is scoped to
+ * a session budget rather than to a user.
+ */
 export async function GET() {
+  const session = await currentSession();
+  if (session === null) return unauthenticated();
+
   const apiKey = serverEnv().REACTOR_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

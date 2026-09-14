@@ -196,6 +196,10 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("NEXT_PUBLIC_PRIVY_APP_ID", ["agentic-ems"], "Privy App ID exposed to the browser.", {
     requiredIn: ["staging", "production"],
   }),
+  v("AUTH_SECRET", ["agentic-ems"], "Secret the desk's session cookie is signed with. A random 32-byte value; rotating it signs everyone out.", {
+    requiredIn: ["staging", "production"],
+    secret: true,
+  }),
   v("REACTOR_API_KEY", ["agentic-ems"], "Reactor video API key for the studio.", { secret: true }),
   v("OPENAI_API_KEY", ["agentic-ems"], "OpenAI key for the upsampling route.", { secret: true }),
   v("OPENAI_BASE_URL", ["agentic-ems"], "OpenAI-compatible base URL.", { format: "url" }),
