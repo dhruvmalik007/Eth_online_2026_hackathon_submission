@@ -1,3 +1,4 @@
+import { clientEnv } from "@/lib/env";
 /**
  * Client for the deployed indexer (`apps/indexer`, Vercel Functions).
  *
@@ -15,7 +16,7 @@
  */
 
 export function indexerBaseUrl(): string | undefined {
-  const url = process.env.NEXT_PUBLIC_INDEXER_URL;
+  const url = clientEnv.NEXT_PUBLIC_INDEXER_URL;
   const trimmed = url?.trim();
   return trimmed !== undefined && trimmed.length > 0 ? trimmed.replace(/\/+$/, "") : undefined;
 }

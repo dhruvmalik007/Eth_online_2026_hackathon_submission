@@ -1,6 +1,7 @@
 import { base, optimism, polygon } from "viem/chains";
 import type { Chain } from "viem";
 import type { PrivyClientConfig } from "@privy-io/react-auth";
+import { clientEnv } from "@/lib/env";
 
 /**
  * Privy configuration for the Agentic EMS desk.
@@ -18,7 +19,7 @@ import type { PrivyClientConfig } from "@privy-io/react-auth";
  *   - Smart wallets → enabled, type "Safe", networks Base / Polygon / Optimism
  *   - App settings → allowed domains include this origin
  */
-export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
+export const PRIVY_APP_ID = clientEnv.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
 
 /** True when the app has enough config to mount Privy. */
 export const PRIVY_CONFIGURED = PRIVY_APP_ID.length > 0;

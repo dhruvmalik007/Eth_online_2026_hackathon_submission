@@ -1,3 +1,4 @@
+import { serverEnv } from "@/lib/env";
 import { NextResponse } from "next/server";
 
 // The account-qualified model this example drives; the minted JWT is scoped
@@ -10,7 +11,7 @@ const MAX_SESSIONS = 10;
 const TOKEN_LIFETIME_SECONDS = 60 * 60;
 
 export async function GET() {
-  const apiKey = process.env.REACTOR_API_KEY;
+  const apiKey = serverEnv().REACTOR_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
       { error: "REACTOR_API_KEY not set" },

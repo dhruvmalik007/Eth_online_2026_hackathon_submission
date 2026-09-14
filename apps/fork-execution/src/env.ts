@@ -17,6 +17,7 @@
  * private node?"), and never the path or query that carries the credential.
  */
 
+import { createEnv, type EnvSource } from "@ethonline2026/env";
 import {
   CHAINS,
   CHAIN_KEYS,
@@ -138,14 +139,25 @@ export function rpcHost(rpcUrl: string): string {
   }
 }
 
+/**
+ * The package's own variables, validated against the shared catalog.
+ *
+ * The chain RPCs are resolved dynamically by `chainRuntime` (each chain contributes its own key),
+ * so they are not listed here — but the static variables are, which is what removes the literal key
+ * strings that used to live in this file.
+ */
+export function forkEnv(env: EnvSource = process.env): Readonly<Record<string, string | undefined>> {
+  return createEnv({ service: "fork-execution", source: env });
+}
+
 /** Where evidence is written. Defaults to the package's own `evidence/` directory. */
 export function evidenceDir(env: Readonly<Record<string, string | undefined>> = process.env): string {
-  return env["FORK_EVIDENCE_DIR"] ?? "evidence";
+  return forkEnv(env).FORK_EVIDENCE_DIR ?? "evidence";
 }
 
 /** Which port the local node listens on. */
 export function anvilPort(env: Readonly<Record<string, string | undefined>> = process.env): number {
-  const raw = env["FORK_ANVIL_PORT"];
+  const raw = forkEnv(env).FORK_ANVIL_PORT;
   if (raw === undefined) return 8545;
   const parsed = Number(raw);
   if (!Number.isInteger(parsed) || parsed <= 0 || parsed > 65535) {

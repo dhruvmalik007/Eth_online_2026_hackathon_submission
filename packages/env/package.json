@@ -1,0 +1,39 @@
+{
+  "name": "@ethonline2026/env",
+  "version": "0.1.0",
+  "description": "Single source of truth for the Agentic EMS environment: every variable, which service reads it, which environments require it, whether it is a secret, and a CLI to validate an environment, generate .env.example files and emit the CI manifest.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "ems-env": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "zod": "^4.5.4"
+  }
+}

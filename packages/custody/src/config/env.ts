@@ -1,3 +1,4 @@
+import { assertCatalogKeys } from "@ethonline2026/env";
 /**
  * Custody package environment loading — zod-validated CUSTODY_* variables.
  *
@@ -121,3 +122,5 @@ export function safeOwners(env: CustodyEnv): `0x${string}`[] | null {
   }
   return owners.length > 0 ? owners : null;
 }
+// The catalog owns the names; a key added here without a catalog entry fails at boot.
+assertCatalogKeys("custody", Object.keys(envSchema.shape));

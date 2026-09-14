@@ -1,3 +1,4 @@
+import { assertCatalogKeys } from "@ethonline2026/env";
 import { readFileSync } from 'node:fs';
 import { Pool, type PoolClient, type PoolConfig } from 'pg';
 import { z } from 'zod';
@@ -448,3 +449,6 @@ function errorCode(err: object): string | null {
   const code: unknown = Reflect.get(err, 'code');
   return typeof code === 'string' && code.length > 0 ? code : null;
 }
+
+// The catalog owns the names; a key added here without a catalog entry fails at boot.
+assertCatalogKeys("timeseries", Object.keys(TimeseriesEnvSchema.shape));

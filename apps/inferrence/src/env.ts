@@ -1,3 +1,4 @@
+import { assertCatalogKeys } from "@ethonline2026/env";
 /**
  * Configuration for the inference service.
  *
@@ -186,3 +187,6 @@ export function egressHosts(env: InferenceEnv): string[] {
     .map((host) => host.trim())
     .filter((host) => host.length > 0);
 }
+
+// The catalog owns the names; a key added here without a catalog entry fails at boot.
+assertCatalogKeys("inference", Object.keys(InferenceEnvSchema.shape));

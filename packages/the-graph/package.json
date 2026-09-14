@@ -27,6 +27,7 @@
     "dryrun:testnet": "tsx src/cli.ts dry-run --network sepolia"
   },
   "dependencies": {
+    "@ethonline2026/env": "workspace:*",
     "@graphprotocol/client-auto-pagination": "^2.0.0",
     "@graphprotocol/client-block-tracking": "^2.0.0",
     "@graphprotocol/client-cli": "^3.0.7",

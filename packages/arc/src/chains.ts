@@ -22,6 +22,7 @@
  *  - Arc CCTP contracts are V2-only; the V1 4-arg selector silently reverts.
  */
 import type { Chain } from "viem";
+import { arcEnv, envNumber, envString } from "./config/env.js";
 
 /** Arc TokenMessenger — same cross-chain address as other CCTP deployments. */
 export const ARC_TOKEN_MESSENGER_V2 =
@@ -59,35 +60,34 @@ export interface ArcChainConfig {
 }
 
 export function arcChainConfig(network: ArcNetwork): ArcChainConfig {
+  const env = arcEnv();
   if (network === "arc-mainnet") {
     return {
       network,
-      chainId: Number(process.env.ARC_MAINNET_CHAIN_ID ?? 5042),
-      rpcUrl: process.env.ARC_MAINNET_RPC_URL ?? "",
-      usdcAddress: process.env.ARC_MAINNET_USDC ?? "",
+      chainId: envNumber(env, "ARC_MAINNET_CHAIN_ID", 5042),
+      rpcUrl: envString(env, "ARC_MAINNET_RPC_URL"),
+      usdcAddress: envString(env, "ARC_MAINNET_USDC"),
       usdcDecimals: 6,
-      messageTransmitterV2: process.env.ARC_MAINNET_MESSAGE_TRANSMITTER_V2 ?? "",
-      tokenMessengerV2: process.env.ARC_MAINNET_TOKEN_MESSENGER_V2 ?? ARC_TOKEN_MESSENGER_V2,
-      cctpDomain: Number(process.env.ARC_MAINNET_CCTP_DOMAIN ?? 0),
+      messageTransmitterV2: envString(env, "ARC_MAINNET_MESSAGE_TRANSMITTER_V2"),
+      tokenMessengerV2: envString(env, "ARC_MAINNET_TOKEN_MESSENGER_V2", ARC_TOKEN_MESSENGER_V2),
+      cctpDomain: envNumber(env, "ARC_MAINNET_CCTP_DOMAIN", 0),
       explorerUrl: "https://arc-scan.org",
     };
   }
   return {
     network,
-    chainId: Number(process.env.ARC_TESTNET_CHAIN_ID ?? 5042002),
-    rpcUrl: process.env.ARC_TESTNET_RPC_URL ?? "https://rpc.testnet.arc.network",
+    chainId: envNumber(env, "ARC_TESTNET_CHAIN_ID", 5042002),
+    rpcUrl: envString(env, "ARC_TESTNET_RPC_URL", "https://rpc.testnet.arc.network"),
     // VERIFIED on-chain: `decimals()` returns 6, symbol "USDC". An earlier note here claimed 18,
     // which scaled every Arc amount by 10^12 — a real balance of 40 read as 0.00000000004.
-    usdcAddress: process.env.ARC_TESTNET_USDC ?? "0x3600000000000000000000000000000000000000",
+    usdcAddress: envString(env, "ARC_TESTNET_USDC", "0x3600000000000000000000000000000000000000"),
     usdcDecimals: 6,
     // VERIFIED: Circle quickstart "Transfer USDC from Ethereum to Arc".
     messageTransmitterV2:
-      process.env.ARC_TESTNET_MESSAGE_V2 ??
-      process.env.ARC_TESTNET_MESSAGE_TRANSMITTER_V2 ??
-      "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+      envString(env, "ARC_TESTNET_MESSAGE_V2", envString(env, "ARC_TESTNET_MESSAGE_TRANSMITTER_V2", "0xe737e5cebeeba77efe34d4aa090756590b1ce275")),
     // VERIFIED: arc-node#110 — same address as other CCTP deployments.
-    tokenMessengerV2: process.env.ARC_TESTNET_TOKEN_MESSENGER_V2 ?? ARC_TOKEN_MESSENGER_V2,
-    cctpDomain: Number(process.env.ARC_TESTNET_CCTP_DOMAIN ?? 26),
+    tokenMessengerV2: envString(env, "ARC_TESTNET_TOKEN_MESSENGER_V2", ARC_TOKEN_MESSENGER_V2),
+    cctpDomain: envNumber(env, "ARC_TESTNET_CCTP_DOMAIN", 26),
     explorerUrl: "https://testnet.arc-scan.org",
   };
 }
@@ -116,6 +116,6 @@ export const SPOKE_DOMAINS: Array<{ chain: KnownChain; domain: number; label: st
  */
 export function irisBaseUrl(network: ArcNetwork): string {
   return network === "arc-mainnet"
-    ? (process.env.IRIS_API_URL ?? "https://iris-api.circle.com")
+    ? envString(arcEnv(), "IRIS_API_URL", "https://iris-api.circle.com")
     : "https://iris-api-sandbox.circle.com";
 }

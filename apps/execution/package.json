@@ -15,6 +15,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@ethonline2026/env": "workspace:*",
     "@ethonline2026/execution-domain": "workspace:*",
     "@ethonline2026/oneinch-aqua": "workspace:*",
     "@ethonline2026/order-execution-layer": "workspace:*",
