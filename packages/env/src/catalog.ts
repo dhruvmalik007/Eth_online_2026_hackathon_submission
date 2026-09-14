@@ -289,7 +289,7 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   // that offers WalletConnect, so committing it leaks nothing. It is NOT a secret, and it must never
   // be confused with the Privy authorization key, which signs our server requests and stays server-side.
   v("NEXT_PUBLIC_REOWN_PROJECT_ID", ["agentic-ems"], "WalletConnect project id from Reown (public, not a secret).", {
-    example: "your-reown-project-id",
+    requiredIn: ["staging", "production"], example: "your-reown-project-id",
   }),
 ];
 
