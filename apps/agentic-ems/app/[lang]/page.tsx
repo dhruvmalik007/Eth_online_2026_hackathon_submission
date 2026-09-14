@@ -12,6 +12,7 @@ import { Stack } from "@/components/landing/stack";
 import { DemoVideo } from "@/components/landing/demo-video";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { DICTS } from "@/lib/i18n";
+import { landingStats } from "@/lib/live/subgraph-stats";
 import { DEFAULT_THEME, LANGS, type Lang } from "@/lib/i18n-meta";
 
 /**
@@ -57,16 +58,18 @@ export default async function LocalePage({
   // Theme is a client concern (applied pre-paint by the inline script in the root
   // layout) — reading it here would opt this page out of static rendering.
   const theme = DEFAULT_THEME;
+  // Counted from the registry at build time, so the hero and the tape carry no literals.
+  const stats = landingStats();
 
   return (
     <>
       <SiteNav t={t} lang={lang as Lang} theme={theme} />
       <main id="top">
-        <Hero t={t} />
-        <Ticker />
+        <Hero t={t} stats={stats} />
+        <Ticker rows={stats.tape} />
         <Thesis t={t} />
         <Architecture t={t} />
-        <LiveData t={t} />
+        <LiveData t={t} stats={stats} />
         <PrizeTracks t={t} />
         <V4Strategies t={t} />
         <Stack t={t} />
