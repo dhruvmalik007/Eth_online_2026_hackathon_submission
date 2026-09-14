@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ethonline2026/env": "workspace:*",
     "@ethonline2026/ux-workflow": "workspace:*",
     "@privy-io/react-auth": "^3.42.0",
     "@reactor-models/fast-h3": "^1.0.2",

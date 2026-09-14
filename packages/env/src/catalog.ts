@@ -160,11 +160,11 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("ARC_TESTNET_RPC_URL", ["inference", "langchain", "arc"], "Arc testnet RPC.", { format: "url" }),
   v("ARC_PRIVATE_KEY", ["langchain"], "Arc signing key.", { secret: true }),
   v("ARC_TESTNET_USDC", ["langchain", "arc"], "USDC address on the Arc testnet."),
-  v("ARC_TESTNET_CCTP_DOMAIN", ["langchain"], "CCTP domain id for Arc testnet.", { format: "number" }),
-  v("ARC_TESTNET_MESSAGE_V2", ["langchain"], "CCTP v2 message contract address."),
-  v("ARC_TESTNET_TOKEN_MESSENGER_V2", ["langchain"], "CCTP v2 token messenger address."),
+  v("ARC_TESTNET_CCTP_DOMAIN", ["langchain", "arc"], "CCTP domain id for Arc testnet.", { format: "number" }),
+  v("ARC_TESTNET_MESSAGE_V2", ["langchain", "arc"], "CCTP v2 message contract address."),
+  v("ARC_TESTNET_TOKEN_MESSENGER_V2", ["langchain", "arc"], "CCTP v2 token messenger address."),
   v("ARC_ACP_KERNEL", ["langchain"], "Arc agent-commerce kernel address."),
-  v("ARC_RISK_EVALUATOR_HOOK", ["langchain"], "Arc risk-evaluator hook address."),
+  v("ARC_RISK_EVALUATOR_HOOK", ["langchain", "arc"], "Arc risk-evaluator hook address."),
   v("STABLEFX_RATE_USDC_EURC", ["langchain"], "Pinned StableFX rate for deterministic runs.", { format: "number" }),
   v("IRIS_API_URL", ["arc"], "Circle Iris attestation API base.", { format: "url" }),
 
@@ -279,6 +279,12 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
 
   // ── LangChain convention ─────────────────────────────────────────────────────────────────────
   v("LANGCHAIN_TRACING_V2", ["langchain", "inference", "indexer"], "LangChain's own tracing switch; complements LANGSMITH_TRACING.", { format: "flag", default: "false" }),
+  v("NEXT_PUBLIC_ARC_CHAIN_ID", ["agentic-ems"], "Arc chain id exposed to the browser.", {
+    format: "number", example: "5042002",
+  }),
+  v("NEXT_PUBLIC_ARC_RPC_URL", ["agentic-ems"], "Arc RPC endpoint exposed to the browser.", {
+    format: "url",
+  }),
 ];
 
 /** Look a variable up by name. */

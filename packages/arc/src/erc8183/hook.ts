@@ -7,6 +7,7 @@
  * Deployed alongside the ACP kernel (Foundry, §7 Phase B of the integration
  * plan); this module exposes the binding + the policy inputs it enforces.
  */
+import { arcEnv } from "../config/env.js";
 import { parseAbi, type Address } from "viem";
 import { ERC8183_ABI } from "./kernel.js";
 
@@ -39,7 +40,7 @@ export function encodeExpectation(e: DeliverableExpectation): `0x${string}` {
 /** Deploy-time note: the hook is set at createJob — hooks are client-trusted
  * (EIP-8183 §Hook security) and MUST NOT be upgradeable mid-job. */
 export function riskEvaluatorHookAddress(): Address | null {
-  const addr = process.env.ARC_RISK_EVALUATOR_HOOK;
+  const addr = arcEnv().ARC_RISK_EVALUATOR_HOOK;
   return (addr as Address) ?? null;
 }
 

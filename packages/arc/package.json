@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@circle-fin/app-kit": "^1.14.0",
+    "@ethonline2026/env": "workspace:*",
     "viem": "^2.56.3",
     "zod": "^4.2.1"
   },
