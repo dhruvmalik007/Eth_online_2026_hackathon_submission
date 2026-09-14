@@ -7,6 +7,7 @@ import { allocationsFor } from "@/lib/demo/data";
 import { useNav } from "@/lib/portfolio/context";
 import { formatAllocUsd } from "@/lib/portfolio/nav";
 import { executionBaseUrl } from "@/lib/execution/mandates";
+import { usePrivyAccessToken } from "@/components/privy-provider";
 import { fetchBridgeProgress, toMessageTracking, type RecordedStep } from "@/lib/execution/live";
 
 export function ExecutingStage({ onPortfolioLive }: { onPortfolioLive?: () => void }) {
@@ -42,7 +43,13 @@ const [live, setLive] = React.useState<{ steps: readonly RecordedStep[]; error: 
   });
 
   const baseUrl = executionBaseUrl();
-  const userId = state.email.length > 0 ? state.email : "demo@agentic-ems.eth";
+  /**
+   * The execution service verifies this token and takes the identity from the verified claims. It
+   * used to be handed `state.email` as a request header, which let the browser name itself. Read per
+   * poll rather than captured once: an access token expires, and this panel stays mounted for
+   * minutes.
+   */
+  const getAccessToken = usePrivyAccessToken();
 
   /**
    * Polled, not read once.
@@ -67,7 +74,9 @@ const [live, setLive] = React.useState<{ steps: readonly RecordedStep[]; error: 
 
     const poll = async () => {
       try {
-        const steps = await fetchBridgeProgress({ baseUrl, userId });
+        const accessToken = await getAccessToken();
+        if (accessToken === null) throw new Error("Sign in to read execution progress.");
+        const steps = await fetchBridgeProgress({ baseUrl, accessToken });
         if (cancelled) return;
         setLive((previous) => ({ steps, error: null }));
       } catch (error) {
@@ -83,7 +92,7 @@ const [live, setLive] = React.useState<{ steps: readonly RecordedStep[]; error: 
       cancelled = true;
       if (timer !== undefined) clearTimeout(timer);
     };
-  }, [state.simulated, baseUrl, userId]);
+  }, [state.simulated, baseUrl, getAccessToken]);
 
   React.useEffect(() => {
     if (done && onPortfolioLive) onPortfolioLive();

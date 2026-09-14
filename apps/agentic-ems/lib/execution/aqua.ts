@@ -37,7 +37,7 @@ export const AQUA_CHAINS = ["polygon", "optimism"] as const;
 
 export async function fetchAquaEnablement(
   chain: string,
-  options: { readonly baseUrl?: string | undefined; readonly userId?: string; readonly efficiencyBps?: number } = {},
+  options: { readonly baseUrl?: string | undefined; readonly accessToken?: string; readonly efficiencyBps?: number } = {},
 ): Promise<AquaReadResult> {
   const baseUrl = options.baseUrl ?? executionBaseUrl();
   if (baseUrl === undefined) {
@@ -57,7 +57,7 @@ export async function fetchAquaEnablement(
     const response = await fetch(`${baseUrl}/aqua/enablement?${params.toString()}`, {
       headers: {
         accept: "application/json",
-        ...(options.userId === undefined ? {} : { "x-user-id": options.userId }),
+        ...(options.accessToken === undefined ? {} : { authorization: `Bearer ${options.accessToken}` }),
       },
       cache: "no-store",
     });
