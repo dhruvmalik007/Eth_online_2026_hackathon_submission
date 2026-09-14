@@ -25,6 +25,7 @@ import { CHAIN_KEYS } from "@ethonline2026/oneinch-aqua";
 import { IntentLegSchema, type IntentLeg } from "@ethonline2026/execution-domain";
 import { UnsignedTransactionSchema } from "@ethonline2026/order-execution-layer/port";
 import { assessApproval, resolveLimits, type ApprovalRequest } from "./approval.js";
+import { evaluateWalletRequest, executeWalletRequest } from "./walletRequest.js";
 import { describeRisk, type RiskNotice } from "./risk.js";
 import { ExecutionReadModel, type ExecutionStepRow, type SessionRow } from "@ethonline2026/timeseries";
 import type { ExecutionRuntime } from "./runtime.js";
@@ -344,6 +345,39 @@ export function buildApp(options: AppOptions): FastifyInstance {
    * question the operator is actually being asked at this point — and answering it here rather than
    * in the UI keeps the figure the same one the approval stage re-reads.
    */
+  // ── WalletConnect bridge ────────────────────────────────────────────────────
+
+  /**
+   * Sign a request that arrived from a dapp over WalletConnect.
+   *
+   * The browser asks; this decides. `evaluateWalletRequest` is an allowlist — chain, method, target
+   * contract, value ceiling — and it answers with the reason it refused, because a user told only
+   * "rejected" cannot tell a policy boundary from a bug and will retry the same thing.
+   *
+   * A request that needs no key is answered without one, so a dapp asking which account is
+   * connected does not cost a signature.
+   */
+  app.post("/wallet/sign", async (request, reply) => {
+    await authenticator.authenticate(request);
+
+    const body = request.body as { method?: unknown; chainId?: unknown; params?: unknown } | undefined;
+    if (body === undefined || typeof body.method !== "string" || typeof body.chainId !== "string") {
+      throw new HttpError("BAD_REQUEST", "Expected { method, chainId, params }.");
+    }
+
+    const decision = evaluateWalletRequest({ method: body.method, chainId: body.chainId, params: body.params });
+    if (!decision.ok) {
+      return reply.code(403).send({ error: { message: decision.reason } });
+    }
+
+    const signer = runtime.signer;
+    if (signer === undefined) {
+      return reply.code(503).send({ error: { message: "No signer is bound on this deployment, so there is nothing to sign with." } });
+    }
+
+    const result = await executeWalletRequest(signer, { method: body.method, chainId: body.chainId, params: body.params });
+    return reply.send({ result });
+  });
   app.post("/runs/:id/simulate", async (request, reply) => {
     const userId = await authenticator.authenticate(request);
     const { id } = request.params as { id: string };
