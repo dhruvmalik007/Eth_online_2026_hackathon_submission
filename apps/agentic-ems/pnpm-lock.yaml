@@ -11,6 +11,9 @@ importers:
       '@ethonline2026/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@ethonline2026/positions':
+        specifier: workspace:*
+        version: link:../../packages/positions
       '@ethonline2026/ux-workflow':
         specifier: workspace:*
         version: link:../../packages/ux-workflow
@@ -102,6 +105,31 @@ importers:
       zod:
         specifier: ^4.5.4
         version: 4.6.1
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.39.1
+        version: 9.39.5
+      '@types/node':
+        specifier: ^24.9.0
+        version: 24.13.4
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.5(jiti@2.7.0)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.46.3
+        version: 8.70.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@24.13.4)(jiti@2.7.0)(lightningcss@1.32.0)
+
+  ../../packages/positions:
+    dependencies:
+      viem:
+        specifier: ^2.56.3
+        version: 2.56.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.6.1)
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.1
