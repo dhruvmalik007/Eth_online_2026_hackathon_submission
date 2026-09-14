@@ -115,7 +115,7 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("APPROVAL_MAX_SPEND_USD", ["execution"], "Most one agent may commit in a single intent, in whole USD.", { format: "number", default: "250000" }),
   v("PRIVY_APP_ID", ["execution", "custody", "inference"], "Privy App ID (a public identifier)."),
   v("PRIVY_APP_SECRET", ["execution", "custody", "inference"], "Privy App Secret (server-side).", { secret: true }),
-  v("PRIVY_VERIFICATION_KEY", ["execution"], "Privy verification key; removes a round-trip from cold start.", { secret: true }),
+  v("PRIVY_VERIFICATION_KEY", ["execution", "agentic-ems"], "Privy verification key; removes a round-trip from cold start.", { secret: true }),
   v("EXECUTION_SIGNER_PRIVATE_KEY", ["execution"], "Key the service signs and broadcasts with. Absent means the signer routes answer 503.", { secret: true }),
   v("EXECUTION_FALLBACK_SIGNER_PRIVATE_KEY", ["execution"], "Backup payer used only when the primary is absent.", { secret: true }),
   v("EXECUTION_SIGNER_CHAIN", ["execution"], "Chain the signer binds to.", { default: "base-sepolia" }),
