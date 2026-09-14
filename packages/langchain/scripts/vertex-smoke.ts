@@ -1,11 +1,11 @@
-// Vertex AI chat-model smoke test — run: VERTEX_AI_MODEL=gemini-2.5-flash-lite npx tsx scripts/vertex-smoke.ts
+// Vertex AI chat-model smoke test — run: VERTEX_AI_MODEL=gemini-2.5-flash npx tsx scripts/vertex-smoke.ts
 import 'dotenv/config';
 
 async function main() {
   const { ChatVertexAI } = await import('@langchain/google-vertexai');
 
   const model = new ChatVertexAI({
-    model: process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-flash-lite',
+    model: process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-flash',
     temperature: 0.1,
     maxRetries: 1,
   });

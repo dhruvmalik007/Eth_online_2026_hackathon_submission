@@ -10,8 +10,11 @@ const envSchema = z.object({
   // Vertex AI
   GOOGLE_CLOUD_PROJECT: z.string().min(1).optional(),
   GOOGLE_CLOUD_LOCATION: z.string().default('us-central1'),
-  // gemini-2.5-flash-lite = cheapest Gemini tier; verified available on this project
-  VERTEX_AI_MODEL: z.string().default('gemini-2.5-flash-lite'),
+  // Must match the catalog's default. This schema and `@ethonline2026/env` both describe this
+  // variable, and they disagreed until they were reconciled — the catalog said `gemini-2.5-pro`
+  // while this said `gemini-2.5-flash-lite`, and `assertCatalogKeys` compares names only, so nothing
+  // reported it. One variable, one default.
+  VERTEX_AI_MODEL: z.string().default('gemini-2.5-flash'),
   VERTEX_AI_TEMPERATURE: z.coerce.number().min(0).max(2).default(0.1),
 
   // LangSmith tracing (Level B/C — traces stream to smith.langchain.com).
