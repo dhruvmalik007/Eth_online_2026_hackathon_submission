@@ -1,4 +1,3 @@
-import { clientEnv } from "@/lib/env";
 /**
  * Client for the deployed indexer (`apps/indexer`, Vercel Functions).
  *
@@ -15,8 +14,14 @@ import { clientEnv } from "@/lib/env";
  * an error to throw at import time.
  */
 
-export function indexerBaseUrl(): string | undefined {
-  const url = clientEnv.NEXT_PUBLIC_INDEXER_URL;
+export function indexerBaseUrl(
+  // The literal member access is load-bearing... see the note above. The parameter exists so tests
+  // can inject their own env without changing what the bundler can see.
+  env: Record<string, string | undefined> = {
+    NEXT_PUBLIC_INDEXER_URL: process.env.NEXT_PUBLIC_INDEXER_URL,
+  },
+): string | undefined {
+  const url = env["NEXT_PUBLIC_INDEXER_URL"];
   const trimmed = url?.trim();
   return trimmed !== undefined && trimmed.length > 0 ? trimmed.replace(/\/+$/, "") : undefined;
 }

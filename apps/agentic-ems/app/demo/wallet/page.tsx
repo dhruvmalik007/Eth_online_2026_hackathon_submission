@@ -11,7 +11,6 @@
  * policy gate. Nothing is signed in the browser.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { clientEnv } from "@/lib/env";
 import {
   createWalletBridge,
   type SessionSummary,
@@ -20,7 +19,7 @@ import {
 } from "@/lib/walletconnect/bridge";
 import { parsePairingUri } from "@/lib/walletconnect/protocol";
 
-const EXECUTION_URL = (clientEnv.NEXT_PUBLIC_EXECUTION_URL ?? "").replace(/\/$/, "");
+const EXECUTION_URL = (process.env.NEXT_PUBLIC_EXECUTION_URL ?? "").replace(/\/$/, "");
 
 export default function WalletSessionPage(): React.JSX.Element {
   const [address, setAddress] = useState<string | null>(null);
@@ -31,7 +30,7 @@ export default function WalletSessionPage(): React.JSX.Element {
   const [requests, setRequests] = useState<readonly WalletRequest[]>([]);
   const [userId, setUserId] = useState("did:privy:demo");
   const bridgeRef = useRef<WalletBridge | null>(null);
-  const projectId = clientEnv.NEXT_PUBLIC_REOWN_PROJECT_ID ?? "";
+  const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID ?? "";
 
   // The account offered to a dapp is the execution service's signer — the same address that does our
   // own executions, so a position opened here and one opened from the chat are the same position.
