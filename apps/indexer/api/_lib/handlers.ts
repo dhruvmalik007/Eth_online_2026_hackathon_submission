@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import {
+  DEFAULT_POOL_LIMIT,
+  DEFAULT_WINDOW_HOURS,
+  MAX_POOL_LIMIT,
+  MAX_WINDOW_HOURS,
   MetricNameSchema,
   type MetricName,
 } from '@ethonline2026/timeseries';
@@ -697,5 +701,126 @@ export async function handleRiskAdjustment(
     });
   } catch (error) {
     return errorResponse(toHttpError(error, 'risk/adjustment'));
+  }
+}
+
+// ── GET /api/pools ──────────────────────────────────────────────────────────
+
+/**
+ * The indexed pool universe.
+ *
+ * The one read that answers "what can this deployment forecast?" without the caller already holding
+ * an address. Every other pool-keyed route requires one, and the set lives in `pool_metrics_hourly`,
+ * so without this the console could only serve someone who had been told a pool id out of band —
+ * which is exactly the state the incumbent was in.
+ *
+ * @param request - The incoming request, whose query string carries the filters.
+ * @param runtime - The indexer runtime.
+ * @returns Pools ordered by recency, the filter values that actually occur, and the freshest
+ *   observation across the returned set.
+ */
+export async function handlePools(request: Request, runtime: IndexerRuntime): Promise<Response> {
+  try {
+    const params = new URL(request.url).searchParams;
+    const limit =
+      numberParam(params, 'limit', { min: 1, max: MAX_POOL_LIMIT, fallback: DEFAULT_POOL_LIMIT }) ??
+      DEFAULT_POOL_LIMIT;
+    const network = stringParam(params, 'network');
+    const protocol = stringParam(params, 'protocol');
+
+    // Read together because the console renders them together: the list, and the two dropdowns that
+    // narrow it. Either is useless alone.
+    const [pools, facets] = await Promise.all([
+      runtime.pools.list({
+        limit,
+        ...(network === undefined ? {} : { network }),
+        ...(protocol === undefined ? {} : { protocol }),
+      }),
+      runtime.pools.facets(),
+    ]);
+
+    const latestObservationAt = pools.reduce<Date | null>((latest, pool) => {
+      if (pool.lastSeen === null) return latest;
+      return latest === null || pool.lastSeen > latest ? pool.lastSeen : latest;
+    }, null);
+
+    return json({
+      count: pools.length,
+      limit,
+      pools: pools.map((pool) => ({
+        poolId: pool.poolId,
+        protocol: pool.protocol,
+        network: pool.network,
+        observations: pool.observations,
+        firstSeen: pool.firstSeen?.toISOString() ?? null,
+        lastSeen: pool.lastSeen?.toISOString() ?? null,
+      })),
+      facets,
+      latestObservationAt: latestObservationAt?.toISOString() ?? null,
+      empty: pools.length === 0,
+      reading:
+        pools.length === 0
+          ? 'No pool metrics are stored, so there is nothing to forecast yet. Ingest a pool, then reload.'
+          : `${pools.length} pools hold metrics across ${facets.networks.length} network(s); the most recent observation is ${latestObservationAt?.toISOString() ?? 'unknown'}.`,
+    });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'pools'));
+  }
+}
+
+// ── GET /api/model-status ───────────────────────────────────────────────────
+
+/**
+ * Recorded model availability.
+ *
+ * Deliberately a read of stored probes rather than a live check. `/api/health` is already the live
+ * view, and probing on every request would both duplicate the cron and make the response
+ * uncacheable. What this must not do is hide how young the record is: nothing persisted a probe
+ * before `model_probes` existed, so `recordedSince` is the left edge of any figure, and a window
+ * holding no samples reports "unobserved" rather than drawing a flat 100%.
+ *
+ * @param request - The incoming request, whose query string may carry `hours`.
+ * @param runtime - The indexer runtime.
+ */
+export async function handleModelStatus(request: Request, runtime: IndexerRuntime): Promise<Response> {
+  try {
+    const params = new URL(request.url).searchParams;
+    const hours =
+      numberParam(params, 'hours', { min: 1, max: MAX_WINDOW_HOURS, fallback: DEFAULT_WINDOW_HOURS }) ??
+      DEFAULT_WINDOW_HOURS;
+    const window = await runtime.modelProbes.window(hours);
+    const recordedHours =
+      window.recordedSince === null
+        ? 0
+        : Math.round(((Date.now() - window.recordedSince.getTime()) / 3_600_000) * 10) / 10;
+
+    return json({
+      window: {
+        requestedHours: hours,
+        recordedSince: window.recordedSince?.toISOString() ?? null,
+        // Carried separately so the console can say "recording for 3h" instead of implying a
+        // baseline it does not have.
+        recordedHours,
+      },
+      services: window.summaries.map((summary) => ({
+        service: summary.service,
+        samples: summary.samples,
+        reachableSamples: summary.reachableSamples,
+        uptimePct: summary.uptimePct,
+        p50LatencyMs: summary.p50LatencyMs,
+        p95LatencyMs: summary.p95LatencyMs,
+        lastProbedAt: summary.lastProbedAt?.toISOString() ?? null,
+        lastReachable: summary.lastReachable,
+      })),
+      empty: window.summaries.length === 0,
+      reading:
+        window.recordedSince === null
+          ? 'No probe has been recorded yet, so no uptime can be claimed for any dependency. The refresh job records the first samples.'
+          : window.summaries.length === 0
+            ? `Probes have been recorded since ${window.recordedSince.toISOString()}, but none fall inside the last ${hours}h — this window is unobserved, not healthy.`
+            : `Uptime is measured from recorded probes only, and the record begins ${window.recordedSince.toISOString()}.`,
+    });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'model-status'));
   }
 }

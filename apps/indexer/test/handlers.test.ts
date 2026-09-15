@@ -27,7 +27,9 @@ import {
   handleForecast,
   handleHealth,
   handleMetrics,
+  handleModelStatus,
   handlePerformance,
+  handlePools,
   handleRiskAdjustment,
   handleRiskChains,
   handleRiskProtocols,
@@ -147,6 +149,39 @@ function fakeRuntime(options: RuntimeOptions = {}): IndexerRuntime {
     decisions: {
       getHistory: async (): Promise<DecisionRecord[]> => [],
     } as unknown as IndexerRuntime['decisions'],
+    pools: {
+      list: async () => [
+        {
+          poolId: '0xpool',
+          protocol: 'aave-v3',
+          network: 'base',
+          observations: 96,
+          firstSeen: new Date('2026-09-01T00:00:00Z'),
+          lastSeen: new Date('2026-09-02T00:00:00Z'),
+        },
+      ],
+      facets: async () => ({ networks: ['base'], protocols: ['aave-v3'] }),
+    } as unknown as IndexerRuntime['pools'],
+    modelProbes: {
+      record: async () => 0,
+      recordedSince: async () => new Date('2026-09-14T00:00:00Z'),
+      window: async (sinceHours: number) => ({
+        sinceHours,
+        recordedSince: new Date('2026-09-14T00:00:00Z'),
+        summaries: [
+          {
+            service: 'timesfm3',
+            samples: 12,
+            reachableSamples: 11,
+            uptimePct: 11 / 12,
+            p50LatencyMs: 42,
+            p95LatencyMs: 310,
+            lastProbedAt: new Date('2026-09-15T00:00:00Z'),
+            lastReachable: true,
+          },
+        ],
+      }),
+    } as unknown as IndexerRuntime['modelProbes'],
     ...(options.vectorEnabled === false
       ? {}
       : {
@@ -988,5 +1023,96 @@ describe('GET /api/health with risk configured', () => {
 
     expect(risk['store']).toBe('unavailable');
     expect(risk['error']).toBe('bucket access denied');
+  });
+});
+
+// ── discovery and availability ──────────────────────────────────────────────
+
+describe('GET /api/pools', () => {
+  it('returns the universe, its real filter values, and how fresh it is', async () => {
+    const res = await handlePools(new Request('https://x/api/pools'), fakeRuntime());
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['count']).toBe(1);
+
+    // An id on its own is not a choice. Protocol, network, observation count and last-seen are what
+    // let a picker tell two pools apart, and every one of them is why this route exists.
+    const pools = payload['pools'] as Record<string, unknown>[];
+    expect(pools[0]?.['poolId']).toBe('0xpool');
+    expect(pools[0]?.['protocol']).toBe('aave-v3');
+    expect(pools[0]?.['network']).toBe('base');
+    expect(pools[0]?.['observations']).toBe(96);
+    expect(pools[0]?.['lastSeen']).toBe('2026-09-02T00:00:00.000Z');
+
+    expect(payload['facets']).toEqual({ networks: ['base'], protocols: ['aave-v3'] });
+    // Derived from the rows, so the console can show recency without trusting a clock of its own.
+    expect(payload['latestObservationAt']).toBe('2026-09-02T00:00:00.000Z');
+  });
+
+  it('reports an empty store as an empty state rather than an error', async () => {
+    const runtime = fakeRuntime();
+    (runtime.pools as unknown as { list: () => Promise<unknown[]> }).list = async () => [];
+
+    const res = await handlePools(new Request('https://x/api/pools'), runtime);
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['empty']).toBe(true);
+    expect(String(payload['reading'])).toContain('No pool metrics');
+  });
+
+  it('rejects a limit beyond the store cap instead of clamping it silently', async () => {
+    const res = await handlePools(new Request('https://x/api/pools?limit=99999'), fakeRuntime());
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('GET /api/model-status', () => {
+  it('reports the recording boundary alongside the window', async () => {
+    const res = await handleModelStatus(
+      new Request('https://x/api/model-status?hours=24'),
+      fakeRuntime(),
+    );
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    const window = payload['window'] as Record<string, unknown>;
+    // The honest left edge. No figure may imply a longer baseline than this instant, because
+    // nothing was recorded before it.
+    expect(window['recordedSince']).toBe('2026-09-14T00:00:00.000Z');
+    expect(window['requestedHours']).toBe(24);
+
+    const services = payload['services'] as Record<string, unknown>[];
+    expect(services[0]?.['service']).toBe('timesfm3');
+    expect(services[0]?.['samples']).toBe(12);
+    expect(services[0]?.['uptimePct']).toBeCloseTo(11 / 12, 6);
+    expect(services[0]?.['p95LatencyMs']).toBe(310);
+  });
+
+  it('calls a window with no samples unobserved instead of healthy', async () => {
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { window: (h: number) => Promise<unknown> }).window = async (
+      h: number,
+    ) => ({ sinceHours: h, recordedSince: new Date('2026-09-14T00:00:00Z'), summaries: [] });
+
+    const res = await handleModelStatus(new Request('https://x/api/model-status'), runtime);
+    const payload = await body(res);
+
+    expect(payload['empty']).toBe(true);
+    expect(String(payload['reading'])).toContain('unobserved, not healthy');
+  });
+
+  it('claims no uptime at all before the first probe is recorded', async () => {
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { window: (h: number) => Promise<unknown> }).window = async (
+      h: number,
+    ) => ({ sinceHours: h, recordedSince: null, summaries: [] });
+
+    const res = await handleModelStatus(new Request('https://x/api/model-status'), runtime);
+    const payload = await body(res);
+
+    expect((payload['window'] as Record<string, unknown>)['recordedHours']).toBe(0);
+    expect(String(payload['reading'])).toContain('No probe has been recorded yet');
   });
 });

@@ -2,8 +2,10 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import {
   DecisionRepository,
   ForecastRepository,
+  ModelProbeRepository,
   PgSqlRunner,
   PerformanceRepository,
+  PoolCatalogRepository,
   TimeseriesClient,
   VectorRepository,
   VertexEmbeddingService,
@@ -57,6 +59,15 @@ export interface IndexerRuntime {
   readonly forecasts: ForecastRepository;
   readonly performance: PerformanceRepository;
   readonly decisions: DecisionRepository;
+  /**
+   * The indexed pool universe.
+   *
+   * The only read on this surface that needs no prior knowledge — every other pool-keyed route takes
+   * an address the caller already had, which is why the console could not work for a newcomer.
+   */
+  readonly pools: PoolCatalogRepository;
+  /** The recorded probe history behind `/api/model-status`, written by the refresh cron. */
+  readonly modelProbes: ModelProbeRepository;
   /** Absent when no Vertex project is configured (retrieval degrades). */
   readonly vectors?: VectorRepository;
   readonly timesfm3: TimesFM3Client;
@@ -200,6 +211,8 @@ export function createRuntime(overrides: RuntimeOverrides = {}): IndexerRuntime 
     forecasts: new ForecastRepository(runner),
     performance: new PerformanceRepository(runner),
     decisions: new DecisionRepository(runner),
+    pools: new PoolCatalogRepository(runner),
+    modelProbes: new ModelProbeRepository(runner),
     ...(vectors === undefined ? {} : { vectors }),
     timesfm3,
     v01,
