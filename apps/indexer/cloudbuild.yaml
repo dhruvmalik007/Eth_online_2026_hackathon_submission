@@ -1,0 +1,59 @@
+# Build and deploy the indexer to Cloud Run.
+#
+# Why Cloud Run and not Vercel Functions: the database takes a fixed IP allowlist and has to be
+# reachable from where the code runs. Vercel Functions have no static egress IP on the plan this
+# project uses, so the container runs where the database already trusts the network — no tunnel, no
+# proxy, no allowlist edit.
+#
+#   gcloud builds submit --config apps/indexer/cloudbuild.yaml \
+#     --substitutions=_SERVICE=agentic-ems-indexer,_REGION=us-central1
+#
+# Secrets are mounted from Secret Manager, never passed on the command line, so they stay out of the
+# build log. The service is public because the dashboard calls it from the browser; it is read-only.
+substitutions:
+  _SERVICE: agentic-ems-indexer
+  _REGION: us-central1
+  _REPO: agentic-ems
+
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - apps/indexer/Dockerfile
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - .
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      # Public read-only API: the dashboard fetches it from the browser. Access control is the
+      # database's, which this service is the only writer to.
+      - --allow-unauthenticated
+      - --port=8080
+      # Scale to zero — this is a demo, not a tier-1 service, and an idle instance is a bill.
+      - --min-instances=0
+      - --max-instances=3
+      - --cpu=1
+      - --memory=512Mi
+      - --timeout=60
+      - --set-env-vars=EMS_ENV=production,INDEXER_RUNTIME=cloudrun,LOG_LEVEL=info,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=${_REGION}
+      - --set-secrets=TIMESERIES_DATABASE_URL=timeseries-database-url:latest,GATEWAY_API_KEY=graph-gateway-api-key:latest,GOOGLE_SERVICE_ACCOUNT_KEY=google-service-account-key:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY

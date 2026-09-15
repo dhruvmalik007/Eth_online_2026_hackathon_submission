@@ -1,6 +1,6 @@
 import { handleRiskChains } from '../_lib/handlers.js';
 import { getRuntime } from '../_lib/runtime.js';
-import { sendWebResponse, toWebRequest } from '../_lib/vercel.js';
+import { sendWebResponse } from '../_lib/vercel.js';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 /** GET /api/risk/chains — every collected chain risk profile, with freshness. */
