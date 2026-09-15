@@ -107,6 +107,15 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   // Not secret, and tagged `langchain` for the same reason as above: that schema declares it.
   v("CACHE_BUCKET", ["indexer", "langchain"], "GCS bucket the refresh job writes and /api/cache/manifest reads (private).", { format: "string" }),
 
+  // ── keyless Google credentials ──────────────────────────────────────────────────────────────
+  // The four halves of a workload identity federation config. A deployment that still holds a
+  // service-account key, and a local `gcloud` session, both work without them — so none is required,
+  // and their absence is a fallback rather than a misconfiguration.
+  v("GCP_PROJECT_NUMBER", ["indexer", "langchain"], "GCP project number, which the federation audience is built from.", { format: "string" }),
+  v("GCP_SERVICE_ACCOUNT_EMAIL", ["indexer", "langchain"], "The keyless identity this deployment impersonates.", { format: "string" }),
+  v("GCP_WORKLOAD_IDENTITY_POOL_ID", ["indexer", "langchain"], "Workload identity pool that trusts Vercel's OIDC issuer.", { format: "string" }),
+  v("GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID", ["indexer", "langchain"], "OIDC provider within that pool, scoped to this project.", { format: "string" }),
+
   // ── execution service ────────────────────────────────────────────────────────────────────────
   v("EXECUTION_MODE", ["execution"], "`dry` simulates and records; `live` may broadcast.", {
     format: "enum",

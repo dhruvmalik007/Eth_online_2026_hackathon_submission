@@ -28,6 +28,7 @@ import {
   createRiskProfileReader,
   type RiskProfileReader,
 } from '@ethonline2026/risk-analysis-data-pipeline';
+import { prepareWorkloadIdentity } from './workloadIdentity.js';
 
 /**
  * Composition root for the serverless surface.
@@ -146,9 +147,30 @@ export function prepareVertexCredentials(env: NodeJS.ProcessEnv = process.env): 
   }
 }
 
+let googleCredentialsPrepared = false;
+
+/**
+ * Give ADC something to work with, preferring federation over a stored key.
+ *
+ * Federation first, because it is the intended path and has nothing to rotate: the subject token is
+ * minted per invocation and the identity it may assume is pinned in IAM to this project and its
+ * environments. The key path stays as the fallback so a deployment still carrying one keeps working,
+ * and a local `vercel dev` with a `gcloud` session needs neither.
+ */
+export function prepareGoogleCredentials(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (googleCredentialsPrepared) return env['GOOGLE_APPLICATION_CREDENTIALS'] !== undefined;
+  googleCredentialsPrepared = true;
+
+  if (prepareWorkloadIdentity(env)) {
+    console.log('[indexer] Google credentials: workload identity federation');
+    return true;
+  }
+  return prepareVertexCredentials(env);
+}
+
 /** Build a fresh runtime. Prefer `getRuntime()` in routes (caches per instance). */
 export function createRuntime(overrides: RuntimeOverrides = {}): IndexerRuntime {
-  prepareVertexCredentials();
+  prepareGoogleCredentials();
   const env = overrides.env ?? loadEnv();
 
   const runner = overrides.runner ?? PgSqlRunner.fromEnv();

@@ -14,6 +14,8 @@
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import { OIDC_HEADER, rememberOidcToken } from "./workloadIdentity.js";
+
 const BODYLESS_METHODS = new Set(["GET", "HEAD"]);
 
 async function readBody(request: IncomingMessage): Promise<Buffer | undefined> {
@@ -39,6 +41,12 @@ export async function toWebRequest(request: IncomingMessage): Promise<Request> {
     if (typeof value === "string") headers.set(key, value);
     else if (Array.isArray(value)) headers.set(key, value.join(", "));
   }
+
+  // Vercel signs an OIDC token for the invocation and delivers it as a header rather than an
+  // environment variable, so this is the only point in the request that can see it. It is stashed
+  // for the GCP credential exchange — nothing else reads it, and it never leaves the process.
+  const oidcToken = headers.get(OIDC_HEADER);
+  if (oidcToken !== null) rememberOidcToken(oidcToken);
 
   const body = await readBody(request);
   return new Request(url, {
