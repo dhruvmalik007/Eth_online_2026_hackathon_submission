@@ -1,3 +1,4 @@
+import { transactionLinks } from "@ethonline2026/order-execution-layer";
 /**
  * executeLegs — the dual-mode executor. Ties the three leg kinds to their
  * real backends:
@@ -29,11 +30,12 @@ const SPOKE_TOKEN_MESSENGER: Record<string, string> = {
   polygon: "",
 };
 
-const EXPLORER: Record<string, string> = {
-  ethereum: "https://sepolia.etherscan.io/tx/",
-  arbitrum: "https://sepolia.arbiscan.io/tx/",
-  optimism: "https://sepolia-optimism.etherscan.io/tx/",
-  polygon: "https://mumbai.polygonscan.com/tx/",
+/** Chain ids for the spoke chains this pipeline bridges to. Testnets, matching the RPCs in use. */
+const SPOKE_CHAIN_IDS: Record<string, number> = {
+  ethereum: 11155111,
+  arbitrum: 421614,
+  optimism: 11155420,
+  polygon: 80002,
 };
 
 /** Coerce a string to the 0x-prefixed hex type viem expects, without template literal type casts. */
@@ -144,7 +146,7 @@ async function executeArcBridge(
     label: leg.label,
     simulated: false,
     txHash: burn.txHash,
-    explorerUrl: (EXPLORER[fromChain] ?? "") + burn.txHash,
+    explorerUrl: transactionLinks({ txHash: burn.txHash, ...(SPOKE_CHAIN_IDS[fromChain] === undefined ? {} : { chainId: SPOKE_CHAIN_IDS[fromChain] }), source: "circle-cctp" })?.primary.url ?? "",
     data: attested.message,
   };
 }

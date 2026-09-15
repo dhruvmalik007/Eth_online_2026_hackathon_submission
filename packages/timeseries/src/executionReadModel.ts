@@ -169,6 +169,8 @@ export class ExecutionReadModel {
         srcTxHash: asString(payload['srcTxHash']),
         dstTxHash: asString(payload['dstTxHash']),
         guid: asString(payload['guid']),
+        ...(payload['scanUrl'] === undefined ? {} : { scanUrl: asString(payload['scanUrl']) }),
+        ...(payload['scanLabel'] === undefined ? {} : { scanLabel: asString(payload['scanLabel']) }),
         error: null,
       };
     });

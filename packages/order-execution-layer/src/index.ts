@@ -26,3 +26,12 @@ export {
   type LegExecutor,
   type LegPlan,
 } from "./registry.js";
+export {
+  chainExplorer,
+  isKnownSource,
+  providerScan,
+  transactionLinks,
+  type ScanTarget,
+  type TransactionLinks,
+  type TransactionReference,
+} from "./explorer.js";
