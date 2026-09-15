@@ -1,46 +1,45 @@
+"use client";
+
+import * as React from "react";
 import {
   Badge,
   Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+  Input,
+  Label,
+  PromptInput,
+  PromptInputSubmit,
+  PromptInputTextarea,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Skeleton,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@ethonline2026/ux-workflow";
-import { ArrowUp, Square } from "lucide-react";
-import * as React from "react";
 
+import { api, ApiCallError, type PoolSummary } from "./api.js";
 import {
-  ApiCallError,
-  api,
-  type CacheManifestResponse,
-  type ModelStatusResponse,
-  type PoolSummary,
-} from "./api";
-import {
-  AgentResult,
-  CacheResult,
-  ForecastResult,
-  HealthResult,
-  JsonResult,
-  MetricsResult,
-  PerformanceResult,
-  PoolsResult,
-  Raw,
-  SearchResult,
-  StatusResult,
-  ago,
-} from "./results";
+  classifyFailure,
+  classifyOk,
+  codeOf,
+  readErrorEnvelope,
+  type Classified,
+} from "./classify.js";
+import { next, specOf, type RunEvent, type RunState } from "./machine.js";
+import { Results } from "./render.js";
+import { RunStateDiagram } from "./state-diagram.js";
 
-/**
- * The console is one session log.
- *
- * Running the agent, browsing pools, calling any endpoint and checking a dependency are the same act
- * here: a command that appends a structured result. That is a deliberate structure rather than a
- * layout choice — the incumbent was fixed panels with a form on top, and it could not say anything
- * until you already knew a pool address. A log always has somewhere to put an answer, including the
- * answer "this deployment has nothing indexed yet".
- */
+/* ── the commands ─────────────────────────────────────────────────────────── */
 
 type CommandId =
   | "ask"
@@ -55,590 +54,801 @@ type CommandId =
 
 interface CommandSpec {
   readonly id: CommandId;
+  /** What it does, in one line, shown beside the picker. */
   readonly hint: string;
-  /** Which guided input the composer reveals, so a pool never has to be typed from memory. */
-  readonly needs?: "pool" | "text";
+  /** The guided input it reveals. A pool is never typed. */
+  readonly wants: "pool" | "text" | "none";
 }
 
 const COMMANDS: readonly CommandSpec[] = [
-  { id: "ask", hint: "run the v0.1 agent cycle on a question", needs: "text" },
+  { id: "ask", hint: "run the v0.1 agent cycle on a question", wants: "text" },
+  {
+    id: "pools",
+    hint: "every pool this deployment holds metrics for",
+    wants: "none",
+  },
   {
     id: "forecast",
-    hint: "TimesFM-3 quantile forecast for a pool",
-    needs: "pool",
+    hint: "TimesFM-3 quantile band for one pool",
+    wants: "pool",
   },
-  { id: "pools", hint: "what this deployment has indexed" },
-  { id: "metrics", hint: "hourly metric ledger for a pool", needs: "pool" },
-  { id: "performance", hint: "realized yield, computed in SQL", needs: "pool" },
-  { id: "search", hint: "nearest stored evidence", needs: "text" },
-  { id: "status", hint: "recorded uptime and latency per dependency" },
-  { id: "health", hint: "live dependency check" },
-  { id: "cache", hint: "what the refresh job has stored" },
+  {
+    id: "metrics",
+    hint: "hourly observations behind a pool's history",
+    wants: "pool",
+  },
+  { id: "performance", hint: "realized yield, computed in SQL", wants: "pool" },
+  {
+    id: "search",
+    hint: "temporal-vector retrieval over stored evidence",
+    wants: "text",
+  },
+  {
+    id: "status",
+    hint: "recorded reachability and latency per dependency",
+    wants: "none",
+  },
+  { id: "health", hint: "probe every dependency right now", wants: "none" },
+  {
+    id: "cache",
+    hint: "what the refresh job has cached, and when",
+    wants: "none",
+  },
 ];
+
+const specOfCommand = (id: CommandId): CommandSpec =>
+  COMMANDS.find((c) => c.id === id) ?? COMMANDS[0]!;
+
+/* ── one session entry ────────────────────────────────────────────────────── */
 
 interface Entry {
   readonly id: string;
   readonly command: CommandId;
+  /** The arguments as a human-readable line, composed at submit time. */
   readonly args: string;
-  readonly ms?: number;
-  readonly state: "running" | "ok" | "error";
-  readonly data?: unknown;
-  readonly error?: { readonly code: string; readonly message: string };
+  readonly startedAt: number;
+  readonly ms: number | null;
+  /** The machine's state for this entry once it settled; `running` while in flight. */
+  readonly outcome: RunState;
+  readonly data: unknown;
+  readonly notice: Classified | null;
 }
 
-const nf = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
-
-/** The strip. Recorded availability, not a live probe — the probe would cost a GPU wake per render. */
-function DependencyStrip({
-  status,
-  cache,
-  onRun,
-}: {
-  status: ModelStatusResponse | null;
-  cache: CacheManifestResponse | null;
-  onRun: (command: CommandId) => void;
-}): React.JSX.Element {
-  const services = status?.services ?? [];
-  return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-      {services.length === 0 ? (
-        <button
-          type="button"
-          onClick={() => onRun("status")}
-          className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint transition-colors hover:text-amber"
-        >
-          no probes recorded
-        </button>
-      ) : (
-        services.map((s) => {
-          const up = s.lastReachable === true;
-          return (
-            <button
-              key={s.service}
-              type="button"
-              onClick={() => onRun("status")}
-              title={`${s.service} — ${s.samples} sample(s), ${s.uptimePct === null ? "no uptime" : `${(s.uptimePct * 100).toFixed(0)}% reachable`}`}
-              className="group flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-fg-dim transition-colors hover:text-fg"
-            >
-              <span
-                aria-hidden
-                className={`size-1.5 rounded-full ${up ? "bg-up animate-pulse-subtle" : "bg-down"}`}
-              />
-              <span>{s.service}</span>
-              {s.p50LatencyMs !== null ? (
-                <span className="text-fg-faint tnum">
-                  {nf.format(s.p50LatencyMs)}ms
-                </span>
-              ) : null}
-            </button>
-          );
-        })
-      )}
-      <button
-        type="button"
-        onClick={() => onRun("cache")}
-        className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint transition-colors hover:text-amber"
-        title={cache?.reading ?? "no cache manifest"}
-      >
-        {cache?.cached === true
-          ? `cached ${ago(cache.generatedAt)}`
-          : "cache empty"}
-      </button>
-    </div>
-  );
-}
+/* ── the shell ────────────────────────────────────────────────────────────── */
 
 export function App(): React.JSX.Element {
-  const [entries, setEntries] = React.useState<readonly Entry[]>([]);
-  const [query, setQuery] = React.useState("");
+  const [run, dispatch] = React.useReducer(
+    (state: RunState, event: RunEvent): RunState => next(state, event) ?? state,
+    "idle",
+  );
   const [command, setCommand] = React.useState<CommandId>("ask");
-  const [poolId, setPoolId] = React.useState<string>("");
+  const [question, setQuestion] = React.useState("");
+  const [search, setSearch] = React.useState("");
+  const [poolId, setPoolId] = React.useState("");
   const [horizon, setHorizon] = React.useState(30);
+  const [windowDays, setWindowDays] = React.useState(30);
+  const [entries, setEntries] = React.useState<readonly Entry[]>([]);
   const [pools, setPools] = React.useState<readonly PoolSummary[]>([]);
-  const [status, setStatus] = React.useState<ModelStatusResponse | null>(null);
-  const [cache, setCache] = React.useState<CacheManifestResponse | null>(null);
-  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [poolsState, setPoolsState] = React.useState<
+    "loading" | "ready" | "failed"
+  >("loading");
+  const [strip, setStrip] = React.useState<StripState | null>(null);
 
-  const inputRef = React.useRef<HTMLTextAreaElement>(null);
-  const endRef = React.useRef<HTMLDivElement>(null);
+  const spec = specOfCommand(command);
+  const busy = run === "submitting" || run === "running";
 
-  const spec = COMMANDS.find((c) => c.id === command) ?? COMMANDS[0]!;
-  const selected = pools.find((p) => p.poolId === poolId);
-
-  const push = React.useCallback(
-    (entry: Entry) => setEntries((prev) => [...prev, entry]),
-    [],
-  );
-  const settle = React.useCallback(
-    (id: string, patch: Partial<Entry>) =>
-      setEntries((prev) =>
-        prev.map((e) => (e.id === id ? { ...e, ...patch } : e)),
-      ),
-    [],
-  );
-
-  const run = React.useCallback(
-    async (
-      id: CommandId,
-      opts?: { query?: string; pool?: string; silent?: boolean },
-    ) => {
-      const subject =
-        opts?.pool !== undefined && opts.pool.length > 0
-          ? opts.pool
-          : undefined;
-      const pool = pools.find((p) => p.poolId === subject);
-      const label =
-        opts?.query !== undefined && opts.query.length > 0
-          ? opts.query
-          : pool !== undefined
-            ? `${pool.protocol} · ${pool.network}`
-            : selected !== undefined
-              ? `${selected.protocol} · ${selected.network}`
-              : "";
-      const target = subject ?? poolId;
-
-      const entryId = `${id}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      if (opts?.silent !== true) {
-        push({ id: entryId, command: id, args: label, state: "running" });
-      }
-      const startedAt = performance.now();
-
-      try {
-        let data: unknown;
-        if (id === "pools") {
-          data = await api.pools();
-          setPools((data as { pools: readonly PoolSummary[] }).pools);
-        } else if (id === "forecast") {
-          const [forecast, metrics] = await Promise.all([
-            api.forecast(target, horizon),
-            api.metrics(target, "apy", 120),
-          ]);
-          data = { forecast, metrics };
-        } else if (id === "metrics") {
-          data = await api.metrics(target, "apy", 120);
-        } else if (id === "performance") {
-          data = await api.performance(target);
-        } else if (id === "search") {
-          data = await api.search(opts?.query ?? query);
-        } else if (id === "status") {
-          data = await api.modelStatus(24);
-          setStatus(data as ModelStatusResponse);
-        } else if (id === "health") {
-          data = await api.health();
-        } else if (id === "cache") {
-          data = await api.cache();
-          setCache(data as CacheManifestResponse);
-        } else {
-          data = await api.agent({
-            query: opts?.query ?? query,
-            ...(target.length > 0 ? { poolId: target } : {}),
-            mode: "v01",
-            horizonDays: horizon,
-          });
-        }
-        if (opts?.silent !== true) {
-          settle(entryId, {
-            state: "ok",
-            data,
-            ms: Math.round(performance.now() - startedAt),
-          });
-        }
-      } catch (error) {
-        if (opts?.silent === true) return;
-        const failure =
-          error instanceof ApiCallError
-            ? { code: error.code, message: error.message }
-            : {
-                code: "NETWORK",
-                message: error instanceof Error ? error.message : String(error),
-              };
-        settle(entryId, {
-          state: "error",
-          error: failure,
-          ms: Math.round(performance.now() - startedAt),
-        });
-      }
-    },
-    [horizon, poolId, pools, push, query, selected, settle],
-  );
-
-  // Orientation on arrival. `pools` is shown rather than silent because it is the whole point of the
-  // rework: the first thing on screen is the list of what is indexed, and nobody had to know an
-  // address to get it. `status` and `cache` feed the strip only — logging them would bury the answer
-  // under its own footnotes.
+  /** The pool picker is the whole point: it exists so no address is ever typed. */
   React.useEffect(() => {
-    void run("pools");
-    void run("status", { silent: true });
-    void run("cache", { silent: true });
-    // Intentionally once. These are ambient facts, not a subscription.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await api.pools();
+        if (cancelled) return;
+        setPools(response.pools);
+        setPoolsState("ready");
+        setPoolId((current) =>
+          current.length > 0 ? current : (response.pools[0]?.poolId ?? ""),
+        );
+      } catch {
+        if (!cancelled) setPoolsState("failed");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  /** The header strip: recorded reachability, and how old the cache is. */
   React.useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [entries.length]);
+    let cancelled = false;
+    void (async () => {
+      const [status, cache] = await Promise.allSettled([
+        api.modelStatus(24),
+        api.cache(),
+      ]);
+      if (cancelled) return;
+      setStrip({
+        services: status.status === "fulfilled" ? status.value.services : [],
+        recordedSince:
+          status.status === "fulfilled"
+            ? status.value.window.recordedSince
+            : null,
+        cachedAt:
+          cache.status === "fulfilled" && cache.value.cached
+            ? cache.value.generatedAt
+            : null,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const submit = (): void => {
-    if (spec.id === "ask" || spec.id === "search") {
-      if (query.trim().length === 0) return;
-    }
-    if (
-      (spec.id === "forecast" ||
-        spec.id === "metrics" ||
-        spec.id === "performance") &&
-      poolId.length === 0
-    ) {
-      return;
-    }
-    void run(spec.id);
-    if (spec.id === "ask" || spec.id === "search") setQuery("");
-  };
+  const argumentProblem = React.useMemo((): string | null => {
+    if (spec.wants === "pool" && poolId.length === 0)
+      return "pick a pool first";
+    if (spec.id === "ask" && question.trim().length === 0)
+      return "a question is required";
+    if (spec.id === "search" && search.trim().length === 0)
+      return "a query is required";
+    return null;
+  }, [spec, poolId, question, search]);
 
-  const matches = COMMANDS.filter(
-    (c) =>
-      menuOpen && (query.length === 0 || c.id.startsWith(query.toLowerCase())),
+  const argsLine = React.useMemo((): string => {
+    const pool = pools.find((p) => p.poolId === poolId);
+    const subject =
+      pool === undefined ? poolId : `${pool.protocol} · ${pool.network}`;
+    switch (spec.id) {
+      case "ask":
+        return question.trim();
+      case "search":
+        return search.trim();
+      case "pools":
+      case "status":
+      case "health":
+      case "cache":
+        return "this deployment";
+      case "forecast":
+        return `${subject} · horizon ${horizon}d`;
+      case "metrics":
+        return `${subject} · ${windowDays}d`;
+      case "performance":
+        return `${subject} · ${windowDays}d`;
+      default:
+        return subject;
+    }
+  }, [spec, pools, poolId, question, search, horizon, windowDays]);
+
+  /**
+   * Send one command and settle its entry.
+   *
+   * Shared by a typed command and the opening read, so both take the same path: the same machine
+   * transitions, the same classification, the same entry. A second implementation for the opening
+   * read would be a second set of behaviours to keep in step.
+   */
+  const perform = React.useCallback(
+    async (
+      id: string,
+      command: CommandId,
+      args: {
+        poolId: string;
+        question: string;
+        search: string;
+        horizon: number;
+        windowDays: number;
+      },
+    ): Promise<void> => {
+      const startedAt = Date.now();
+      let classified: Classified;
+      let data: unknown = null;
+      try {
+        data = await call(command, args);
+        classified = classifyOk(data);
+      } catch (error) {
+        if (error instanceof ApiCallError) {
+          classified = classifyFailure(
+            error.status,
+            codeOf(error.code),
+            error.message,
+          );
+        } else {
+          // Nothing came back, so nothing came back with a status.
+          const envelope = readErrorEnvelope(error);
+          classified = classifyFailure(0, envelope.code, envelope.message);
+        }
+      }
+      dispatch(classified.event);
+      const settled = next("running", classified.event) ?? "failed";
+      setEntries((current) =>
+        current.map((entry) =>
+          entry.id === id
+            ? {
+                ...entry,
+                ms: Date.now() - startedAt,
+                outcome: settled,
+                data,
+                notice: classified,
+              }
+            : entry,
+        ),
+      );
+    },
+    [],
   );
 
+  const submit = React.useCallback(async (): Promise<void> => {
+    if (busy) return;
+
+    // The machine has a state for a request that cannot be sent, so an incomplete form is a
+    // transition rather than a disabled button — the reader is told what is missing and the diagram
+    // shows why nothing went out.
+    if (argumentProblem !== null) {
+      dispatch("reject");
+      return;
+    }
+
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setEntries((current) => [
+      ...current,
+      {
+        id,
+        command: spec.id,
+        args: argsLine,
+        startedAt: Date.now(),
+        ms: null,
+        outcome: "running",
+        data: null,
+        notice: null,
+      },
+    ]);
+    // Two transitions, not one. `submitting` is "the request is going out" and `accept` is "it went
+    // out"; the outcome events leave from `running`, so without the second the machine has no
+    // transition to take on success and sticks in `submitting` forever.
+    dispatch("submit");
+    dispatch("accept");
+    await perform(id, spec.id, {
+      poolId,
+      question: question.trim(),
+      search: search.trim(),
+      horizon,
+      windowDays,
+    });
+  }, [
+    busy,
+    argumentProblem,
+    spec,
+    argsLine,
+    poolId,
+    question,
+    search,
+    horizon,
+    windowDays,
+    perform,
+  ]);
+
+  /**
+   * The opening read.
+   *
+   * A session log that starts empty tells a visitor nothing about the deployment they just opened.
+   * `pools` runs on arrival because it answers "what is indexed here?" — and because it is the
+   * command that could not exist before this branch: nothing could enumerate the universe, so the
+   * first thing anyone saw was a form demanding an address they did not have.
+   *
+   * It goes through `perform`, so the machine, the diagram and the entry behave exactly as they do
+   * for a typed command. The arguments are the composer's defaults and are ignored by this command.
+   */
+  React.useEffect(() => {
+    const id = "opening-pools";
+    setEntries([
+      {
+        id,
+        command: "pools",
+        args: "this deployment",
+        startedAt: Date.now(),
+        ms: null,
+        outcome: "running",
+        data: null,
+        notice: null,
+      },
+    ]);
+    dispatch("select");
+    dispatch("submit");
+    dispatch("accept");
+    void perform(id, "pools", {
+      poolId: "",
+      question: "",
+      search: "",
+      horizon: 30,
+      windowDays: 90,
+    });
+  }, [perform]);
+
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-20 border-b border-edge bg-ink/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3">
-          <h1 className="shrink-0 font-mono text-[12px] font-medium uppercase tracking-[0.22em] text-fg">
-            Agentic EMS<span className="mx-2 text-fg-faint">//</span>
-            <span className="text-amber">Indexer</span>
-          </h1>
-          <div className="ml-auto min-w-0">
-            <DependencyStrip
-              status={status}
-              cache={cache}
-              onRun={(c) => void run(c)}
-            />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-dvh bg-ink text-fg">
+      <Header strip={strip} />
 
-      <main className="mx-auto max-w-[1180px] px-5 pb-32">
-        {/* Composer. Sticky because the log grows downward and the next action should never scroll away. */}
-        <div className="sticky top-[53px] z-10 -mx-5 border-b border-edge bg-ink/95 px-5 py-4 backdrop-blur">
-          <div className="border border-edge-2 bg-panel focus-within:border-amber-dim">
-            <div className="flex items-start gap-3 px-3 py-2.5">
-              <span
-                aria-hidden
-                className="pt-1 font-mono text-[13px] leading-none text-amber"
-              >
-                ›
-              </span>
-              <textarea
-                ref={inputRef}
-                rows={1}
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setMenuOpen(true);
-                }}
-                onFocus={() => setMenuOpen(true)}
-                onBlur={() => window.setTimeout(() => setMenuOpen(false), 120)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    setMenuOpen(false);
-                    submit();
-                  }
-                }}
-                placeholder={
-                  spec.needs === "pool"
-                    ? `${spec.id} — pick a pool below, then press enter`
-                    : spec.id === "search"
-                      ? "search the stored evidence…"
-                      : spec.id === "ask"
-                        ? "ask the cycle a question…"
-                        : `run ${spec.id}`
-                }
-                aria-label="Command"
-                className="min-h-[22px] min-w-0 flex-1 resize-none bg-transparent font-mono text-[13px] leading-relaxed text-fg placeholder:text-fg-faint focus:outline-none"
+      <main className="mx-auto flex max-w-[1180px] flex-col px-5 pb-16">
+        <section className="sticky top-[57px] z-10 -mx-5 bg-ink/95 px-5 pt-5 backdrop-blur">
+          <Composer
+            command={command}
+            onCommand={setCommand}
+            spec={spec}
+            question={question}
+            onQuestion={setQuestion}
+            search={search}
+            onSearch={setSearch}
+            pools={pools}
+            poolsState={poolsState}
+            poolId={poolId}
+            onPool={setPoolId}
+            horizon={horizon}
+            onHorizon={setHorizon}
+            windowDays={windowDays}
+            onWindowDays={setWindowDays}
+            busy={busy}
+            onSubmit={submit}
+          />
+          <RunStateDiagram state={run} />
+        </section>
+
+        <Conversation className="mt-6 min-h-[40vh]">
+          <ConversationContent className="gap-0 p-0">
+            {entries.length === 0 ? (
+              <ConversationEmptyState
+                title="Nothing run yet"
+                description="Pick a command above. Nothing here needs a pool address — the universe is read from this deployment."
               />
-              <Button
-                type="button"
-                onClick={submit}
-                size="sm"
-                className="h-7 shrink-0 gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em]"
-              >
-                <ArrowUp className="size-3" />
-                run
-              </Button>
-            </div>
-
-            {/* The guided inputs. A pool is chosen, never typed — the whole point of the rework. */}
-            <div className="flex flex-wrap items-end gap-x-5 gap-y-3 border-t border-edge px-3 py-3">
-              <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-fg-faint">
-                  command
-                </span>
-                <Select
-                  value={command}
-                  onValueChange={(v) => setCommand(v as CommandId)}
-                >
-                  <SelectTrigger className="h-7 w-full font-mono text-[11px] sm:w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COMMANDS.map((c) => (
-                      <SelectItem
-                        key={c.id}
-                        value={c.id}
-                        className="font-mono text-[12px]"
-                      >
-                        {c.id}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </label>
-
-              {spec.needs === "pool" ? (
-                <>
-                  <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-                    <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-fg-faint">
-                      pool
-                    </span>
-                    <Select value={poolId} onValueChange={setPoolId}>
-                      <SelectTrigger className="h-7 w-full font-mono text-[11px] sm:w-[260px]">
-                        <SelectValue
-                          placeholder={
-                            pools.length === 0
-                              ? "nothing indexed"
-                              : "choose a pool"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {pools.map((p) => (
-                          <SelectItem
-                            key={p.poolId}
-                            value={p.poolId}
-                            className="font-mono text-[12px]"
-                          >
-                            {p.protocol} · {p.network} · {p.observations} obs
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </label>
-                  <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-                    <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-fg-faint">
-                      {spec.id === "forecast"
-                        ? "horizon (days)"
-                        : "window (days)"}
-                    </span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={365}
-                      value={horizon}
-                      onChange={(e) =>
-                        setHorizon(
-                          Math.max(
-                            1,
-                            Math.min(365, Number(e.target.value) || 30),
-                          ),
-                        )
-                      }
-                      className="h-7 w-full border border-edge-2 bg-panel-2 px-2 font-mono text-[11px] tnum text-fg focus:border-amber-dim focus:outline-none sm:w-[92px]"
-                    />
-                  </label>
-                </>
-              ) : null}
-
-              {/* The hint is the first thing to go on a narrow screen: it describes an affordance that
-                  is already visible, and at 390px it was the element forcing the page wider than the
-                  viewport. */}
-              <p className="hidden text-right font-mono text-[10px] leading-relaxed text-fg-faint lg:ml-auto lg:block lg:max-w-[46ch]">
-                {spec.hint}
-              </p>
-            </div>
-          </div>
-
-          {menuOpen && matches.length > 1 ? (
-            <ul className="mt-1 flex flex-wrap gap-1.5">
-              {matches.map((c) => (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setCommand(c.id);
-                      setMenuOpen(false);
-                      inputRef.current?.focus();
-                    }}
-                    className={`border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors ${
-                      c.id === command
-                        ? "border-amber-dim text-amber"
-                        : "border-edge text-fg-faint hover:border-edge-2 hover:text-fg-dim"
-                    }`}
-                  >
-                    {c.id}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-
-        {/* The log. */}
-        <div className="pt-6">
-          {entries.length === 0 ? (
-            <p className="max-w-[62ch] text-[13px] leading-relaxed text-fg-dim">
-              Nothing run yet in this session. Pick a command above —{" "}
-              <span className="font-mono text-fg">pools</span> lists what is
-              indexed, and nothing here needs you to know a pool address.
-            </p>
-          ) : null}
-
-          <ol className="divide-y divide-edge">
-            {entries.map((entry) => (
-              <li
-                key={entry.id}
-                className="animate-fade-slide-up py-6 first:pt-0"
-              >
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="font-mono text-[12px] text-amber">›</span>
-                  <span className="font-mono text-[12px] text-fg">
-                    {entry.command}
-                  </span>
-                  {entry.args.length > 0 ? (
-                    <span className="font-mono text-[12px] text-fg-dim">
-                      {entry.args}
-                    </span>
-                  ) : null}
-                  <span className="ml-auto flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em]">
-                    {entry.state === "running" ? (
-                      <span className="flex items-center gap-1.5 text-fg-faint">
-                        <span
-                          className="size-1.5 animate-pulse-subtle rounded-full bg-amber"
-                          aria-hidden
-                        />
-                        running
-                      </span>
-                    ) : entry.state === "ok" ? (
-                      <span className="tnum text-fg-faint">{entry.ms}ms</span>
-                    ) : (
-                      <Badge
-                        variant="destructive"
-                        className="font-mono text-[9px]"
-                      >
-                        {entry.error?.code}
-                      </Badge>
-                    )}
-                  </span>
-                </div>
-
-                <div className="mt-3">
-                  {entry.state === "running" ? (
-                    <div className="space-y-2" aria-hidden>
-                      <div className="h-3 w-2/5 bg-panel-2" />
-                      <div className="h-3 w-3/5 bg-panel-2" />
-                    </div>
-                  ) : entry.state === "error" ? (
-                    <div className="border border-down/40 bg-down/5 px-3 py-2.5">
-                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-down">
-                        {entry.error?.code}
-                      </p>
-                      <p className="mt-1 max-w-[75ch] text-[13px] leading-relaxed text-fg">
-                        {entry.error?.message}
-                      </p>
-                    </div>
-                  ) : (
-                    <Result
-                      entry={entry}
-                      onRun={(c, opts) => void run(c, opts)}
-                    />
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-          <div ref={endRef} />
-        </div>
+            ) : (
+              entries.map((entry) => <EntryRow key={entry.id} entry={entry} />)
+            )}
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
       </main>
     </div>
   );
 }
 
-function Result({
-  entry,
-  onRun,
+/* ── the header ───────────────────────────────────────────────────────────── */
+
+interface StripState {
+  readonly services: readonly {
+    service: string;
+    p50LatencyMs: number | null;
+    lastReachable: boolean | null;
+    samples: number;
+  }[];
+  readonly recordedSince: string | null;
+  readonly cachedAt: string | null;
+}
+
+function Header({ strip }: { strip: StripState | null }): React.JSX.Element {
+  return (
+    <header className="sticky top-0 z-20 border-b border-edge bg-ink/95 backdrop-blur">
+      <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3">
+        <h1 className="shrink-0 font-mono text-[12px] font-medium uppercase tracking-[0.22em] text-fg">
+          Agentic EMS <span className="text-fg-faint">//</span>{" "}
+          <span className="text-amber">Indexer</span>
+        </h1>
+        <div className="ml-auto min-w-0">
+          {strip === null ? (
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              {strip.services.map((service) => (
+                <Tooltip key={service.service}>
+                  <TooltipTrigger asChild>
+                    <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-fg-dim">
+                      <span
+                        aria-hidden
+                        className={`inline-block size-1.5 rounded-full ${
+                          service.lastReachable === null
+                            ? "bg-fg-faint"
+                            : service.lastReachable
+                              ? "bg-up"
+                              : "bg-down"
+                        }`}
+                      />
+                      {service.service}
+                      {service.p50LatencyMs === null ? null : (
+                        <span className="tabular-nums text-fg-faint">
+                          {Math.round(service.p50LatencyMs)}ms
+                        </span>
+                      )}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {service.samples === 0
+                      ? "no probe recorded in the last 24h — this dependency is unobserved, not necessarily healthy"
+                      : `${service.samples} probes in the last 24h; median ${Math.round(service.p50LatencyMs ?? 0)}ms`}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+              {strip.cachedAt === null ? null : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
+                      cached {ago(strip.cachedAt)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    The refresh job last wrote the cache {ago(strip.cachedAt)}.
+                    Cached figures were observed then, not now.
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ── the composer ─────────────────────────────────────────────────────────── */
+
+interface ComposerProps {
+  readonly command: CommandId;
+  readonly onCommand: (id: CommandId) => void;
+  readonly spec: CommandSpec;
+  readonly question: string;
+  readonly onQuestion: (value: string) => void;
+  readonly search: string;
+  readonly onSearch: (value: string) => void;
+  readonly pools: readonly PoolSummary[];
+  readonly poolsState: "loading" | "ready" | "failed";
+  readonly poolId: string;
+  readonly onPool: (value: string) => void;
+  readonly horizon: number;
+  readonly onHorizon: (value: number) => void;
+  readonly windowDays: number;
+  readonly onWindowDays: (value: number) => void;
+  readonly busy: boolean;
+  readonly onSubmit: () => Promise<void>;
+}
+
+function Composer(props: ComposerProps): React.JSX.Element {
+  const { spec, pools, poolsState } = props;
+  const needsText = spec.wants === "text";
+  const text = spec.id === "search" ? props.search : props.question;
+  const onText = spec.id === "search" ? props.onSearch : props.onQuestion;
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      <PromptInput
+        isLoading={props.busy}
+        onSubmit={(event) => {
+          event.preventDefault();
+          void props.onSubmit();
+        }}
+      >
+        <div className="flex min-w-0 flex-1 items-start gap-1">
+          <span
+            aria-hidden
+            className="select-none pt-0.5 font-mono text-[13px] text-amber"
+          >
+            ›
+          </span>
+          {needsText ? (
+            <PromptInputTextarea
+              autoFocus
+              value={text}
+              onChange={(event) => onText(event.target.value)}
+              placeholder={
+                spec.id === "ask"
+                  ? "ask the cycle a question…"
+                  : "describe what to retrieve…"
+              }
+              className="min-h-[22px] flex-1 border-0 bg-transparent px-1 py-0 text-[13px] focus-visible:ring-0"
+            />
+          ) : (
+            <p className="flex-1 px-1 py-0.5 font-mono text-[12px] text-fg-faint">
+              {spec.id === "pools"
+                ? "read every pool this deployment holds metrics for"
+                : spec.id === "status"
+                  ? "read the recorded probe history"
+                  : spec.id === "health"
+                    ? "probe each dependency now"
+                    : "read what the refresh job cached"}
+            </p>
+          )}
+          <PromptInputSubmit disabled={props.busy} aria-label="Run">
+            {props.busy ? "running" : "run"}
+          </PromptInputSubmit>
+        </div>
+      </PromptInput>
+
+      <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
+        <div className="flex w-full flex-col gap-1.5 sm:w-auto">
+          <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
+            command
+          </Label>
+          <Select
+            value={props.command}
+            onValueChange={(value) => props.onCommand(value as CommandId)}
+          >
+            <SelectTrigger
+              className="h-7 w-full font-mono text-[11px] sm:w-[170px]"
+              aria-label="Command"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {COMMANDS.map((item) => (
+                <SelectItem
+                  key={item.id}
+                  value={item.id}
+                  className="font-mono text-[11px]"
+                >
+                  {item.id}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {spec.wants === "pool" ? (
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto">
+            <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
+              pool
+            </Label>
+            {poolsState === "loading" ? (
+              <Skeleton className="h-7 w-full sm:w-[320px]" />
+            ) : poolsState === "failed" ? (
+              <p className="font-mono text-[11px] text-down">
+                could not read the pool list
+              </p>
+            ) : (
+              <Select value={props.poolId} onValueChange={props.onPool}>
+                <SelectTrigger
+                  className="h-7 w-full font-mono text-[11px] sm:w-[320px]"
+                  aria-label="Pool"
+                >
+                  <SelectValue placeholder="choose a pool" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pools.map((pool) => (
+                    <SelectItem
+                      key={pool.poolId}
+                      value={pool.poolId}
+                      className="font-mono text-[11px]"
+                    >
+                      {pool.protocol} · {pool.network} · {pool.observations} obs
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        ) : null}
+
+        {spec.id === "forecast" ? (
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto">
+            <Label
+              htmlFor="horizon"
+              className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint"
+            >
+              horizon (days)
+            </Label>
+            <Input
+              id="horizon"
+              type="number"
+              min={1}
+              max={365}
+              value={props.horizon}
+              onChange={(event) => props.onHorizon(Number(event.target.value))}
+              className="h-7 w-full font-mono text-[11px] sm:w-[92px]"
+            />
+          </div>
+        ) : null}
+
+        {spec.id === "metrics" || spec.id === "performance" ? (
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto">
+            <Label
+              htmlFor="window"
+              className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint"
+            >
+              window (days)
+            </Label>
+            <Input
+              id="window"
+              type="number"
+              min={1}
+              max={365}
+              value={props.windowDays}
+              onChange={(event) =>
+                props.onWindowDays(Number(event.target.value))
+              }
+              className="h-7 w-full font-mono text-[11px] sm:w-[92px]"
+            />
+          </div>
+        ) : null}
+
+        <p className="hidden max-w-[42ch] text-right font-mono text-[10px] leading-relaxed text-fg-faint lg:ml-auto lg:block">
+          {spec.hint}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── one entry ────────────────────────────────────────────────────────────── */
+
+function EntryRow({ entry }: { entry: Entry }): React.JSX.Element {
+  const running = entry.outcome === "running";
+  const spec = specOf(entry.outcome);
+
+  return (
+    <article className="border-b border-edge py-5 first:pt-0">
+      <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span aria-hidden className="font-mono text-[12px] text-amber">
+          ›
+        </span>
+        <span className="font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-fg">
+          {entry.command}
+        </span>
+        <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-fg-dim">
+          {entry.args}
+        </span>
+        <Badge
+          variant={badgeFor(entry.outcome)}
+          className="font-mono text-[9px] uppercase tracking-[0.14em]"
+        >
+          {running ? "running" : spec.label}
+        </Badge>
+        <span className="font-mono text-[10px] tabular-nums text-fg-faint">
+          {entry.ms === null ? "…" : `${entry.ms}ms`}
+        </span>
+      </header>
+
+      <div className="mt-3 pl-5">
+        {running ? (
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-2/3" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+        ) : entry.outcome === "unavailable" ? (
+          <Unavailable notice={entry.notice} />
+        ) : entry.outcome === "refused" || entry.outcome === "failed" ? (
+          <Refused notice={entry.notice} outcome={entry.outcome} />
+        ) : (
+          <Results command={entry.command} data={entry.data} />
+        )}
+      </div>
+    </article>
+  );
+}
+
+/**
+ * A command this deployment cannot answer, which is not the same as one that failed.
+ *
+ * The distinction decides what the reader does next: a failed request is worth retrying, an
+ * unavailable one never will be until something is configured. `RISK_UNAVAILABLE` on three routes is
+ * the case that made this a state rather than an error string.
+ */
+function Unavailable({
+  notice,
 }: {
-  entry: Entry;
-  onRun: (command: CommandId, opts?: { query?: string; pool?: string }) => void;
+  notice: Classified | null;
 }): React.JSX.Element {
-  const data = entry.data;
-  switch (entry.command) {
+  return (
+    <div className="border border-edge-2 bg-panel/60 p-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
+        not available on this deployment
+      </p>
+      <p className="mt-1.5 max-w-[70ch] text-[13px] leading-relaxed text-fg">
+        {notice?.remedy ?? "A dependency this route needs is not configured."}
+      </p>
+      {notice?.summary === undefined ? null : (
+        <p className="mt-2 font-mono text-[11px] text-fg-faint">
+          {notice.code ?? "—"} · HTTP {notice.status} · {notice.summary}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Refused({
+  notice,
+  outcome,
+}: {
+  notice: Classified | null;
+  outcome: RunState;
+}): React.JSX.Element {
+  return (
+    <div className="border border-down/40 bg-down/5 p-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-down">
+        {outcome === "refused" ? "request refused" : "request failed"}
+      </p>
+      <p className="mt-1.5 max-w-[70ch] text-[13px] leading-relaxed text-fg">
+        {notice?.summary ?? "The call did not complete."}
+      </p>
+      {notice?.code == null ? null : (
+        <p className="mt-2 font-mono text-[11px] text-fg-faint">
+          {notice.code} · HTTP {notice.status}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ── calling ──────────────────────────────────────────────────────────────── */
+
+async function call(
+  command: CommandId,
+  input: {
+    poolId: string;
+    question: string;
+    search: string;
+    horizon: number;
+    windowDays: number;
+  },
+): Promise<unknown> {
+  switch (command) {
+    case "ask":
+      return input.poolId.length > 0
+        ? api.agent({
+            query: input.question,
+            poolId: input.poolId,
+            mode: "v01",
+            horizonDays: input.horizon,
+          })
+        : api.agent({
+            query: input.question,
+            mode: "v01",
+            horizonDays: input.horizon,
+          });
     case "pools":
-      return (
-        <>
-          <PoolsResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
+      return api.pools();
     case "forecast": {
-      const bundle = data as { forecast: never; metrics: never };
-      return (
-        <>
-          <ForecastResult forecast={bundle.forecast} metrics={bundle.metrics} />
-          <Raw data={data} />
-        </>
-      );
+      // Both halves in one command. The band alone says where the model thinks the yield goes; the
+      // observations are what make it legible as a continuation of a past rather than a floating
+      // prediction, which is the reason the chart takes history and forecast together.
+      const [forecast, metrics] = await Promise.all([
+        api.forecast(input.poolId, input.horizon),
+        api.metrics(input.poolId, "apy", 90),
+      ]);
+      return { forecast, metrics };
     }
     case "metrics":
-      return (
-        <>
-          <MetricsResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
+      return api.metrics(input.poolId, "apy", input.windowDays);
     case "performance":
-      return (
-        <>
-          <PerformanceResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
-    case "status":
-      return (
-        <>
-          <StatusResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
-    case "health":
-      return (
-        <>
-          <HealthResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
-    case "cache":
-      return (
-        <>
-          <CacheResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
+      return api.performance(input.poolId);
     case "search":
-      return (
-        <>
-          <SearchResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
-    case "ask":
-      return (
-        <>
-          <AgentResult data={data as never} />
-          <Raw data={data} />
-        </>
-      );
+      return api.search(input.search);
+    case "status":
+      return api.modelStatus(24);
+    case "health":
+      return api.health();
+    case "cache":
+      return api.cache();
     default:
-      return <Raw data={data} />;
+      return null;
   }
+}
+
+/* ── small shared helpers ─────────────────────────────────────────────────── */
+
+const badgeFor = (state: RunState): "up" | "down" | "secondary" | "outline" => {
+  const accent = specOf(state).accent;
+  if (accent === "up") return "up";
+  if (accent === "down") return "down";
+  if (accent === "faint") return "outline";
+  return "secondary";
+};
+
+function ago(instant: string | null): string {
+  if (instant === null) return "—";
+  const then = Date.parse(instant);
+  if (Number.isNaN(then)) return "—";
+  const minutes = Math.round((Date.now() - then) / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
 }

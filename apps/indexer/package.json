@@ -5,10 +5,10 @@
   "type": "module",
   "description": "Serverless agent API for the Agentic EMS: a Vercel-hosted surface over the v0.1 LangGraph cycle, the TimesFM-3 forecast ledger, SQL-computed performance evaluation and temporal vector retrieval.",
   "scripts": {
-    "build": "tsc -p tsconfig.json --noEmit",
-    "build:console": "vite build",
+    "build": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.console.json --noEmit",
+    "build:console": "tsc -p tsconfig.console.json --noEmit && vite build",
     "dev:console": "vite",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.console.json --noEmit",
     "lint": "eslint api test scripts",
     "test": "vitest run",
     "dev": "vercel dev",

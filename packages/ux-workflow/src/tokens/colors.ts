@@ -46,4 +46,27 @@ export const motion = {
   flashGreen: "animate-flash-green",
   flashRed: "animate-flash-red",
   fadeSlideUp: "animate-fade-slide-up",
+  /**
+   * Marching dashes along an active edge. Exported because "this is the path currently being taken"
+   * is not specific to the desk — the indexer console uses it to show which transition a run is on.
+   */
+  flowDash: "animate-flow-dash",
+  accordionDown: "animate-accordion-down",
+  accordionUp: "animate-accordion-up",
+  /**
+   * Curves and durations, so a caller names the system's timing rather than inventing one.
+   *
+   * The keyframes above carry their own curves; these are for everything else — hover, focus, press,
+   * and any transition a component composes itself. Without them each surface picks its own
+   * `ease-out` and `150ms`, and the product stops feeling like one thing.
+   */
+  ease: {
+    out: "var(--tk-ease-out)",
+    inOut: "var(--tk-ease-in-out)",
+  },
+  duration: {
+    quick: "var(--tk-dur-quick)",
+    base: "var(--tk-dur-base)",
+    slow: "var(--tk-dur-slow)",
+  },
 } as const;

@@ -87,7 +87,8 @@ const ISO_INSTANT = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z/g;
 export function Reading({
   children,
 }: {
-  children?: string;
+  /** The API omits `reading` on some payloads, so `undefined` is a legitimate value to pass. */
+  children?: string | undefined;
 }): React.JSX.Element | null {
   if (children === undefined || children.length === 0) return null;
   return (
@@ -361,7 +362,7 @@ export function ForecastResult({
         <Field
           label="band / median"
           value={`${bandWidth.toFixed(2)}×`}
-          tone={bandWidth > 1 ? "down" : undefined}
+          {...(bandWidth > 1 ? { tone: "down" as const } : {})}
         />
         <Field
           label="quantiles"

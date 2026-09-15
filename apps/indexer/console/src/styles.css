@@ -12,9 +12,17 @@
  * direction, no negotiation: the package owns the system, this file follows it.
  */
 
-/* The package ships compiled classes, so Tailwind has to be told to read them. Without this the
- * chart, table and select components render unstyled — their class strings are never scanned. */
-@source "../../../packages/ux-workflow/dist";
+/*
+ * The package ships compiled classes, so Tailwind has to be told to read them. Without this every
+ * component renders as an unstyled box: the utility classes that live *inside* the package — a
+ * Select's trigger, a Table's cell padding, a popover's surface — are never emitted, and only the
+ * classes this file's own markup happens to use survive.
+ *
+ * Count the depth rather than copying the app's string. From `apps/indexer/console/src/` the repo
+ * root is four levels up; `apps/agentic-ems/app/` sits three, which is why the same text is wrong
+ * here. A missing `@source` is silent — nothing warns, the classes are simply absent.
+ */
+@source "../../../../packages/ux-workflow/dist";
 
 @theme inline {
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -38,8 +46,14 @@
   --color-oneinch: var(--tk-oneinch);
   --color-uniswap: var(--tk-uniswap);
 
+  /* The whole vocabulary, not the subset the first build happened to use. `flow-dash` runs the
+   * marching dashes along an active diagram edge; a value that flashes on change is the other half
+   * of "motion means something happened". */
   --animate-pulse-subtle: pulse-subtle 2.4s ease-in-out infinite;
+  --animate-flash-green: flash-green 0.6s ease-out;
+  --animate-flash-red: flash-red 0.6s ease-out;
   --animate-fade-slide-up: fade-slide-up 0.16s ease-out;
+  --animate-flow-dash: flow-dash 1s linear infinite;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 }
@@ -64,6 +78,23 @@
   --tk-oneinch: #12aab5;
   --tk-uniswap: #ff007a;
   color-scheme: dark;
+}
+
+/*
+ * Timing, not a second motion system.
+ *
+ * The keyframes above are one-shot and carry their own curves. These name the curve and the duration
+ * for everything a component composes itself — a hover, a focus ring, a panel opening — so the whole
+ * surface moves on the same beats instead of each element inventing a `transition-all duration-300`.
+ * JS motion libraries are deliberately absent: this list is enough for a surface whose list only ever
+ * appends, and a second motion system would be a second thing to keep in step with the design system.
+ */
+:root {
+  --tk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --tk-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --tk-dur-quick: 120ms;
+  --tk-dur-base: 200ms;
+  --tk-dur-slow: 320ms;
 }
 
 /*
@@ -102,6 +133,8 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
+/* Motion keyframes — consumed via --animate-* above. */
+
 @keyframes pulse-subtle {
   0%,
   100% {
@@ -109,6 +142,24 @@ body {
   }
   50% {
     opacity: 0.55;
+  }
+}
+
+@keyframes flash-green {
+  from {
+    background-color: color-mix(in srgb, var(--tk-up) 35%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+@keyframes flash-red {
+  from {
+    background-color: color-mix(in srgb, var(--tk-down) 35%, transparent);
+  }
+  to {
+    background-color: transparent;
   }
 }
 
@@ -122,6 +173,13 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Travels the dashes along an edge, so "this is the path being taken" is legible without colour. */
+@keyframes flow-dash {
+  to {
+    background-position-x: 16px;
   }
 }
 
@@ -149,9 +207,13 @@ body {
   }
 }
 
+/* Every animation in the vocabulary, so a new one cannot quietly escape the preference. */
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-subtle,
+  .animate-flash-green,
+  .animate-flash-red,
   .animate-fade-slide-up,
+  .animate-flow-dash,
   .animate-accordion-down,
   .animate-accordion-up {
     animation: none !important;

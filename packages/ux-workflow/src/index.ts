@@ -59,7 +59,12 @@ export { TypingIndicator } from "./ai/typing-indicator.js";
 export { CodeBlock } from "./ai/code-block.js";
 
 // AI Forecasting components (TimesFM-3, built on shadcn Chart)
-export { ForecastChart } from "./ai/forecast-chart.js";
+export {
+  ForecastChart,
+  type ForecastPoint,
+  type ForecastTarget,
+  type ForecastChartProps,
+} from "./ai/forecast-chart.js";
 export { BacktestResult } from "./ai/backtest-result.js";
 export { MacroVariableCard } from "./ai/macro-variable-card.js";
 export { CovariateTimeline } from "./ai/covariate-timeline.js";
@@ -75,6 +80,22 @@ export { ObservabilityDashboard } from "./ai/observability-dashboard.js";
 export { TraceViewer } from "./ai/trace-viewer.js";
 export { MetricsTimeline } from "./ai/metrics-timeline.js";
 export { AlertFeed } from "./ai/alert-feed.js";
+
+// Flow diagram — the generic node/edge canvas the desk's income Sankey is built on
+export {
+  FlowDiagram,
+  assignColumns,
+  accentOf,
+  formatValue,
+  ACCENT_BADGE,
+  type FlowDiagramProps,
+  type FlowNode,
+  type FlowEdge,
+  type FlowTone,
+  type FlowAccent,
+  type FlowMetric,
+  type FlowLegendItem,
+} from "./data/flow-diagram.js";
 
 // Data visualization primitives
 export { Sparkline } from "./data/sparkline.js";
