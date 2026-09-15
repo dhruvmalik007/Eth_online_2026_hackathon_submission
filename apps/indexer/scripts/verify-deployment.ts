@@ -271,3 +271,13 @@ main().catch((error: unknown) => {
   console.error(error);
   process.exit(1);
 });
+
+/**
+ * A module, not a global script.
+ *
+ * A TypeScript file with no import or export is treated as a script and its top-level declarations
+ * join the global scope. This repo has two standalone verifiers, so their `main` functions merged
+ * into one declaration and `tsc` reported "Duplicate function implementation" for a file that was
+ * perfectly correct on its own. The empty export is what makes this a module.
+ */
+export {};

@@ -28,6 +28,10 @@ export const ROUTES: Readonly<Record<string, string>> = {
   "/api/risk/chains": "../api/risk/chains.js",
   "/api/risk/protocols": "../api/risk/protocols.js",
   "/api/risk/adjustment": "../api/risk/adjustment.js",
+  "/api/pools": "../api/pools.js",
+  "/api/model-status": "../api/model-status.js",
+  "/api/cache/manifest": "../api/cache/manifest.js",
+  "/api/cron/probe": "../api/cron/probe.js",
 };
 
 /** Parse `KEY=VALUE` lines, ignoring comments and blank lines. Pure, so it is testable. */
