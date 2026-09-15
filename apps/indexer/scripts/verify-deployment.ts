@@ -244,13 +244,21 @@ async function main(): Promise<void> {
     const failures_ = Array.isArray(manifest['failures']) ? (manifest['failures'] as Record<string, unknown>[]) : [];
     note('partial failures', failures_.map((f) => String(f['key'])).join(', ') || 'none');
 
-    // A failure the live view does not corroborate is a bug, not a degraded state: the two disagree
-    // about the same dependency, so one of them is wrong and neither can be trusted.
-    if (health !== null && failures_.length > 0) {
+    const malformedFailures = failures_.filter(
+      (f) => typeof f['key'] !== 'string' || typeof f['error'] !== 'string',
+    );
+    check('every reported failure names a dependency and a reason', malformedFailures.length === 0,
+      malformedFailures.map((f) => String(f['key'])).join(', '));
+
+    // Reported side by side, never compared. The manifest's `failures` are *cache entries*
+    // (`health`, `risk/chains`, `model-status`) while health's `degraded` is a list of *dependencies*
+    // (`timescaledb`, `risk`). Earlier versions of this block inferred a relationship between the two
+    // lists and were wrong both times: first grading a stale cache against a live view, then reading
+    // `risk/chains` as "not `risk`, therefore recovered". Different vocabularies, so a reader gets
+    // both and decides.
+    if (health !== null) {
       const degraded = Array.isArray(health['degraded']) ? (health['degraded'] as unknown[]).map(String) : [];
-      const unexplained = failures_.filter((f) => !degraded.includes(String(f['key']).split('/')[0] ?? ''));
-      check('every cache failure is corroborated by the live health view', unexplained.length === 0,
-        unexplained.map((f) => String(f['key'])).join(', '));
+      note('live health now reports degraded', degraded.join(', ') || 'none');
     }
   }
 
