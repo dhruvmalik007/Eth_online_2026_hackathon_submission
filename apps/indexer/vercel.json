@@ -22,7 +22,7 @@
       "maxDuration": 30
     },
     "api/health.ts": {
-      "maxDuration": 15
+      "maxDuration": 60
     },
     "api/risk/chains.ts": {
       "maxDuration": 30

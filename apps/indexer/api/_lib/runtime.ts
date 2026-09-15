@@ -278,18 +278,40 @@ export function getRuntime(overrides: RuntimeOverrides = {}): IndexerRuntime {
   return scope.__agenticEmsIndexerRuntime;
 }
 
-/** Probe the TimesFM-3 service without spending GPU time on a forecast. */
+/**
+ * Probe the TimesFM-3 service without spending GPU time on a forecast.
+ *
+ * The wait is bounded on purpose. The service scales to zero, so the first call after an idle period
+ * pays a GPU cold start — and an unbounded probe turns that into a 504 for the *whole route*, which
+ * reads as "the indexer is down" when the truth is "one dependency is waking up". A bound converts an
+ * unanswerable question into an answer the caller can act on.
+ *
+ * 25s covers a warm response and a short cold start, and leaves room inside the function's budget for
+ * the rest of the sweep: the database ping, the capability probe and the risk manifest.
+ */
+const TIMESFM3_PROBE_TIMEOUT_MS = 25_000;
+
 export async function probeTimesfm3(
   baseUrl: string,
   fetchImpl: typeof fetch = fetch,
+  timeoutMs: number = TIMESFM3_PROBE_TIMEOUT_MS,
 ): Promise<ServiceProbe> {
   try {
     // Any HTTP status — including 404 — proves the service answered. Only a
     // transport failure means it is actually unreachable.
-    const res = await fetchImpl(baseUrl, { method: 'GET' });
+    const res = await fetchImpl(baseUrl, { method: 'GET', signal: AbortSignal.timeout(timeoutMs) });
     return { reachable: true, status: res.status };
   } catch (err) {
-    return { reachable: false, error: err instanceof Error ? err.message : String(err) };
+    const timedOut =
+      err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
+    return {
+      reachable: false,
+      error: timedOut
+        ? `no response within ${timeoutMs}ms — the service scales to zero, so a cold start can take longer than this`
+        : err instanceof Error
+          ? err.message
+          : String(err),
+    };
   }
 }
 
