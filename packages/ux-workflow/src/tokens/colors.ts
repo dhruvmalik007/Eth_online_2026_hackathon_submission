@@ -54,6 +54,13 @@ export const motion = {
   accordionDown: "animate-accordion-down",
   accordionUp: "animate-accordion-up",
   /**
+   * A scrim arriving over content that is being replaced.
+   *
+   * Opacity only, and short: a loading layer says "you cannot act on this yet". Anything with a
+   * transform makes it an object that lands, which invites looking at it instead of past it.
+   */
+  overlayIn: "animate-overlay-in",
+  /**
    * Curves and durations, so a caller names the system's timing rather than inventing one.
    *
    * The keyframes above carry their own curves; these are for everything else — hover, focus, press,

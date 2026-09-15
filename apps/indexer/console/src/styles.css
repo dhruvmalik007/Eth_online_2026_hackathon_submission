@@ -56,6 +56,7 @@
   --animate-flow-dash: flow-dash 1s linear infinite;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-overlay-in: overlay-in 0.18s ease-out;
 }
 
 :root,
@@ -183,6 +184,16 @@ body {
   }
 }
 
+/* Opacity only, so a scrim reads as the surface being covered rather than an object landing on it. */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
@@ -214,6 +225,7 @@ body {
   .animate-flash-red,
   .animate-fade-slide-up,
   .animate-flow-dash,
+  .animate-overlay-in,
   .animate-accordion-down,
   .animate-accordion-up {
     animation: none !important;

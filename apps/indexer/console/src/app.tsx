@@ -12,10 +12,6 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  Conversation,
-  ConversationContent,
-  ConversationEmptyState,
-  ConversationScrollButton,
   Input,
   Label,
   PromptInput,
@@ -132,7 +128,15 @@ export function App(): React.JSX.Element {
   const [poolId, setPoolId] = React.useState("");
   const [horizon, setHorizon] = React.useState(30);
   const [windowDays, setWindowDays] = React.useState(30);
-  const [entries, setEntries] = React.useState<readonly Entry[]>([]);
+  /**
+   * The one result on screen.
+   *
+   * A new command *replaces* it rather than appending to a log. A transcript answers "what have I
+   * done?" when the question is always "what did I just ask, and what came back?" — and the previous
+   * answers push the current one below the fold exactly when it matters. Tools that present one
+   * response at a time — a status page, an API reference — never accumulate, and neither does this.
+   */
+  const [result, setResult] = React.useState<Entry | null>(null);
   const [pools, setPools] = React.useState<readonly PoolSummary[]>([]);
   const [poolsState, setPoolsState] = React.useState<
     "loading" | "ready" | "failed"
@@ -264,18 +268,18 @@ export function App(): React.JSX.Element {
       }
       dispatch(classified.event);
       const settled = next("running", classified.event) ?? "failed";
-      setEntries((current) =>
-        current.map((entry) =>
-          entry.id === id
-            ? {
-                ...entry,
-                ms: Date.now() - startedAt,
-                outcome: settled,
-                data,
-                notice: classified,
-              }
-            : entry,
-        ),
+      // Settle the entry this call started. Guarded on the id so a slow run that resolves after a
+      // newer command was issued cannot overwrite the newer result with an older one.
+      setResult((current) =>
+        current === null || current.id !== id
+          ? current
+          : {
+              ...current,
+              ms: Date.now() - startedAt,
+              outcome: settled,
+              data,
+              notice: classified,
+            },
       );
     },
     [],
@@ -293,19 +297,16 @@ export function App(): React.JSX.Element {
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    setEntries((current) => [
-      ...current,
-      {
-        id,
-        command: spec.id,
-        args: argsLine,
-        startedAt: Date.now(),
-        ms: null,
-        outcome: "running",
-        data: null,
-        notice: null,
-      },
-    ]);
+    setResult({
+      id,
+      command: spec.id,
+      args: argsLine,
+      startedAt: Date.now(),
+      ms: null,
+      outcome: "running",
+      data: null,
+      notice: null,
+    });
     // Two transitions, not one. `submitting` is "the request is going out" and `accept` is "it went
     // out"; the outcome events leave from `running`, so without the second the machine has no
     // transition to take on success and sticks in `submitting` forever.
@@ -344,18 +345,16 @@ export function App(): React.JSX.Element {
    */
   React.useEffect(() => {
     const id = "opening-pools";
-    setEntries([
-      {
-        id,
-        command: "pools",
-        args: "this deployment",
-        startedAt: Date.now(),
-        ms: null,
-        outcome: "running",
-        data: null,
-        notice: null,
-      },
-    ]);
+    setResult({
+      id,
+      command: "pools",
+      args: "this deployment",
+      startedAt: Date.now(),
+      ms: null,
+      outcome: "running",
+      data: null,
+      notice: null,
+    });
     dispatch("select");
     dispatch("submit");
     dispatch("accept");
@@ -396,19 +395,21 @@ export function App(): React.JSX.Element {
           <RunStateDiagram state={run} />
         </section>
 
-        <Conversation className="mt-6 min-h-[40vh]">
-          <ConversationContent className="gap-0 p-0">
-            {entries.length === 0 ? (
-              <ConversationEmptyState
-                title="Nothing run yet"
-                description="Pick a command above. Nothing here needs a pool address — the universe is read from this deployment."
-              />
-            ) : (
-              entries.map((entry) => <EntryRow key={entry.id} entry={entry} />)
-            )}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
+        {/*
+          One answer, replaced rather than appended. A log of every query you have run is a transcript,
+          and a transcript is the wrong instrument for a measurement: the reader came for the current
+          figure, and scrolling past six superseded ones to reach it is work they did not ask for.
+        */}
+        <section className="mt-6 min-h-[40vh]">
+          {result === null ? (
+            <p className="border border-edge bg-panel px-4 py-6 text-[13px] leading-relaxed text-fg-dim">
+              Nothing run yet. Pick a command above — nothing here needs a pool address, because the
+              universe is read from this deployment.
+            </p>
+          ) : (
+            <ResultPanel entry={result} />
+          )}
+        </section>
       </main>
     </div>
   );
@@ -716,9 +717,15 @@ function EntryRow({ entry }: { entry: Entry }): React.JSX.Element {
 
       <CardContent className="py-4">
         {running ? (
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-2/3" />
-            <Skeleton className="h-3 w-1/2" />
+          // The shape of an answer rather than a pair of bars. The scrim above blurs it, so what
+          // shows through is a page forming in place, which is what makes the wait legible.
+          <div className="space-y-3">
+            <Skeleton className="h-3 w-1/3" />
+            <div className="space-y-px">
+              <Skeleton className="h-7 w-full" />
+              <Skeleton className="h-7 w-full" />
+              <Skeleton className="h-7 w-full" />
+            </div>
           </div>
         ) : entry.outcome === "unavailable" ? (
           <Unavailable notice={entry.notice} />
@@ -729,6 +736,77 @@ function EntryRow({ entry }: { entry: Entry }): React.JSX.Element {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/* ── the one result ───────────────────────────────────────────────────────── */
+
+/**
+ * What the wait is for, per command.
+ *
+ * A spinner says "something is happening" and nothing else. These say what is happening, and — for
+ * the two that can be slow — why, so a cold start reads as a known cost rather than a hang. The
+ * commands differ enough that one sentence cannot cover them: a database read, a model call and a
+ * full agent cycle are not the same wait, and presenting them identically wastes the one moment the
+ * reader is definitely paying attention.
+ */
+const WAIT_NOTE: Readonly<Record<string, string>> = {
+  ask: "Running the v0.1 cycle — retrieval, yield projection, synthesis, then guardrails. One model call per node.",
+  forecast:
+    "Requesting a TimesFM-3 projection. The service scales to zero, so the first call after an idle period includes a cold start.",
+  metrics: "Reading hourly buckets from TimescaleDB.",
+  performance: "Computing realised yield in SQL over the stored ledger.",
+  pools: "Reading the indexed universe.",
+  search: "Searching the embedding index.",
+  status: "Reading recorded probes.",
+  health: "Probing every dependency, live.",
+  cache: "Reading the cache index.",
+};
+
+const DEFAULT_WAIT_NOTE =
+  "Reading this deployment. Nothing is required of you until it answers.";
+
+/**
+ * The answer to the current command, covered while that command is in flight.
+ *
+ * The panel keeps its shape and is *covered* rather than emptied. A scrim fading in over the
+ * skeletons behind it says "this is being replaced, here, in the space you were already looking at" —
+ * whereas emptying the page and refilling it loses the reader's place and makes a two-second wait
+ * feel like a navigation.
+ *
+ * The scrim is also what blocks interaction. The result underneath is not yet the result, so anything
+ * clickable in it would be clickable only until it stopped existing.
+ */
+function ResultPanel({ entry }: { entry: Entry }): React.JSX.Element {
+  const running = entry.outcome === "running";
+
+  return (
+    <div className="relative">
+      <EntryRow entry={entry} />
+      {running ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 z-10 flex animate-overlay-in flex-col items-center justify-center gap-3 rounded-[4px] bg-ink/70 backdrop-blur-[3px]"
+        >
+          <span className="flex items-center gap-2.5">
+            <span
+              aria-hidden
+              className="size-1.5 animate-pulse-subtle rounded-full bg-amber"
+            />
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-amber">
+              {entry.command}
+            </span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-fg-dim">
+              running
+            </span>
+          </span>
+          <p className="max-w-[52ch] px-6 text-center text-[12px] leading-relaxed text-fg-dim">
+            {WAIT_NOTE[entry.command] ?? DEFAULT_WAIT_NOTE}
+          </p>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
