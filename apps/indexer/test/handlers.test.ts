@@ -24,6 +24,7 @@ import type {
 import { HttpError, errorResponse, json, numberParam, readBody, stringParam } from '../api/_lib/http.js';
 import {
   handleAgent,
+  handleCronProbe,
   handleForecast,
   handleHealth,
   handleMetrics,
@@ -86,6 +87,9 @@ function fakeRuntime(options: RuntimeOptions = {}): IndexerRuntime {
       TIMESFM3_SERVICE_URL: 'https://timesfm.example',
       TIMESERIES_DATABASE_URL: 'postgres://u:p@host:5432/tsdb',
       TIMESERIES_DB_MAX_CONNECTIONS: 5,
+      // Present by default so the auth tests have to opt *out* to exercise the unset case; a fake
+      // that omits it would make every probe test pass for the wrong reason.
+      CRON_SECRET: 'test-secret',
     },
     runner: {} as IndexerRuntime['runner'],
     metrics: {
@@ -1114,5 +1118,95 @@ describe('GET /api/model-status', () => {
 
     expect((payload['window'] as Record<string, unknown>)['recordedHours']).toBe(0);
     expect(String(payload['reading'])).toContain('No probe has been recorded yet');
+  });
+});
+
+// ── scheduled maintenance ───────────────────────────────────────────────────
+
+describe('POST /api/cron/probe', () => {
+  const authed = (): Request =>
+    new Request('https://x/api/cron/probe', {
+      method: 'POST',
+      headers: { authorization: 'Bearer test-secret' },
+    });
+
+  const unauthed = (): Request =>
+    new Request('https://x/api/cron/probe', { method: 'POST' });
+
+  /** The envelope nests the code under `error`, as every route's does. */
+  const errorCode = async (res: Response): Promise<unknown> => {
+    const payload = await body(res);
+    return (payload['error'] as Record<string, unknown>)['code'];
+  };
+
+  it('records one row per dependency and answers with the health report', async () => {
+    const seen: string[] = [];
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { record: (r: readonly { service: string }[]) => Promise<number> }).record =
+      async (rows) => {
+        seen.push(...rows.map((row) => row.service));
+        return rows.length;
+      };
+
+    const res = await handleCronProbe(authed(), runtime);
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    // Every dependency the sweep covers, not a subset: recording four of five would produce an
+    // uptime figure for a system that was never fully observed.
+    expect([...seen].sort()).toEqual(['retrieval', 'risk', 'timescaledb', 'timesfm3', 'vector']);
+    expect(payload['recorded']).toBe(5);
+    // The same report `/api/health` answers with, so its caller can compare cache against live view.
+    expect(payload['service']).toBe('agentic-ems-indexer');
+    expect(Array.isArray(payload['degraded'])).toBe(true);
+  });
+
+  it('refuses a caller presenting no token', async () => {
+    const res = await handleCronProbe(unauthed(), fakeRuntime());
+    expect(res.status).toBe(401);
+    expect(await errorCode(res)).toBe('UNAUTHORIZED');
+  });
+
+  it('refuses a caller presenting the wrong token', async () => {
+    const res = await handleCronProbe(
+      new Request('https://x/api/cron/probe', {
+        method: 'POST',
+        headers: { authorization: 'Bearer not-the-secret' },
+      }),
+      fakeRuntime(),
+    );
+    expect(res.status).toBe(401);
+    expect(await errorCode(res)).toBe('UNAUTHORIZED');
+  });
+
+  it('does not write anything when the caller is refused', async () => {
+    let calls = 0;
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { record: () => Promise<number> }).record = async () => {
+      calls += 1;
+      return 0;
+    };
+
+    await handleCronProbe(unauthed(), runtime);
+
+    // The check runs before the sweep for exactly this reason: an unauthenticated caller must not be
+    // able to make the deployment write rows, let alone probe its dependencies.
+    expect(calls).toBe(0);
+  });
+
+  it('fails closed, by name, when the deployment has no secret', async () => {
+    const runtime = fakeRuntime();
+    // Failing open here would turn this into an unauthenticated trigger that spends model quota and
+    // writes probe rows, which is the opposite of what the route exists for. Deleted rather than set
+    // to undefined, so the key is genuinely absent.
+    delete (runtime.env as unknown as Record<string, unknown>)['CRON_SECRET'];
+
+    const res = await handleCronProbe(authed(), runtime);
+    const error = (await body(res))['error'] as Record<string, unknown>;
+
+    expect(res.status).toBe(500);
+    expect(error['code']).toBe('INTERNAL_ERROR');
+    // The operator needs to know which variable to set, so the message names it.
+    expect(String(error['message'])).toContain('CRON_SECRET');
   });
 });

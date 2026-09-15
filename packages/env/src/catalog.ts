@@ -97,6 +97,14 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("RISK_LOCAL_DIR", ["risk", "indexer", "inference", "langchain"], "Local directory used instead of GCS (local development).", { format: "path" }),
   v("EDGE_CONFIG", ["agentic-ems", "execution", "indexer"], "Vercel Global Config connection string for runtime flags and per-env service URLs.", { secret: true }),
 
+  // ── scheduled maintenance ───────────────────────────────────────────────────────────────────
+  // Tagged `langchain` as well as `indexer`, because that package's schema declares the key and
+  // `assertCatalogKeys` checks *service association*, not just membership in the catalog. `requiredIn`
+  // is per-spec, so this does make `env check --service langchain --env staging` ask for it — which is
+  // accurate rather than noisy: the schema that declares it is langchain's, and the only deployment
+  // that consumes it is the indexer, whose refresh probe fails closed without it.
+  v("CRON_SECRET", ["indexer", "langchain"], "Bearer token the scheduled refresh job presents to POST /api/cron/probe.", { secret: true, requiredIn: ["staging", "production"] }),
+
   // ── execution service ────────────────────────────────────────────────────────────────────────
   v("EXECUTION_MODE", ["execution"], "`dry` simulates and records; `live` may broadcast.", {
     format: "enum",

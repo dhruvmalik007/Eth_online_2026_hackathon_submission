@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import type { ZodType } from 'zod';
 
 /**
@@ -11,6 +12,7 @@ import type { ZodType } from 'zod';
 
 export const ERROR_CODES = [
   'BAD_REQUEST',
+  'UNAUTHORIZED',
   'NOT_FOUND',
   'VECTOR_UNAVAILABLE',
   'RISK_UNAVAILABLE',
@@ -24,6 +26,10 @@ export type ErrorCode = (typeof ERROR_CODES)[number];
 
 const STATUS_BY_CODE: Readonly<Record<ErrorCode, number>> = {
   BAD_REQUEST: 400,
+  // Only the refresh probe returns this, and only a machine ever calls it. Distinct from
+  // BAD_REQUEST because the remedy is different: a bad request means fix the call, this means the
+  // caller is not allowed to make it at all.
+  UNAUTHORIZED: 401,
   NOT_FOUND: 404,
   VECTOR_UNAVAILABLE: 503,
   // Distinct from VECTOR_UNAVAILABLE because the remedy differs: one needs a
@@ -158,6 +164,41 @@ export async function readBody<T>(
     );
   }
   return result.data;
+}
+
+/**
+ * Require a bearer token, compared in constant time.
+ *
+ * For the one route called by a machine rather than a browser. A plain `===` on a secret leaks its
+ * length and prefix through timing; that is a slow attack, but this is a free way to not have it.
+ *
+ * The three outcomes are deliberately distinct, because they need different actions: an unset secret
+ * is an operator mistake (500, and it names the variable), a missing token is a caller mistake (401),
+ * and a wrong token is a rejected attempt (401).
+ */
+export function requireBearer(
+  request: Request,
+  expected: string | undefined,
+  context: string,
+): void {
+  if (expected === undefined || expected.trim().length === 0) {
+    // Failing open here would turn this into an unauthenticated trigger, so it fails closed.
+    throw new HttpError('INTERNAL_ERROR', `${context} is not configured: set CRON_SECRET.`);
+  }
+
+  const header = request.headers.get('authorization') ?? '';
+  const presented = header.startsWith('Bearer ') ? header.slice('Bearer '.length) : '';
+  if (presented.length === 0) {
+    throw new HttpError('UNAUTHORIZED', `${context} requires a bearer token.`);
+  }
+
+  const a = Buffer.from(presented);
+  const b = Buffer.from(expected);
+  // `timingSafeEqual` throws on a length mismatch, so length is compared first. That leaks the
+  // secret's length and nothing else — which is why the comparison is not merely `a.equals(b)`.
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    throw new HttpError('UNAUTHORIZED', `${context} rejected the presented token.`);
+  }
 }
 
 /**

@@ -32,6 +32,15 @@
     },
     "api/risk/adjustment.ts": {
       "maxDuration": 15
+    },
+    "api/pools.ts": {
+      "maxDuration": 20
+    },
+    "api/model-status.ts": {
+      "maxDuration": 20
+    },
+    "api/cron/probe.ts": {
+      "maxDuration": 45
     }
   }
 }

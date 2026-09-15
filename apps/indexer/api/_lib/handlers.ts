@@ -5,6 +5,7 @@ import {
   MAX_POOL_LIMIT,
   MAX_WINDOW_HOURS,
   MetricNameSchema,
+  type CapabilityReport,
   type MetricName,
 } from '@ethonline2026/timeseries';
 import { runV01 } from '@ethonline2026/langchain-agent';
@@ -17,8 +18,17 @@ import {
   type RiskProfileReader,
   type SourceState,
 } from '@ethonline2026/risk-analysis-data-pipeline';
-import { HttpError, errorResponse, json, numberParam, readBody, stringParam, toHttpError } from './http.js';
-import type { IndexerRuntime } from './runtime.js';
+import {
+  HttpError,
+  errorResponse,
+  json,
+  numberParam,
+  readBody,
+  requireBearer,
+  stringParam,
+  toHttpError,
+} from './http.js';
+import type { IndexerRuntime, ServiceProbe } from './runtime.js';
 
 /**
  * Route handlers.
@@ -47,63 +57,148 @@ function rangeFrom(params: URLSearchParams): {
 
 // ── GET /api/health ─────────────────────────────────────────────────────────
 
-export async function handleHealth(runtime: IndexerRuntime): Promise<Response> {
-  let dbReachable = false;
-  let dbError: string | undefined;
-  try {
-    dbReachable = await runtime.metrics.ping();
-  } catch (err) {
-    dbError = err instanceof Error ? err.message : String(err);
-  }
+/** One dependency, in the shape the recorder stores it. */
+interface DependencyProbe {
+  readonly service: string;
+  readonly reachable: boolean;
+  /** Null where a latency means nothing — these are capability checks, not round trips. */
+  readonly latencyMs: number | null;
+  readonly status: number | null;
+  readonly detail: string | null;
+}
+
+interface DependencySweep {
+  readonly probes: readonly DependencyProbe[];
+  readonly dbReachable: boolean;
+  readonly dbError?: string;
+  readonly capabilities: CapabilityReport | null;
+  readonly timesfm3: ServiceProbe;
+  readonly riskStore: 'unconfigured' | 'ready' | 'unavailable';
+  readonly riskError?: string;
+  readonly degraded: string[];
+}
+
+/**
+ * Sweep every dependency once, timing each.
+ *
+ * Shared by the live health route and the cron probe so the two can never disagree about what
+ * "reachable" means. They would drift the moment one gained a check the other lacked, and a status
+ * page that contradicts its own history is worse than no status page at all.
+ */
+async function sweepDependencies(runtime: IndexerRuntime): Promise<DependencySweep> {
+  const timed = async <T>(
+    fn: () => Promise<T>,
+  ): Promise<{ value: T | null; latencyMs: number; error?: string }> => {
+    const started = Date.now();
+    try {
+      return { value: await fn(), latencyMs: Date.now() - started };
+    } catch (err) {
+      return {
+        value: null,
+        latencyMs: Date.now() - started,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  };
+
+  const db = await timed(() => runtime.metrics.ping());
+  const dbReachable = db.value === true;
 
   const capabilities = dbReachable ? await runtime.capabilities() : null;
-  const timesfm3 = await runtime.probeTimesfm3(runtime.env.TIMESFM3_SERVICE_URL);
+  const timesfm3 = await timed(() => runtime.probeTimesfm3(runtime.env.TIMESFM3_SERVICE_URL));
 
-  // Risk snapshot availability. Resolved *and read*: constructing a store handle
-  // succeeds even when the bucket does not exist or the credentials are wrong, so
-  // only a real read distinguishes "configured" from "actually usable". The
-  // manifest is the cheapest such read — one small object.
-  let riskStore: 'unconfigured' | 'ready' | 'unavailable' = 'unconfigured';
-  let riskError: string | undefined;
-  try {
+  // Risk snapshot availability. Resolved *and read*: constructing a store handle succeeds even when
+  // the bucket does not exist or the credentials are wrong, so only a real read distinguishes
+  // "configured" from "actually usable". The manifest is the cheapest such read — one small object.
+  const risk = await timed(async () => {
     const reader = await runtime.riskReader();
-    if (reader === undefined) {
-      riskStore = 'unconfigured';
-    } else {
-      await reader.manifest();
-      riskStore = 'ready';
-    }
-  } catch (err) {
-    riskStore = 'unavailable';
-    riskError = err instanceof Error ? err.message : String(err);
-  }
+    if (reader === undefined) return 'unconfigured' as const;
+    await reader.manifest();
+    return 'ready' as const;
+  });
+  const riskStore = risk.value ?? 'unavailable';
+
+  const probes: DependencyProbe[] = [
+    {
+      service: 'timescaledb',
+      reachable: dbReachable,
+      latencyMs: db.latencyMs,
+      status: null,
+      detail: db.error ?? null,
+    },
+    {
+      service: 'timesfm3',
+      reachable: timesfm3.value?.reachable === true,
+      latencyMs: timesfm3.latencyMs,
+      status: timesfm3.value?.status ?? null,
+      detail: timesfm3.value?.error ?? timesfm3.error ?? null,
+    },
+    {
+      // Derived from the capability probe rather than called, so it has no latency of its own.
+      service: 'vector',
+      reachable: capabilities?.vectorEnabled === true,
+      latencyMs: null,
+      status: null,
+      detail: capabilities === null ? 'unknown — the database could not be reached' : null,
+    },
+    {
+      service: 'retrieval',
+      reachable: runtime.vectors !== undefined,
+      latencyMs: null,
+      status: null,
+      detail: runtime.vectors === undefined ? 'no embedding service configured' : null,
+    },
+    {
+      service: 'risk',
+      reachable: riskStore === 'ready',
+      latencyMs: risk.latencyMs,
+      status: null,
+      detail: risk.error ?? null,
+    },
+  ];
 
   const degraded: string[] = [];
   if (!dbReachable) degraded.push('timescaledb');
-  if (!timesfm3.reachable) degraded.push('timesfm3');
+  if (timesfm3.value?.reachable !== true) degraded.push('timesfm3');
   if (capabilities !== null && !capabilities.vectorEnabled) degraded.push('vector');
   if (runtime.vectors === undefined) degraded.push('retrieval');
   if (riskStore !== 'ready') degraded.push('risk');
 
-  return json({
-    service: 'agentic-ems-indexer',
-    status: degraded.length === 0 ? 'ok' : 'degraded',
+  return {
+    probes,
+    dbReachable,
+    ...(db.error === undefined ? {} : { dbError: db.error }),
+    capabilities,
+    timesfm3:
+      timesfm3.value ??
+      ({ reachable: false, ...(timesfm3.error === undefined ? {} : { error: timesfm3.error }) } as ServiceProbe),
+    riskStore,
+    ...(risk.error === undefined ? {} : { riskError: risk.error }),
     degraded,
+  };
+}
+
+/** The report both routes answer with, so neither can describe the same sweep differently. */
+function healthReport(runtime: IndexerRuntime, sweep: DependencySweep): Record<string, unknown> {
+  return {
+    service: 'agentic-ems-indexer',
+    status: sweep.degraded.length === 0 ? 'ok' : 'degraded',
+    degraded: sweep.degraded,
     database: {
-      reachable: dbReachable,
-      ...(dbError === undefined ? {} : { error: dbError }),
+      reachable: sweep.dbReachable,
+      ...(sweep.dbError === undefined ? {} : { error: sweep.dbError }),
       poolMax: runtime.env.TIMESERIES_DB_MAX_CONNECTIONS,
       viaDsn: runtime.env.TIMESERIES_DATABASE_URL !== undefined,
     },
-    timescaledb: capabilities,
+    timescaledb: sweep.capabilities,
     timesfm3: {
       url: runtime.env.TIMESFM3_SERVICE_URL,
-      ...timesfm3,
+      ...sweep.timesfm3,
     },
     retrieval: runtime.vectors === undefined ? 'unconfigured' : 'enabled',
     risk: {
-      store: riskStore,
-      ...(riskError === undefined ? {} : { error: riskError }),
+      store: sweep.riskStore,
+      ...(sweep.riskError === undefined ? {} : { error: sweep.riskError }),
       bucket: runtime.env.RISK_GCS_BUCKET ?? null,
       prefix: runtime.env.RISK_GCS_PREFIX,
       localDir: runtime.env.RISK_LOCAL_DIR ?? null,
@@ -114,7 +209,53 @@ export async function handleHealth(runtime: IndexerRuntime): Promise<Response> {
       embeddingModel: runtime.env.VERTEX_EMBEDDING_MODEL,
       timesfm3Model: 'timesfm-3.0',
     },
-  });
+  };
+}
+
+/**
+ * Is each dependency usable right now?
+ *
+ * The live view. It records nothing, so the console can poll it without writing rows — the history
+ * comes from the probe below instead.
+ */
+export async function handleHealth(runtime: IndexerRuntime): Promise<Response> {
+  return json(healthReport(runtime, await sweepDependencies(runtime)));
+}
+
+// ── POST /api/cron/probe ────────────────────────────────────────────────────
+
+/**
+ * Sweep the dependencies and record what was found.
+ *
+ * The only writer of `model_probes`, and it exists because nothing else can be: a stored snapshot
+ * shows the present and no history, and an uptime percentage without history cannot show an outage.
+ * The Cloud Run Job calls it every two hours. The bearer check is what stops it being an open trigger
+ * anyone can use to write rows.
+ *
+ * It answers with the same report as `/api/health`, so its caller caches a document it can also
+ * compare against the live view.
+ *
+ * @param request - Must carry `Authorization: Bearer $CRON_SECRET`.
+ * @param runtime - The indexer runtime.
+ */
+export async function handleCronProbe(
+  request: Request,
+  runtime: IndexerRuntime,
+): Promise<Response> {
+  try {
+    requireBearer(request, runtime.env.CRON_SECRET, 'POST /api/cron/probe');
+
+    const sweep = await sweepDependencies(runtime);
+    // One INSERT for the whole sweep, so a partial write cannot make one dependency look healthier
+    // than the others over the same window.
+    const recorded = await runtime.modelProbes.record(
+      sweep.probes.map((probe) => ({ ...probe, source: 'cron' as const })),
+    );
+
+    return json({ ...healthReport(runtime, sweep), recorded });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'cron/probe'));
+  }
 }
 
 // ── GET /api/metrics ────────────────────────────────────────────────────────
