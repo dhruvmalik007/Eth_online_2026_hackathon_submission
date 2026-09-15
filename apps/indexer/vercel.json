@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@ethonline2026/indexer^...",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@ethonline2026/indexer^... && pnpm --filter @ethonline2026/indexer build:console",
   "outputDirectory": "public",
   "functions": {
     "api/agent.ts": {

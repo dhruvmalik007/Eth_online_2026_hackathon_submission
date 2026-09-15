@@ -6,6 +6,8 @@
   "description": "Serverless agent API for the Agentic EMS: a Vercel-hosted surface over the v0.1 LangGraph cycle, the TimesFM-3 forecast ledger, SQL-computed performance evaluation and temporal vector retrieval.",
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
+    "build:console": "vite build",
+    "dev:console": "vite",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint api test scripts",
     "test": "vitest run",
@@ -20,16 +22,26 @@
     "@ethonline2026/langchain-agent": "workspace:*",
     "@ethonline2026/risk-analysis-data-pipeline": "workspace:*",
     "@ethonline2026/timeseries": "workspace:*",
+    "@ethonline2026/ux-workflow": "workspace:*",
     "@google-cloud/storage": "^7.22.0",
+    "lucide-react": "^0.469.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "zod": "^4.5.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.9.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^9.39.1",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.23.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",
+    "vite": "^7.3.6",
     "vitest": "^3.2.4"
   }
 }
