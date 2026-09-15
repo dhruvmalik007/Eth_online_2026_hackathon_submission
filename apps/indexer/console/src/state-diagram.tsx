@@ -74,7 +74,7 @@ export function RunStateDiagram({
   state,
   selected,
   onSelect,
-  height = 220,
+  height = 320,
 }: RunStateDiagramProps): React.JSX.Element {
   const focused = selected ?? state;
   const spec = specOf(focused);
@@ -113,8 +113,12 @@ export function RunStateDiagram({
           nodes={nodes}
           edges={edges}
           height={height}
-          columnWidth={150}
-          nodeHeight={56}
+          // A column is `NODE_W` (148) plus the gap the ribbon is drawn in, so 150 left a one-pixel
+          // connector — the canvas was drawing the machine and hiding it at the same time.
+          columnWidth={172}
+          // The tallest column holds five outcomes: 5 x 46 + 4 x 14 = 286, inside 320. At 56 the
+          // column overflowed the canvas and the last two states were simply not on screen.
+          nodeHeight={46}
           activeNodeId={focused}
           ariaLabel="Run lifecycle states and the transitions between them"
           {...(onSelect === undefined

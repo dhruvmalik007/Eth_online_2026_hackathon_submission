@@ -977,39 +977,48 @@ export function AgentResult({
       ) : null}
 
       {synthesis !== undefined ? (
-        <div className="mt-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
+        <Collapsible className="mt-4">
+          <CollapsibleTrigger className="flex w-full items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint transition-colors hover:text-fg-dim">
+            <ChevronRight className="size-3 transition-transform data-[state=open]:rotate-90" />
             synthesis
-          </p>
-          <pre className="mt-2 max-h-[240px] overflow-auto border border-edge bg-panel p-3 font-mono text-[11px] leading-relaxed text-fg-dim">
-            {JSON.stringify(synthesis, null, 2)}
-          </pre>
-        </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2 overflow-hidden border border-edge">
+            <CodeBlock language="json" code={JSON.stringify(synthesis, null, 2)} />
+          </CollapsibleContent>
+        </Collapsible>
       ) : null}
 
       {audit.length > 0 ? (
-        <ol className="mt-4 border-t border-edge">
-          {audit.map((step, i) => (
-            <li
-              key={i}
-              className="flex items-baseline gap-4 border-b border-edge py-2"
-            >
-              <span className="w-28 shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
-                {String(step["node"] ?? "—")}
-              </span>
-              <span className="min-w-0 flex-1 text-[12px] leading-relaxed text-fg-dim">
-                {String(step["detail"] ?? "")}
-              </span>
-              <span className="shrink-0 font-mono text-[11px] text-fg-faint">
-                {when(
-                  typeof step["at"] === "string"
-                    ? (step["at"] as string)
-                    : null,
-                )}
-              </span>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
+            audit
+          </p>
+          <ul className="mt-2">
+            {audit.map((step, i) => (
+              <li
+                key={i}
+                className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-edge py-2 last:border-b-0"
+              >
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 font-mono text-[9px] uppercase tracking-[0.14em]"
+                >
+                  {String(step["node"] ?? "—")}
+                </Badge>
+                <span className="min-w-0 flex-1 text-[12px] leading-relaxed text-fg-dim">
+                  {String(step["detail"] ?? "")}
+                </span>
+                <span className="shrink-0 font-mono text-[11px] tabular-nums text-fg-faint">
+                  {when(
+                    typeof step["at"] === "string"
+                      ? (step["at"] as string)
+                      : null,
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
     </div>
   );

@@ -4,6 +4,11 @@ import * as React from "react";
 import {
   Badge,
   Button,
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -683,29 +688,33 @@ function EntryRow({ entry }: { entry: Entry }): React.JSX.Element {
   const spec = specOf(entry.outcome);
 
   return (
-    <article className="border-b border-edge py-5 first:pt-0">
-      <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span aria-hidden className="font-mono text-[12px] text-amber">
-          ›
-        </span>
-        <span className="font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-fg">
-          {entry.command}
-        </span>
-        <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-fg-dim">
-          {entry.args}
-        </span>
-        <Badge
-          variant={badgeFor(entry.outcome)}
-          className="font-mono text-[9px] uppercase tracking-[0.14em]"
-        >
-          {running ? "running" : spec.label}
-        </Badge>
-        <span className="font-mono text-[10px] tabular-nums text-fg-faint">
-          {entry.ms === null ? "…" : `${entry.ms}ms`}
-        </span>
-      </header>
+    <Card className="gap-0 overflow-hidden py-0">
+      <CardHeader className="flex-row flex-wrap items-center gap-x-3 gap-y-1 border-b border-edge py-3">
+        <CardTitle className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px] font-medium">
+          <span aria-hidden className="font-mono text-[12px] text-amber">
+            ›
+          </span>
+          <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-fg">
+            {entry.command}
+          </span>
+          <span className="min-w-0 truncate font-mono text-[11px] font-normal tracking-normal text-fg-dim">
+            {entry.args}
+          </span>
+        </CardTitle>
+        <CardAction className="flex items-center gap-3">
+          <Badge
+            variant={badgeFor(entry.outcome)}
+            className="font-mono text-[9px] uppercase tracking-[0.14em]"
+          >
+            {running ? "running" : spec.label}
+          </Badge>
+          <span className="font-mono text-[10px] tabular-nums text-fg-faint">
+            {entry.ms === null ? "…" : `${entry.ms}ms`}
+          </span>
+        </CardAction>
+      </CardHeader>
 
-      <div className="mt-3 pl-5">
+      <CardContent className="py-4">
         {running ? (
           <div className="space-y-2">
             <Skeleton className="h-3 w-2/3" />
@@ -718,8 +727,8 @@ function EntryRow({ entry }: { entry: Entry }): React.JSX.Element {
         ) : (
           <Results command={entry.command} data={entry.data} />
         )}
-      </div>
-    </article>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -736,18 +745,21 @@ function Unavailable({
   notice: Classified | null;
 }): React.JSX.Element {
   return (
-    <div className="border border-edge-2 bg-panel/60 p-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
-        not available on this deployment
-      </p>
-      <p className="mt-1.5 max-w-[70ch] text-[13px] leading-relaxed text-fg">
-        {notice?.remedy ?? "A dependency this route needs is not configured."}
-      </p>
-      {notice?.summary === undefined ? null : (
-        <p className="mt-2 font-mono text-[11px] text-fg-faint">
-          {notice.code ?? "—"} · HTTP {notice.status} · {notice.summary}
+    <div className="flex gap-3">
+      <span aria-hidden className="mt-[7px] size-1.5 shrink-0 rounded-full bg-fg-faint" />
+      <div className="min-w-0">
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
+          not available on this deployment
         </p>
-      )}
+        <p className="mt-1.5 max-w-[70ch] text-[13px] leading-relaxed text-fg">
+          {notice?.remedy ?? "A dependency this route needs is not configured."}
+        </p>
+        {notice?.summary === undefined ? null : (
+          <p className="mt-2 font-mono text-[11px] text-fg-faint">
+            {notice.code ?? "—"} · HTTP {notice.status} · {notice.summary}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -760,18 +772,30 @@ function Refused({
   outcome: RunState;
 }): React.JSX.Element {
   return (
-    <div className="border border-down/40 bg-down/5 p-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-down">
-        {outcome === "refused" ? "request refused" : "request failed"}
-      </p>
-      <p className="mt-1.5 max-w-[70ch] text-[13px] leading-relaxed text-fg">
-        {notice?.summary ?? "The call did not complete."}
-      </p>
-      {notice?.code == null ? null : (
-        <p className="mt-2 font-mono text-[11px] text-fg-faint">
-          {notice.code} · HTTP {notice.status}
+    <div className="flex gap-3">
+      <span aria-hidden className="mt-[7px] size-1.5 shrink-0 rounded-full bg-down" />
+      <div className="min-w-0">
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-down">
+          {outcome === "refused" ? "request refused" : "request failed"}
         </p>
-      )}
+        <p className="mt-1.5 max-w-[70ch] text-[13px] leading-relaxed text-fg">
+          {notice?.summary ?? "The call did not complete."}
+        </p>
+        {notice === null ? null : (
+          // The technical line, below the sentence rather than instead of it: the contract's code,
+          // the status, and the runtime's own words when there were any. It answers "what exactly?"
+          // — which is a different question from "what happened?".
+          <p className="mt-2 font-mono text-[11px] leading-relaxed text-fg-faint">
+            {[
+              notice.code,
+              notice.status === 0 ? "no response" : `HTTP ${notice.status}`,
+              notice.detail,
+            ]
+              .filter((part): part is string => typeof part === "string" && part.length > 0)
+              .join(" · ")}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

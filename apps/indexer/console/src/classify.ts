@@ -22,6 +22,8 @@ export interface Classified {
   readonly status: number;
   /** What happened, in one sentence, for the entry card. */
   readonly summary: string;
+  /** The raw text behind the summary, when there was any worth keeping. */
+  readonly detail?: string;
   /** What would fix it, when the fix is configuration rather than a retry. */
   readonly remedy?: string;
 }
@@ -119,16 +121,26 @@ export function classifyFailure(
     };
   }
 
+  // A transport failure has no HTTP answer to quote, and an exception's own text — `fetch failed`,
+  // `NetworkError when attempting to fetch resource` — is the runtime talking about itself rather
+  // than a description of what the reader now knows. It is kept, one line down, and is not the
+  // headline.
+  if (status === 0) {
+    return {
+      event: "settle-failed",
+      code,
+      status,
+      summary: "The request never reached the deployment, so nothing was run.",
+      ...(message.length === 0 ? {} : { detail: message }),
+    };
+  }
+
   return {
     event: "settle-failed",
     code,
     status,
     summary:
-      message.length > 0
-        ? message
-        : status === 0
-          ? "The request never reached the deployment."
-          : `The deployment answered ${status}.`,
+      message.length > 0 ? message : `The deployment answered ${status}.`,
   };
 }
 

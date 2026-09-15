@@ -281,6 +281,7 @@ export function FlowDiagram({
 
     const laid = new Map<string, LaidNode>();
     const maxColumn = Math.max(0, ...byColumn.keys());
+    let lastColumnInline = true;
 
     for (const [column, bucket] of [...byColumn.entries()].sort(
       (a, b) => a[0] - b[0],
@@ -293,6 +294,7 @@ export function FlowDiagram({
       const columnInline = heights.every(
         (barHeight) => barHeight >= LABEL_MIN_H,
       );
+      if (column === maxColumn) lastColumnInline = columnInline;
       const contentH =
         heights.reduce((sum, h) => sum + h, 0) +
         Math.max(bucket.length - 1, 0) * NODE_GAP;
@@ -400,7 +402,12 @@ export function FlowDiagram({
     return {
       nodes: [...laid.values()],
       edges: laidEdges,
-      width: (maxColumn + 1) * columnWidth + PAD_RIGHT,
+      // `PAD_RIGHT` is room for labels that sit *outside* the last column's nodes. When those nodes
+      // are tall enough for an inline label — any diagram with a fixed node height, and most with
+      // large magnitudes — reserving it leaves 168px of dead canvas, enough to push a five-column
+      // diagram past its container and hand the reader a scrollbar over empty space.
+      width:
+        (maxColumn + 1) * columnWidth + (lastColumnInline ? 0 : PAD_RIGHT),
     };
   }, [nodes, edges, height, columnWidth]);
 
@@ -473,11 +480,15 @@ export function FlowDiagram({
                     className={cn(
                       "absolute cursor-pointer border-0 p-0 transition-opacity duration-150",
                       ACCENT_BG[accent],
+                      // Dimming has to leave a diagram readable. At 10% an unhighlighted ribbon is not
+                      // quiet, it is absent — and on a canvas where one selection touches two of
+                      // thirteen edges, that removes most of the picture rather than pointing at a
+                      // part of it.
                       isDim
-                        ? "opacity-10"
+                        ? "opacity-25"
                         : isActive
-                          ? "opacity-80"
-                          : "opacity-40",
+                          ? "opacity-85"
+                          : "opacity-50",
                     )}
                     style={{ left, top, width, height: h, clipPath }}
                   >
@@ -543,7 +554,9 @@ export function FlowDiagram({
                     isActive
                       ? "border-amber ring-1 ring-amber"
                       : "border-edge-2 hover:border-amber",
-                    isDim && "opacity-30",
+                    // Same reason as the ribbons: a node has to stay legible while something else is
+                    // highlighted, or the diagram can only show one state at a time.
+                    isDim && "opacity-55",
                     animate && "animate-fade-slide-up",
                   )}
                   style={{
