@@ -23,6 +23,7 @@ import {
   CalibrationSliceSchema,
   RetrievalEvidenceSchema,
   YieldProjectionSchema,
+  type ReadjustmentAction,
   type V01State,
   type YieldProjection,
 } from './schemas.js';
@@ -429,10 +430,40 @@ export function buildV01Graph(deps: V01Deps) {
           audit: [...state.audit, { at: new Date().toISOString(), node: 'readjustment', detail: 'HOLD (synthesis unavailable)' }],
         };
       }
-      const decisions = await generateReadjustment({
-        synthesis: state.synthesisPayload,
-        llm: deps.synthesisLlm,
-      });
+      // A model that answers with an ungrounded decision fails the schema even after the retry.
+      // Letting that throw discards a synthesis, a forecast and an audit that all succeeded, and
+      // hands whoever asked the question a raw zod dump instead of an answer. So the decision
+      // degrades instead: one explicit HOLD, marked `ungrounded`, and the run completes with its
+      // evidence intact and the failure named in the audit where a reader can see it.
+      let decisions: ReadjustmentAction[];
+      let degraded: string | null = null;
+      try {
+        decisions = await generateReadjustment({
+          synthesis: state.synthesisPayload,
+          llm: deps.synthesisLlm,
+        });
+      } catch (error) {
+        degraded = error instanceof Error ? error.message : String(error);
+        decisions = [
+          {
+            action: 'HOLD',
+            protocol:
+              state.synthesisPayload.violations[0]?.protocol ??
+              state.synthesisPayload.alpha[0]?.protocol ??
+              state.synthesisPayload.feasibility[0]?.protocol ??
+              'unspecified',
+            amountPercentage: 100,
+            rationale:
+              'HOLD — the readjustment model returned a decision that failed validation, so nothing is reallocated rather than acting on an unverified one.',
+            parameters: {},
+            citations: [
+              ...state.synthesisPayload.violations.map((v) => v.constraintId),
+              ...state.synthesisPayload.alpha.map((a) => a.projectionId),
+            ].slice(0, 1),
+            ungrounded: true,
+          },
+        ];
+      }
       const riskAssessment = assessRisk({
         projections: state.yieldProjections,
         synthesis: state.synthesisPayload,
@@ -448,7 +479,10 @@ export function buildV01Graph(deps: V01Deps) {
           {
             at: new Date().toISOString(),
             node: 'readjustment',
-            detail: `${decisions.length} decisions; guardrails: ${riskAssessment.reasons.join('; ') || 'clean'}${riskAssessment.replanNeeded ? ' → re-plan' : ''}`,
+            detail:
+              degraded === null
+                ? `${decisions.length} decisions; guardrails: ${riskAssessment.reasons.join('; ') || 'clean'}${riskAssessment.replanNeeded ? ' → re-plan' : ''}`
+                : `degraded to an ungrounded HOLD — the model's decision failed validation (${degraded})`,
           },
         ],
       };

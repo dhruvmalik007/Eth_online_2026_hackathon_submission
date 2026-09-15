@@ -38,6 +38,22 @@
   --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 
+/*
+ * Motion timing — what tokens/colors.ts exposes as `motion.ease` and `motion.duration`.
+ *
+ * The keyframes above carry their own curves because each is a single gesture. These are for
+ * transitions a component composes itself, and naming the same curve everywhere is most of what
+ * makes a product feel like one thing rather than several. Not theme-dependent, so they sit outside
+ * the dark/light flip.
+ */
+:root {
+  --tk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --tk-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --tk-dur-quick: 120ms;
+  --tk-dur-base: 200ms;
+  --tk-dur-slow: 320ms;
+}
+
 :root,
 .dark {
   --tk-ink: #0a0b0d;

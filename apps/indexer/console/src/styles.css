@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+/*
+ * Terminal Noir, mirrored.
+ *
+ * `@ethonline2026/ux-workflow` publishes components but not its stylesheet (`files: ["dist"]`, and the
+ * CSS lives in `src/styles/`), so every consumer mirrors the tokens. The app does the same, and this
+ * is that mirror — copied value for value so the console and the desk are the same world rather than
+ * two interpretations of it.
+ *
+ * If a token changes in `packages/ux-workflow/src/styles/globals.css`, it changes here. One
+ * direction, no negotiation: the package owns the system, this file follows it.
+ */
+
+/*
+ * The package ships compiled classes, so Tailwind has to be told to read them. Without this every
+ * component renders as an unstyled box: the utility classes that live *inside* the package — a
+ * Select's trigger, a Table's cell padding, a popover's surface — are never emitted, and only the
+ * classes this file's own markup happens to use survive.
+ *
+ * Count the depth rather than copying the app's string. From `apps/indexer/console/src/` the repo
+ * root is four levels up; `apps/agentic-ems/app/` sits three, which is why the same text is wrong
+ * here. A missing `@source` is silent — nothing warns, the classes are simply absent.
+ */
+@source "../../../../packages/ux-workflow/dist";
+
+@theme inline {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --color-ink: var(--tk-ink);
+  --color-panel: var(--tk-panel);
+  --color-panel-2: var(--tk-panel-2);
+  --color-edge: var(--tk-edge);
+  --color-edge-2: var(--tk-edge-2);
+  --color-fg: var(--tk-fg);
+  --color-fg-dim: var(--tk-fg-dim);
+  --color-fg-faint: var(--tk-fg-faint);
+  --color-amber: var(--tk-amber);
+  --color-amber-dim: var(--tk-amber-dim);
+  --color-on-amber: var(--tk-on-amber);
+  --color-up: var(--tk-up);
+  --color-down: var(--tk-down);
+  --color-graph: var(--tk-graph);
+  --color-graph-soft: var(--tk-graph-soft);
+  --color-oneinch: var(--tk-oneinch);
+  --color-uniswap: var(--tk-uniswap);
+
+  /* The whole vocabulary, not the subset the first build happened to use. `flow-dash` runs the
+   * marching dashes along an active diagram edge; a value that flashes on change is the other half
+   * of "motion means something happened". */
+  --animate-pulse-subtle: pulse-subtle 2.4s ease-in-out infinite;
+  --animate-flash-green: flash-green 0.6s ease-out;
+  --animate-flash-red: flash-red 0.6s ease-out;
+  --animate-fade-slide-up: fade-slide-up 0.16s ease-out;
+  --animate-flow-dash: flow-dash 1s linear infinite;
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-overlay-in: overlay-in 0.18s ease-out;
+}
+
+:root,
+.dark {
+  --tk-ink: #0a0b0d;
+  --tk-panel: #101214;
+  --tk-panel-2: #14171a;
+  --tk-edge: #1e2126;
+  --tk-edge-2: #2a2e35;
+  --tk-fg: #e8eaed;
+  --tk-fg-dim: #9ba1ab;
+  --tk-fg-faint: #5f6670;
+  --tk-amber: #ffb300;
+  --tk-amber-dim: #b37f00;
+  --tk-on-amber: #0a0b0d;
+  --tk-up: #16c784;
+  --tk-down: #ea3943;
+  --tk-graph: #6747ee;
+  --tk-graph-soft: #a292f5;
+  --tk-oneinch: #12aab5;
+  --tk-uniswap: #ff007a;
+  color-scheme: dark;
+}
+
+/*
+ * Timing, not a second motion system.
+ *
+ * The keyframes above are one-shot and carry their own curves. These name the curve and the duration
+ * for everything a component composes itself — a hover, a focus ring, a panel opening — so the whole
+ * surface moves on the same beats instead of each element inventing a `transition-all duration-300`.
+ * JS motion libraries are deliberately absent: this list is enough for a surface whose list only ever
+ * appends, and a second motion system would be a second thing to keep in step with the design system.
+ */
+:root {
+  --tk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --tk-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --tk-dur-quick: 120ms;
+  --tk-dur-base: 200ms;
+  --tk-dur-slow: 320ms;
+}
+
+/*
+ * The type system is pinned, not chosen: `@ethonline2026/ux-workflow` specifies Inter and JetBrains
+ * Mono, and this file mirrors that system value for value. The brief is explicit that the incumbent
+ * world is preserved, so substituting a face here would make the console a different product from the
+ * desk it is read beside.
+ */
+html,
+body {
+  background: var(--tk-ink);
+  color: var(--tk-fg);
+  /* impeccable-disable-next-line overused-font -- Inherited from the design system, not selected. */
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--tk-amber) 30%, transparent);
+}
+
+/*
+ * Tabular figures on every piece of data.
+ *
+ * This is the one typographic decision the whole surface rests on: a column of APYs that shifts
+ * horizontally as digits change is unreadable at a glance, and this console is read by scanning
+ * columns. Applied to the mono stack rather than to every number, so prose numerals stay proportional.
+ */
+.font-mono,
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Motion keyframes — consumed via --animate-* above. */
+
+@keyframes pulse-subtle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes flash-green {
+  from {
+    background-color: color-mix(in srgb, var(--tk-up) 35%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+@keyframes flash-red {
+  from {
+    background-color: color-mix(in srgb, var(--tk-down) 35%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+/* The one authored entrance: a result settling into the log. Short, once, and from a state the
+ * element is already legible in — it reads as arrival, not as the page assembling itself. */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Travels the dashes along an edge, so "this is the path being taken" is legible without colour. */
+@keyframes flow-dash {
+  to {
+    background-position-x: 16px;
+  }
+}
+
+/* Opacity only, so a scrim reads as the surface being covered rather than an object landing on it. */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* Every animation in the vocabulary, so a new one cannot quietly escape the preference. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-subtle,
+  .animate-flash-green,
+  .animate-flash-red,
+  .animate-fade-slide-up,
+  .animate-flow-dash,
+  .animate-overlay-in,
+  .animate-accordion-down,
+  .animate-accordion-up {
+    animation: none !important;
+  }
+}

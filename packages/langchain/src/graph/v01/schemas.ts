@@ -217,9 +217,25 @@ export const ReadjustmentActionSchema = z.object({
   protocol: z.string().min(1),
   amountPercentage: z.number().min(0).max(100),
   rationale: z.string().min(1),
-  parameters: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  /**
+   * Transaction-ready fields, when the action has any.
+   *
+   * Defaults to empty rather than being required. A `HOLD` legitimately carries no parameters —
+   * "do nothing, here is why" is the model's most reasonable answer to a breached constraint — and
+   * requiring the key made exactly that answer unparseable. The requirement also protected nothing:
+   * `parameters` is not what grounds a decision, so its absence was never evidence of a problem.
+   */
+  parameters: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).default({}),
   /** Traceability: projections + constraints this decision is grounded in. */
   citations: z.array(CitationIdSchema).min(1),
+  /**
+   * Set by the system, never by the model, when a decision is a degraded placeholder.
+   *
+   * Declaring it here bypasses nothing: `citations` is still enforced with `.min(1)` on every model
+   * reply, so a model cannot claim this to escape the citation requirement. Only the readjustment
+   * node constructs one, and only after the model's own output has failed validation outright.
+   */
+  ungrounded: z.boolean().optional(),
 });
 
 export type ReadjustmentAction = z.infer<typeof ReadjustmentActionSchema>;

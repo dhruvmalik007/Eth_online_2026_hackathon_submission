@@ -97,6 +97,25 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("RISK_LOCAL_DIR", ["risk", "indexer", "inference", "langchain"], "Local directory used instead of GCS (local development).", { format: "path" }),
   v("EDGE_CONFIG", ["agentic-ems", "execution", "indexer"], "Vercel Global Config connection string for runtime flags and per-env service URLs.", { secret: true }),
 
+  // ── scheduled maintenance ───────────────────────────────────────────────────────────────────
+  // Tagged `langchain` as well as `indexer`, because that package's schema declares the key and
+  // `assertCatalogKeys` checks *service association*, not just membership in the catalog. `requiredIn`
+  // is per-spec, so this does make `env check --service langchain --env staging` ask for it — which is
+  // accurate rather than noisy: the schema that declares it is langchain's, and the only deployment
+  // that consumes it is the indexer, whose refresh probe fails closed without it.
+  v("CRON_SECRET", ["indexer", "langchain"], "Bearer token the scheduled refresh job presents to POST /api/cron/probe.", { secret: true, requiredIn: ["staging", "production"] }),
+  // Not secret, and tagged `langchain` for the same reason as above: that schema declares it.
+  v("CACHE_BUCKET", ["indexer", "langchain"], "GCS bucket the refresh job writes and /api/cache/manifest reads (private).", { format: "string" }),
+
+  // ── keyless Google credentials ──────────────────────────────────────────────────────────────
+  // The four halves of a workload identity federation config. A deployment that still holds a
+  // service-account key, and a local `gcloud` session, both work without them — so none is required,
+  // and their absence is a fallback rather than a misconfiguration.
+  v("GCP_PROJECT_NUMBER", ["indexer", "langchain"], "GCP project number, which the federation audience is built from.", { format: "string" }),
+  v("GCP_SERVICE_ACCOUNT_EMAIL", ["indexer", "langchain"], "The keyless identity this deployment impersonates.", { format: "string" }),
+  v("GCP_WORKLOAD_IDENTITY_POOL_ID", ["indexer", "langchain"], "Workload identity pool that trusts Vercel's OIDC issuer.", { format: "string" }),
+  v("GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID", ["indexer", "langchain"], "OIDC provider within that pool, scoped to this project.", { format: "string" }),
+
   // ── execution service ────────────────────────────────────────────────────────────────────────
   v("EXECUTION_MODE", ["execution"], "`dry` simulates and records; `live` may broadcast.", {
     format: "enum",

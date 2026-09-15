@@ -1,5 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
+
+/**
+ * The cache reader is mocked file-wide, and only the cache tests touch it. It is the seam between the
+ * route and GCS, and every branch worth asserting lives on this side of it: an absent manifest is a
+ * state, a mismatched schema is an error, and the signing is the only part that needs a bucket.
+ */
+vi.mock('../api/_lib/cache.js', () => ({
+  CACHE_SCHEMA_VERSION: 1,
+  readManifest: vi.fn(),
+  signManifest: vi.fn(),
+}));
+
+import { readManifest, signManifest } from '../api/_lib/cache.js';
 import { loadEnv } from '@ethonline2026/langchain-agent';
 import {
   ChainRiskProfileSchema,
@@ -24,10 +37,14 @@ import type {
 import { HttpError, errorResponse, json, numberParam, readBody, stringParam } from '../api/_lib/http.js';
 import {
   handleAgent,
+  handleCacheManifest,
+  handleCronProbe,
   handleForecast,
   handleHealth,
   handleMetrics,
+  handleModelStatus,
   handlePerformance,
+  handlePools,
   handleRiskAdjustment,
   handleRiskChains,
   handleRiskProtocols,
@@ -84,6 +101,10 @@ function fakeRuntime(options: RuntimeOptions = {}): IndexerRuntime {
       TIMESFM3_SERVICE_URL: 'https://timesfm.example',
       TIMESERIES_DATABASE_URL: 'postgres://u:p@host:5432/tsdb',
       TIMESERIES_DB_MAX_CONNECTIONS: 5,
+      // Present by default so the auth tests have to opt *out* to exercise the unset case; a fake
+      // that omits it would make every probe test pass for the wrong reason.
+      CRON_SECRET: 'test-secret',
+      CACHE_BUCKET: 'test-cache-bucket',
     },
     runner: {} as IndexerRuntime['runner'],
     metrics: {
@@ -147,6 +168,39 @@ function fakeRuntime(options: RuntimeOptions = {}): IndexerRuntime {
     decisions: {
       getHistory: async (): Promise<DecisionRecord[]> => [],
     } as unknown as IndexerRuntime['decisions'],
+    pools: {
+      list: async () => [
+        {
+          poolId: '0xpool',
+          protocol: 'aave-v3',
+          network: 'base',
+          observations: 96,
+          firstSeen: new Date('2026-09-01T00:00:00Z'),
+          lastSeen: new Date('2026-09-02T00:00:00Z'),
+        },
+      ],
+      facets: async () => ({ networks: ['base'], protocols: ['aave-v3'] }),
+    } as unknown as IndexerRuntime['pools'],
+    modelProbes: {
+      record: async () => 0,
+      recordedSince: async () => new Date('2026-09-14T00:00:00Z'),
+      window: async (sinceHours: number) => ({
+        sinceHours,
+        recordedSince: new Date('2026-09-14T00:00:00Z'),
+        summaries: [
+          {
+            service: 'timesfm3',
+            samples: 12,
+            reachableSamples: 11,
+            uptimePct: 11 / 12,
+            p50LatencyMs: 42,
+            p95LatencyMs: 310,
+            lastProbedAt: new Date('2026-09-15T00:00:00Z'),
+            lastReachable: true,
+          },
+        ],
+      }),
+    } as unknown as IndexerRuntime['modelProbes'],
     ...(options.vectorEnabled === false
       ? {}
       : {
@@ -988,5 +1042,274 @@ describe('GET /api/health with risk configured', () => {
 
     expect(risk['store']).toBe('unavailable');
     expect(risk['error']).toBe('bucket access denied');
+  });
+});
+
+// ── discovery and availability ──────────────────────────────────────────────
+
+describe('GET /api/pools', () => {
+  it('returns the universe, its real filter values, and how fresh it is', async () => {
+    const res = await handlePools(new Request('https://x/api/pools'), fakeRuntime());
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['count']).toBe(1);
+
+    // An id on its own is not a choice. Protocol, network, observation count and last-seen are what
+    // let a picker tell two pools apart, and every one of them is why this route exists.
+    const pools = payload['pools'] as Record<string, unknown>[];
+    expect(pools[0]?.['poolId']).toBe('0xpool');
+    expect(pools[0]?.['protocol']).toBe('aave-v3');
+    expect(pools[0]?.['network']).toBe('base');
+    expect(pools[0]?.['observations']).toBe(96);
+    expect(pools[0]?.['lastSeen']).toBe('2026-09-02T00:00:00.000Z');
+
+    expect(payload['facets']).toEqual({ networks: ['base'], protocols: ['aave-v3'] });
+    // Derived from the rows, so the console can show recency without trusting a clock of its own.
+    expect(payload['latestObservationAt']).toBe('2026-09-02T00:00:00.000Z');
+  });
+
+  it('reports an empty store as an empty state rather than an error', async () => {
+    const runtime = fakeRuntime();
+    (runtime.pools as unknown as { list: () => Promise<unknown[]> }).list = async () => [];
+
+    const res = await handlePools(new Request('https://x/api/pools'), runtime);
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['empty']).toBe(true);
+    expect(String(payload['reading'])).toContain('No pool metrics');
+  });
+
+  it('rejects a limit beyond the store cap instead of clamping it silently', async () => {
+    const res = await handlePools(new Request('https://x/api/pools?limit=99999'), fakeRuntime());
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('GET /api/model-status', () => {
+  it('reports the recording boundary alongside the window', async () => {
+    const res = await handleModelStatus(
+      new Request('https://x/api/model-status?hours=24'),
+      fakeRuntime(),
+    );
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    const window = payload['window'] as Record<string, unknown>;
+    // The honest left edge. No figure may imply a longer baseline than this instant, because
+    // nothing was recorded before it.
+    expect(window['recordedSince']).toBe('2026-09-14T00:00:00.000Z');
+    expect(window['requestedHours']).toBe(24);
+
+    const services = payload['services'] as Record<string, unknown>[];
+    expect(services[0]?.['service']).toBe('timesfm3');
+    expect(services[0]?.['samples']).toBe(12);
+    expect(services[0]?.['uptimePct']).toBeCloseTo(11 / 12, 6);
+    expect(services[0]?.['p95LatencyMs']).toBe(310);
+  });
+
+  it('calls a window with no samples unobserved instead of healthy', async () => {
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { window: (h: number) => Promise<unknown> }).window = async (
+      h: number,
+    ) => ({ sinceHours: h, recordedSince: new Date('2026-09-14T00:00:00Z'), summaries: [] });
+
+    const res = await handleModelStatus(new Request('https://x/api/model-status'), runtime);
+    const payload = await body(res);
+
+    expect(payload['empty']).toBe(true);
+    expect(String(payload['reading'])).toContain('unobserved, not healthy');
+  });
+
+  it('claims no uptime at all before the first probe is recorded', async () => {
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { window: (h: number) => Promise<unknown> }).window = async (
+      h: number,
+    ) => ({ sinceHours: h, recordedSince: null, summaries: [] });
+
+    const res = await handleModelStatus(new Request('https://x/api/model-status'), runtime);
+    const payload = await body(res);
+
+    expect((payload['window'] as Record<string, unknown>)['recordedHours']).toBe(0);
+    expect(String(payload['reading'])).toContain('No probe has been recorded yet');
+  });
+});
+
+// ── scheduled maintenance ───────────────────────────────────────────────────
+
+describe('POST /api/cron/probe', () => {
+  const authed = (): Request =>
+    new Request('https://x/api/cron/probe', {
+      method: 'POST',
+      headers: { authorization: 'Bearer test-secret' },
+    });
+
+  const unauthed = (): Request =>
+    new Request('https://x/api/cron/probe', { method: 'POST' });
+
+  /** The envelope nests the code under `error`, as every route's does. */
+  const errorCode = async (res: Response): Promise<unknown> => {
+    const payload = await body(res);
+    return (payload['error'] as Record<string, unknown>)['code'];
+  };
+
+  it('records one row per dependency and answers with the health report', async () => {
+    const seen: string[] = [];
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { record: (r: readonly { service: string }[]) => Promise<number> }).record =
+      async (rows) => {
+        seen.push(...rows.map((row) => row.service));
+        return rows.length;
+      };
+
+    const res = await handleCronProbe(authed(), runtime);
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    // Every dependency the sweep covers, not a subset: recording four of five would produce an
+    // uptime figure for a system that was never fully observed.
+    expect([...seen].sort()).toEqual(['retrieval', 'risk', 'timescaledb', 'timesfm3', 'vector']);
+    expect(payload['recorded']).toBe(5);
+    // The same report `/api/health` answers with, so its caller can compare cache against live view.
+    expect(payload['service']).toBe('agentic-ems-indexer');
+    expect(Array.isArray(payload['degraded'])).toBe(true);
+  });
+
+  it('refuses a caller presenting no token', async () => {
+    const res = await handleCronProbe(unauthed(), fakeRuntime());
+    expect(res.status).toBe(401);
+    expect(await errorCode(res)).toBe('UNAUTHORIZED');
+  });
+
+  it('refuses a caller presenting the wrong token', async () => {
+    const res = await handleCronProbe(
+      new Request('https://x/api/cron/probe', {
+        method: 'POST',
+        headers: { authorization: 'Bearer not-the-secret' },
+      }),
+      fakeRuntime(),
+    );
+    expect(res.status).toBe(401);
+    expect(await errorCode(res)).toBe('UNAUTHORIZED');
+  });
+
+  it('does not write anything when the caller is refused', async () => {
+    let calls = 0;
+    const runtime = fakeRuntime();
+    (runtime.modelProbes as unknown as { record: () => Promise<number> }).record = async () => {
+      calls += 1;
+      return 0;
+    };
+
+    await handleCronProbe(unauthed(), runtime);
+
+    // The check runs before the sweep for exactly this reason: an unauthenticated caller must not be
+    // able to make the deployment write rows, let alone probe its dependencies.
+    expect(calls).toBe(0);
+  });
+
+  it('fails closed, by name, when the deployment has no secret', async () => {
+    const runtime = fakeRuntime();
+    // Failing open here would turn this into an unauthenticated trigger that spends model quota and
+    // writes probe rows, which is the opposite of what the route exists for. Deleted rather than set
+    // to undefined, so the key is genuinely absent.
+    delete (runtime.env as unknown as Record<string, unknown>)['CRON_SECRET'];
+
+    const res = await handleCronProbe(authed(), runtime);
+    const error = (await body(res))['error'] as Record<string, unknown>;
+
+    expect(res.status).toBe(500);
+    expect(error['code']).toBe('INTERNAL_ERROR');
+    // The operator needs to know which variable to set, so the message names it.
+    expect(String(error['message'])).toContain('CRON_SECRET');
+  });
+});
+
+// ── the CDN cache ───────────────────────────────────────────────────────────
+
+describe('GET /api/cache/manifest', () => {
+  // Held separately rather than indexed out of the manifest: `manifest.entries[0]` is `T | undefined`
+  // under `noUncheckedIndexedAccess`, and spreading that widens every field to optional.
+  const entry = {
+    key: 'pools',
+    path: 'cache/v1/pools.json',
+    fetchedAt: '2026-09-15T10:00:00.000Z',
+    changedAt: '2026-09-01T00:00:00.000Z',
+    sha256: 'a'.repeat(64),
+    bytes: 8214,
+  };
+
+  const manifest = {
+    version: 1,
+    generatedAt: '2026-09-15T10:00:00.000Z',
+    durationMs: 2841,
+    entries: [entry],
+    failures: [],
+    healthStatus: 'ok',
+  };
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('returns every entry with a URL that can actually be fetched', async () => {
+    vi.mocked(readManifest).mockResolvedValue(manifest);
+    vi.mocked(signManifest).mockResolvedValue({
+      ...manifest,
+      expiresAt: '2026-09-15T11:00:00.000Z',
+      entries: [{ ...entry, url: 'https://storage.googleapis.com/x?sig=abc' }],
+    });
+
+    const res = await handleCacheManifest(fakeRuntime());
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['cached']).toBe(true);
+    const entries = payload['entries'] as Record<string, unknown>[];
+    // A path is not fetchable — the bucket is private, so signing is the entire point of this hop.
+    expect(entries[0]?.['path']).toBe('cache/v1/pools.json');
+    expect(String(entries[0]?.['url'])).toContain('sig=');
+    // And `changedAt` is what separates "fresh data" from "a fresh check" once the console renders it.
+    expect(entries[0]?.['changedAt']).toBe('2026-09-01T00:00:00.000Z');
+  });
+
+  it('treats "the job has never run" as a state, not an outage', async () => {
+    vi.mocked(readManifest).mockResolvedValue(undefined);
+
+    const res = await handleCacheManifest(fakeRuntime());
+    const payload = await body(res);
+
+    // A 404 would make an unrun job look like a broken deployment, and the console would show an
+    // error where the honest answer is "nothing is cached yet".
+    expect(res.status).toBe(200);
+    expect(payload['cached']).toBe(false);
+    expect(String(payload['reading'])).toContain('has not run yet');
+  });
+
+  it('reports an unconfigured bucket without touching GCS', async () => {
+    const runtime = fakeRuntime();
+    delete (runtime.env as unknown as Record<string, unknown>)['CACHE_BUCKET'];
+
+    const res = await handleCacheManifest(runtime);
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['configured']).toBe(false);
+    expect(vi.mocked(readManifest)).not.toHaveBeenCalled();
+  });
+
+  it('surfaces a schema mismatch as an error rather than as an empty cache', async () => {
+    // The dangerous failure. Reporting "nothing cached" for a manifest this build cannot read would
+    // hide a full cache behind an empty state, and nobody would think to look further.
+    vi.mocked(readManifest).mockRejectedValue(
+      new Error('cache manifest is schema version 2; this deployment reads 1'),
+    );
+
+    const res = await handleCacheManifest(fakeRuntime());
+    const payload = await body(res);
+
+    expect(res.status).toBeGreaterThanOrEqual(500);
+    expect((payload['error'] as Record<string, unknown>)['code']).toBeDefined();
   });
 });

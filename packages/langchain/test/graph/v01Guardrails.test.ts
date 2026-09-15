@@ -61,6 +61,44 @@ describe('ReadjustmentActionSchema citations', () => {
   });
 });
 
+describe('ReadjustmentActionSchema parameters and grounding', () => {
+  const hold = {
+    action: 'HOLD' as const,
+    protocol: 'aave-v3',
+    amountPercentage: 100,
+    rationale: 'a constraint is breached, so nothing is reallocated',
+    citations: ['c-aave-v3-0-ltv'],
+  };
+
+  it('accepts a decision that omits parameters entirely', () => {
+    // Observed live, failing an entire run:
+    //   {"expected":"record","code":"invalid_type","path":["parameters"],"message":"Invalid input: expected record, received undefined"}
+    // A HOLD has no transaction fields to carry, so its absence was never the problem.
+    const parsed = ReadjustmentActionSchema.parse(hold);
+    expect(parsed.parameters).toEqual({});
+  });
+
+  it('keeps the parameters when the action supplies them', () => {
+    const parsed = ReadjustmentActionSchema.parse({
+      ...hold,
+      parameters: { rate_mode: 'variable', target_ltv: 0.65 },
+    });
+    expect(parsed.parameters).toEqual({ rate_mode: 'variable', target_ltv: 0.65 });
+  });
+
+  it('does not let the ungrounded marker excuse a missing citation', () => {
+    // The marker exists for the degraded HOLD the readjustment node builds for itself. If a model
+    // reply could set it to escape the citation requirement, the grounding guarantee would become
+    // optional in practice, which is the one thing this schema is here to prevent.
+    expect(() => ReadjustmentActionSchema.parse({ ...hold, citations: [], ungrounded: true })).toThrow();
+  });
+
+  it('carries the system-set marker through when the decision is otherwise valid', () => {
+    const parsed = ReadjustmentActionSchema.parse({ ...hold, ungrounded: true });
+    expect(parsed.ungrounded).toBe(true);
+  });
+});
+
 const step = (day: number, q10: number, q50: number, q90: number) => ({ day, q10, q50, q90 });
 
 // steps: q10 [0.030, 0.031, 0.032], q50 [0.040, 0.0405, 0.0412], q90 [0.050, 0.052, 0.054]

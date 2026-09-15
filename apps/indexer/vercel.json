@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@ethonline2026/indexer^...",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@ethonline2026/indexer^... && pnpm --filter @ethonline2026/indexer build:console",
   "outputDirectory": "public",
   "functions": {
     "api/agent.ts": {
@@ -22,7 +22,7 @@
       "maxDuration": 30
     },
     "api/health.ts": {
-      "maxDuration": 15
+      "maxDuration": 60
     },
     "api/risk/chains.ts": {
       "maxDuration": 30
@@ -32,6 +32,18 @@
     },
     "api/risk/adjustment.ts": {
       "maxDuration": 15
+    },
+    "api/pools.ts": {
+      "maxDuration": 20
+    },
+    "api/model-status.ts": {
+      "maxDuration": 20
+    },
+    "api/cron/probe.ts": {
+      "maxDuration": 45
+    },
+    "api/cache/manifest.ts": {
+      "maxDuration": 20
     }
   }
 }

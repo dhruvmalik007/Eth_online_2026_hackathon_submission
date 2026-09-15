@@ -103,6 +103,16 @@ const HYPERTABLES: readonly HypertableSpec[] = [
     orderBy: 'ts_start DESC',
     compress: false,
   },
+  {
+    // Append-only and read strictly by time, with no ANN index for compression to invalidate.
+    // Segmented by `service` because that is the shape of every query the status view makes: one
+    // service's window at a time.
+    table: 'model_probes',
+    timeColumn: 'probed_at',
+    segmentBy: 'service',
+    orderBy: 'probed_at DESC',
+    compress: true,
+  },
   // ── Risk-data pipeline history ────────────────────────────────────────────
   // These four carry the temporal risk record: how a chain's decentralisation,
   // a protocol's governance, a market maker's depth, and the security-incident
@@ -250,6 +260,25 @@ const TABLE_DDL: readonly { readonly name: string; readonly sql: string }[] = [
   available           jsonb       NOT NULL,
   vector_enabled      boolean     NOT NULL,
   vectorscale_enabled boolean     NOT NULL
+)`,
+  },
+  // The model-availability record. Until this existed, an uptime view had nothing to read: the
+  // health probe answered a request and the answer was discarded, and no table carried a
+  // success/failure column, so a failure left no trace anywhere. One row per probe.
+  //
+  // `source` distinguishes a scheduled probe from one a visitor triggered, because a window that
+  // looks dense only when someone was watching is a misleading uptime figure and the reader should
+  // be able to tell which they are looking at.
+  {
+    name: 'model_probes',
+    sql: `CREATE TABLE IF NOT EXISTS model_probes (
+  probed_at  timestamptz NOT NULL DEFAULT now(),
+  service    text        NOT NULL,
+  reachable  boolean     NOT NULL,
+  latency_ms numeric,
+  status     integer,
+  detail     text,
+  source     text        NOT NULL DEFAULT 'cron'
 )`,
   },
   // ── Risk-data pipeline history ──────────────────────────────────────────────
@@ -609,6 +638,11 @@ const TABLE_DDL: readonly { readonly name: string; readonly sql: string }[] = [
  * tenant-scoped panels, `strategy_id`/`session_id` for the lineage walks.
  */
 const INDEX_DDL: readonly { readonly name: string; readonly sql: string }[] = [
+  {
+    name: 'model_probes_service_probed_idx',
+    sql: `CREATE INDEX IF NOT EXISTS model_probes_service_probed_idx
+       ON model_probes (service, probed_at DESC)`,
+  },
   {
     name: 'exec_sessions_user_activity_idx',
     sql: `CREATE INDEX IF NOT EXISTS exec_sessions_user_activity_idx

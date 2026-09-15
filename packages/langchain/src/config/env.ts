@@ -79,6 +79,22 @@ const envSchema = z.object({
   RPC_URL_BASE_SEPOLIA: z.string().url().default('https://base-sepolia-rpc.publicnode.com'),
   RPC_URL_ARBITRUM_SEPOLIA: z.string().url().default('https://arbitrum-sepolia-rpc.publicnode.com'),
   RPC_URL_OPTIMISM_SEPOLIA: z.string().url().default('https://optimism-sepolia-rpc.publicnode.com'),
+
+  // Machine-callable routes. Optional because only the indexer serves one, and only a deployment with
+  // a scheduled refresh job needs it. The route fails closed when it is absent, so an unset secret
+  // degrades the refresh instead of opening the endpoint to anyone.
+  CRON_SECRET: z.string().min(1).optional(),
+  // The cache bucket the refresh job writes and `/api/cache/manifest` reads. Absent, that route
+  // reports itself unconfigured rather than failing — the console then falls back to the live reads.
+  CACHE_BUCKET: z.string().min(1).optional(),
+
+  // Keyless Google credentials. All four are optional because a deployment still carrying a
+  // service-account key, and a local `gcloud` session, both work without them — the credential layer
+  // falls back rather than failing, so only a deployment configured for federation needs the set.
+  GCP_PROJECT_NUMBER: z.string().optional(),
+  GCP_SERVICE_ACCOUNT_EMAIL: z.string().optional(),
+  GCP_WORKLOAD_IDENTITY_POOL_ID: z.string().optional(),
+  GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

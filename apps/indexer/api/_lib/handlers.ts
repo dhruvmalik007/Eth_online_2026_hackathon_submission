@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import {
+  DEFAULT_POOL_LIMIT,
+  DEFAULT_WINDOW_HOURS,
+  MAX_POOL_LIMIT,
+  MAX_WINDOW_HOURS,
   MetricNameSchema,
+  type CapabilityReport,
   type MetricName,
 } from '@ethonline2026/timeseries';
 import { runV01 } from '@ethonline2026/langchain-agent';
@@ -13,8 +18,18 @@ import {
   type RiskProfileReader,
   type SourceState,
 } from '@ethonline2026/risk-analysis-data-pipeline';
-import { HttpError, errorResponse, json, numberParam, readBody, stringParam, toHttpError } from './http.js';
-import type { IndexerRuntime } from './runtime.js';
+import {
+  HttpError,
+  errorResponse,
+  json,
+  numberParam,
+  readBody,
+  requireBearer,
+  stringParam,
+  toHttpError,
+} from './http.js';
+import { CACHE_SCHEMA_VERSION, readManifest, signManifest } from './cache.js';
+import type { IndexerRuntime, ServiceProbe } from './runtime.js';
 
 /**
  * Route handlers.
@@ -43,63 +58,148 @@ function rangeFrom(params: URLSearchParams): {
 
 // ── GET /api/health ─────────────────────────────────────────────────────────
 
-export async function handleHealth(runtime: IndexerRuntime): Promise<Response> {
-  let dbReachable = false;
-  let dbError: string | undefined;
-  try {
-    dbReachable = await runtime.metrics.ping();
-  } catch (err) {
-    dbError = err instanceof Error ? err.message : String(err);
-  }
+/** One dependency, in the shape the recorder stores it. */
+interface DependencyProbe {
+  readonly service: string;
+  readonly reachable: boolean;
+  /** Null where a latency means nothing — these are capability checks, not round trips. */
+  readonly latencyMs: number | null;
+  readonly status: number | null;
+  readonly detail: string | null;
+}
+
+interface DependencySweep {
+  readonly probes: readonly DependencyProbe[];
+  readonly dbReachable: boolean;
+  readonly dbError?: string;
+  readonly capabilities: CapabilityReport | null;
+  readonly timesfm3: ServiceProbe;
+  readonly riskStore: 'unconfigured' | 'ready' | 'unavailable';
+  readonly riskError?: string;
+  readonly degraded: string[];
+}
+
+/**
+ * Sweep every dependency once, timing each.
+ *
+ * Shared by the live health route and the cron probe so the two can never disagree about what
+ * "reachable" means. They would drift the moment one gained a check the other lacked, and a status
+ * page that contradicts its own history is worse than no status page at all.
+ */
+async function sweepDependencies(runtime: IndexerRuntime): Promise<DependencySweep> {
+  const timed = async <T>(
+    fn: () => Promise<T>,
+  ): Promise<{ value: T | null; latencyMs: number; error?: string }> => {
+    const started = Date.now();
+    try {
+      return { value: await fn(), latencyMs: Date.now() - started };
+    } catch (err) {
+      return {
+        value: null,
+        latencyMs: Date.now() - started,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  };
+
+  const db = await timed(() => runtime.metrics.ping());
+  const dbReachable = db.value === true;
 
   const capabilities = dbReachable ? await runtime.capabilities() : null;
-  const timesfm3 = await runtime.probeTimesfm3(runtime.env.TIMESFM3_SERVICE_URL);
+  const timesfm3 = await timed(() => runtime.probeTimesfm3(runtime.env.TIMESFM3_SERVICE_URL));
 
-  // Risk snapshot availability. Resolved *and read*: constructing a store handle
-  // succeeds even when the bucket does not exist or the credentials are wrong, so
-  // only a real read distinguishes "configured" from "actually usable". The
-  // manifest is the cheapest such read — one small object.
-  let riskStore: 'unconfigured' | 'ready' | 'unavailable' = 'unconfigured';
-  let riskError: string | undefined;
-  try {
+  // Risk snapshot availability. Resolved *and read*: constructing a store handle succeeds even when
+  // the bucket does not exist or the credentials are wrong, so only a real read distinguishes
+  // "configured" from "actually usable". The manifest is the cheapest such read — one small object.
+  const risk = await timed(async () => {
     const reader = await runtime.riskReader();
-    if (reader === undefined) {
-      riskStore = 'unconfigured';
-    } else {
-      await reader.manifest();
-      riskStore = 'ready';
-    }
-  } catch (err) {
-    riskStore = 'unavailable';
-    riskError = err instanceof Error ? err.message : String(err);
-  }
+    if (reader === undefined) return 'unconfigured' as const;
+    await reader.manifest();
+    return 'ready' as const;
+  });
+  const riskStore = risk.value ?? 'unavailable';
+
+  const probes: DependencyProbe[] = [
+    {
+      service: 'timescaledb',
+      reachable: dbReachable,
+      latencyMs: db.latencyMs,
+      status: null,
+      detail: db.error ?? null,
+    },
+    {
+      service: 'timesfm3',
+      reachable: timesfm3.value?.reachable === true,
+      latencyMs: timesfm3.latencyMs,
+      status: timesfm3.value?.status ?? null,
+      detail: timesfm3.value?.error ?? timesfm3.error ?? null,
+    },
+    {
+      // Derived from the capability probe rather than called, so it has no latency of its own.
+      service: 'vector',
+      reachable: capabilities?.vectorEnabled === true,
+      latencyMs: null,
+      status: null,
+      detail: capabilities === null ? 'unknown — the database could not be reached' : null,
+    },
+    {
+      service: 'retrieval',
+      reachable: runtime.vectors !== undefined,
+      latencyMs: null,
+      status: null,
+      detail: runtime.vectors === undefined ? 'no embedding service configured' : null,
+    },
+    {
+      service: 'risk',
+      reachable: riskStore === 'ready',
+      latencyMs: risk.latencyMs,
+      status: null,
+      detail: risk.error ?? null,
+    },
+  ];
 
   const degraded: string[] = [];
   if (!dbReachable) degraded.push('timescaledb');
-  if (!timesfm3.reachable) degraded.push('timesfm3');
+  if (timesfm3.value?.reachable !== true) degraded.push('timesfm3');
   if (capabilities !== null && !capabilities.vectorEnabled) degraded.push('vector');
   if (runtime.vectors === undefined) degraded.push('retrieval');
   if (riskStore !== 'ready') degraded.push('risk');
 
-  return json({
-    service: 'agentic-ems-indexer',
-    status: degraded.length === 0 ? 'ok' : 'degraded',
+  return {
+    probes,
+    dbReachable,
+    ...(db.error === undefined ? {} : { dbError: db.error }),
+    capabilities,
+    timesfm3:
+      timesfm3.value ??
+      ({ reachable: false, ...(timesfm3.error === undefined ? {} : { error: timesfm3.error }) } as ServiceProbe),
+    riskStore,
+    ...(risk.error === undefined ? {} : { riskError: risk.error }),
     degraded,
+  };
+}
+
+/** The report both routes answer with, so neither can describe the same sweep differently. */
+function healthReport(runtime: IndexerRuntime, sweep: DependencySweep): Record<string, unknown> {
+  return {
+    service: 'agentic-ems-indexer',
+    status: sweep.degraded.length === 0 ? 'ok' : 'degraded',
+    degraded: sweep.degraded,
     database: {
-      reachable: dbReachable,
-      ...(dbError === undefined ? {} : { error: dbError }),
+      reachable: sweep.dbReachable,
+      ...(sweep.dbError === undefined ? {} : { error: sweep.dbError }),
       poolMax: runtime.env.TIMESERIES_DB_MAX_CONNECTIONS,
       viaDsn: runtime.env.TIMESERIES_DATABASE_URL !== undefined,
     },
-    timescaledb: capabilities,
+    timescaledb: sweep.capabilities,
     timesfm3: {
       url: runtime.env.TIMESFM3_SERVICE_URL,
-      ...timesfm3,
+      ...sweep.timesfm3,
     },
     retrieval: runtime.vectors === undefined ? 'unconfigured' : 'enabled',
     risk: {
-      store: riskStore,
-      ...(riskError === undefined ? {} : { error: riskError }),
+      store: sweep.riskStore,
+      ...(sweep.riskError === undefined ? {} : { error: sweep.riskError }),
       bucket: runtime.env.RISK_GCS_BUCKET ?? null,
       prefix: runtime.env.RISK_GCS_PREFIX,
       localDir: runtime.env.RISK_LOCAL_DIR ?? null,
@@ -110,7 +210,110 @@ export async function handleHealth(runtime: IndexerRuntime): Promise<Response> {
       embeddingModel: runtime.env.VERTEX_EMBEDDING_MODEL,
       timesfm3Model: 'timesfm-3.0',
     },
-  });
+  };
+}
+
+/**
+ * Is each dependency usable right now?
+ *
+ * The live view. It records nothing, so the console can poll it without writing rows — the history
+ * comes from the probe below instead.
+ */
+export async function handleHealth(runtime: IndexerRuntime): Promise<Response> {
+  return json(healthReport(runtime, await sweepDependencies(runtime)));
+}
+
+// ── POST /api/cron/probe ────────────────────────────────────────────────────
+
+/**
+ * Sweep the dependencies and record what was found.
+ *
+ * The only writer of `model_probes`, and it exists because nothing else can be: a stored snapshot
+ * shows the present and no history, and an uptime percentage without history cannot show an outage.
+ * The Cloud Run Job calls it every two hours. The bearer check is what stops it being an open trigger
+ * anyone can use to write rows.
+ *
+ * It answers with the same report as `/api/health`, so its caller caches a document it can also
+ * compare against the live view.
+ *
+ * @param request - Must carry `Authorization: Bearer $CRON_SECRET`.
+ * @param runtime - The indexer runtime.
+ */
+export async function handleCronProbe(
+  request: Request,
+  runtime: IndexerRuntime,
+): Promise<Response> {
+  try {
+    requireBearer(request, runtime.env.CRON_SECRET, 'POST /api/cron/probe');
+
+    const sweep = await sweepDependencies(runtime);
+    // One INSERT for the whole sweep, so a partial write cannot make one dependency look healthier
+    // than the others over the same window.
+    const recorded = await runtime.modelProbes.record(
+      sweep.probes.map((probe) => ({ ...probe, source: 'cron' as const })),
+    );
+
+    return json({ ...healthReport(runtime, sweep), recorded });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'cron/probe'));
+  }
+}
+
+// ── GET /api/cache/manifest ─────────────────────────────────────────────────
+
+/**
+ * The cache index, with a fetchable URL beside every entry.
+ *
+ * This route exists because the bucket is private. The console's browser is authenticated to Vercel,
+ * not to GCS, so something has to sign on its behalf — and this is that hop, and the only one. Every
+ * entry comes back with a short-lived V4 URL, so the payloads themselves are still served by Google's
+ * edge rather than through a function.
+ *
+ * An absent manifest is a **state, not an error**: it means the refresh job has never run, and the
+ * caller renders "not started" rather than an outage. A manifest written at a schema this deployment
+ * cannot read *is* an error, because that is a real mismatch and reporting it as empty would hide a
+ * full cache behind an empty state.
+ *
+ * @param runtime - The indexer runtime.
+ */
+export async function handleCacheManifest(runtime: IndexerRuntime): Promise<Response> {
+  const bucketName = runtime.env.CACHE_BUCKET?.trim();
+  if (bucketName === undefined || bucketName.length === 0) {
+    return json({
+      configured: false,
+      cached: false,
+      entries: [],
+      failures: [],
+      reading:
+        'No cache bucket is configured on this deployment, so the console reads the live routes only.',
+    });
+  }
+
+  try {
+    const manifest = await readManifest(bucketName);
+    if (manifest === undefined) {
+      return json({
+        configured: true,
+        cached: false,
+        version: CACHE_SCHEMA_VERSION,
+        generatedAt: null,
+        expiresAt: null,
+        entries: [],
+        failures: [],
+        reading:
+          'The refresh job has not run yet, so nothing is cached. The console falls back to the live routes until it does.',
+      });
+    }
+
+    return json({
+      configured: true,
+      cached: true,
+      ...(await signManifest(bucketName, manifest)),
+      reading: `Cached at ${manifest.generatedAt}. Every figure served from it was observed then, not now.`,
+    });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'cache/manifest'));
+  }
 }
 
 // ── GET /api/metrics ────────────────────────────────────────────────────────
@@ -697,5 +900,126 @@ export async function handleRiskAdjustment(
     });
   } catch (error) {
     return errorResponse(toHttpError(error, 'risk/adjustment'));
+  }
+}
+
+// ── GET /api/pools ──────────────────────────────────────────────────────────
+
+/**
+ * The indexed pool universe.
+ *
+ * The one read that answers "what can this deployment forecast?" without the caller already holding
+ * an address. Every other pool-keyed route requires one, and the set lives in `pool_metrics_hourly`,
+ * so without this the console could only serve someone who had been told a pool id out of band —
+ * which is exactly the state the incumbent was in.
+ *
+ * @param request - The incoming request, whose query string carries the filters.
+ * @param runtime - The indexer runtime.
+ * @returns Pools ordered by recency, the filter values that actually occur, and the freshest
+ *   observation across the returned set.
+ */
+export async function handlePools(request: Request, runtime: IndexerRuntime): Promise<Response> {
+  try {
+    const params = new URL(request.url).searchParams;
+    const limit =
+      numberParam(params, 'limit', { min: 1, max: MAX_POOL_LIMIT, fallback: DEFAULT_POOL_LIMIT }) ??
+      DEFAULT_POOL_LIMIT;
+    const network = stringParam(params, 'network');
+    const protocol = stringParam(params, 'protocol');
+
+    // Read together because the console renders them together: the list, and the two dropdowns that
+    // narrow it. Either is useless alone.
+    const [pools, facets] = await Promise.all([
+      runtime.pools.list({
+        limit,
+        ...(network === undefined ? {} : { network }),
+        ...(protocol === undefined ? {} : { protocol }),
+      }),
+      runtime.pools.facets(),
+    ]);
+
+    const latestObservationAt = pools.reduce<Date | null>((latest, pool) => {
+      if (pool.lastSeen === null) return latest;
+      return latest === null || pool.lastSeen > latest ? pool.lastSeen : latest;
+    }, null);
+
+    return json({
+      count: pools.length,
+      limit,
+      pools: pools.map((pool) => ({
+        poolId: pool.poolId,
+        protocol: pool.protocol,
+        network: pool.network,
+        observations: pool.observations,
+        firstSeen: pool.firstSeen?.toISOString() ?? null,
+        lastSeen: pool.lastSeen?.toISOString() ?? null,
+      })),
+      facets,
+      latestObservationAt: latestObservationAt?.toISOString() ?? null,
+      empty: pools.length === 0,
+      reading:
+        pools.length === 0
+          ? 'No pool metrics are stored, so there is nothing to forecast yet. Ingest a pool, then reload.'
+          : `${pools.length} pools hold metrics across ${facets.networks.length} network(s); the most recent observation is ${latestObservationAt?.toISOString() ?? 'unknown'}.`,
+    });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'pools'));
+  }
+}
+
+// ── GET /api/model-status ───────────────────────────────────────────────────
+
+/**
+ * Recorded model availability.
+ *
+ * Deliberately a read of stored probes rather than a live check. `/api/health` is already the live
+ * view, and probing on every request would both duplicate the cron and make the response
+ * uncacheable. What this must not do is hide how young the record is: nothing persisted a probe
+ * before `model_probes` existed, so `recordedSince` is the left edge of any figure, and a window
+ * holding no samples reports "unobserved" rather than drawing a flat 100%.
+ *
+ * @param request - The incoming request, whose query string may carry `hours`.
+ * @param runtime - The indexer runtime.
+ */
+export async function handleModelStatus(request: Request, runtime: IndexerRuntime): Promise<Response> {
+  try {
+    const params = new URL(request.url).searchParams;
+    const hours =
+      numberParam(params, 'hours', { min: 1, max: MAX_WINDOW_HOURS, fallback: DEFAULT_WINDOW_HOURS }) ??
+      DEFAULT_WINDOW_HOURS;
+    const window = await runtime.modelProbes.window(hours);
+    const recordedHours =
+      window.recordedSince === null
+        ? 0
+        : Math.round(((Date.now() - window.recordedSince.getTime()) / 3_600_000) * 10) / 10;
+
+    return json({
+      window: {
+        requestedHours: hours,
+        recordedSince: window.recordedSince?.toISOString() ?? null,
+        // Carried separately so the console can say "recording for 3h" instead of implying a
+        // baseline it does not have.
+        recordedHours,
+      },
+      services: window.summaries.map((summary) => ({
+        service: summary.service,
+        samples: summary.samples,
+        reachableSamples: summary.reachableSamples,
+        uptimePct: summary.uptimePct,
+        p50LatencyMs: summary.p50LatencyMs,
+        p95LatencyMs: summary.p95LatencyMs,
+        lastProbedAt: summary.lastProbedAt?.toISOString() ?? null,
+        lastReachable: summary.lastReachable,
+      })),
+      empty: window.summaries.length === 0,
+      reading:
+        window.recordedSince === null
+          ? 'No probe has been recorded yet, so no uptime can be claimed for any dependency. The refresh job records the first samples.'
+          : window.summaries.length === 0
+            ? `Probes have been recorded since ${window.recordedSince.toISOString()}, but none fall inside the last ${hours}h — this window is unobserved, not healthy.`
+            : `Uptime is measured from recorded probes only, and the record begins ${window.recordedSince.toISOString()}.`,
+    });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'model-status'));
   }
 }

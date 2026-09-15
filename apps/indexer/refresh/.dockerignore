@@ -1,0 +1,5 @@
+# The build context is this directory alone, so nothing from the monorepo (node_modules, dist,
+# .env files) can reach the image even by accident.
+Dockerfile
+.dockerignore
+node_modules

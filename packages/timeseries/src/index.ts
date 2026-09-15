@@ -97,6 +97,27 @@ export { DecisionRepository } from './decisions.js';
 
 export { PerformanceRepository } from './performance.js';
 
+// ─── Discovery and availability ───────────────────────────────────────────────
+
+export {
+  PoolCatalogRepository,
+  DEFAULT_POOL_LIMIT,
+  MAX_POOL_LIMIT,
+  type PoolSummary,
+  type PoolFilters,
+  type PoolFacets,
+} from './pools.js';
+
+export {
+  ModelProbeRepository,
+  DEFAULT_WINDOW_HOURS,
+  MAX_WINDOW_HOURS,
+  type ProbeRecord,
+  type ProbeSource,
+  type ProbeSummary,
+  type ProbeWindow,
+} from './modelProbes.js';
+
 // ─── Temporal vector layer ────────────────────────────────────────────────────
 
 export {

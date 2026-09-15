@@ -2,8 +2,10 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import {
   DecisionRepository,
   ForecastRepository,
+  ModelProbeRepository,
   PgSqlRunner,
   PerformanceRepository,
+  PoolCatalogRepository,
   TimeseriesClient,
   VectorRepository,
   VertexEmbeddingService,
@@ -26,6 +28,7 @@ import {
   createRiskProfileReader,
   type RiskProfileReader,
 } from '@ethonline2026/risk-analysis-data-pipeline';
+import { prepareWorkloadIdentity } from './workloadIdentity.js';
 
 /**
  * Composition root for the serverless surface.
@@ -57,6 +60,15 @@ export interface IndexerRuntime {
   readonly forecasts: ForecastRepository;
   readonly performance: PerformanceRepository;
   readonly decisions: DecisionRepository;
+  /**
+   * The indexed pool universe.
+   *
+   * The only read on this surface that needs no prior knowledge — every other pool-keyed route takes
+   * an address the caller already had, which is why the console could not work for a newcomer.
+   */
+  readonly pools: PoolCatalogRepository;
+  /** The recorded probe history behind `/api/model-status`, written by the refresh cron. */
+  readonly modelProbes: ModelProbeRepository;
   /** Absent when no Vertex project is configured (retrieval degrades). */
   readonly vectors?: VectorRepository;
   readonly timesfm3: TimesFM3Client;
@@ -135,9 +147,30 @@ export function prepareVertexCredentials(env: NodeJS.ProcessEnv = process.env): 
   }
 }
 
+let googleCredentialsPrepared = false;
+
+/**
+ * Give ADC something to work with, preferring federation over a stored key.
+ *
+ * Federation first, because it is the intended path and has nothing to rotate: the subject token is
+ * minted per invocation and the identity it may assume is pinned in IAM to this project and its
+ * environments. The key path stays as the fallback so a deployment still carrying one keeps working,
+ * and a local `vercel dev` with a `gcloud` session needs neither.
+ */
+export function prepareGoogleCredentials(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (googleCredentialsPrepared) return env['GOOGLE_APPLICATION_CREDENTIALS'] !== undefined;
+  googleCredentialsPrepared = true;
+
+  if (prepareWorkloadIdentity(env)) {
+    console.log('[indexer] Google credentials: workload identity federation');
+    return true;
+  }
+  return prepareVertexCredentials(env);
+}
+
 /** Build a fresh runtime. Prefer `getRuntime()` in routes (caches per instance). */
 export function createRuntime(overrides: RuntimeOverrides = {}): IndexerRuntime {
-  prepareVertexCredentials();
+  prepareGoogleCredentials();
   const env = overrides.env ?? loadEnv();
 
   const runner = overrides.runner ?? PgSqlRunner.fromEnv();
@@ -200,6 +233,8 @@ export function createRuntime(overrides: RuntimeOverrides = {}): IndexerRuntime 
     forecasts: new ForecastRepository(runner),
     performance: new PerformanceRepository(runner),
     decisions: new DecisionRepository(runner),
+    pools: new PoolCatalogRepository(runner),
+    modelProbes: new ModelProbeRepository(runner),
     ...(vectors === undefined ? {} : { vectors }),
     timesfm3,
     v01,
@@ -243,18 +278,40 @@ export function getRuntime(overrides: RuntimeOverrides = {}): IndexerRuntime {
   return scope.__agenticEmsIndexerRuntime;
 }
 
-/** Probe the TimesFM-3 service without spending GPU time on a forecast. */
+/**
+ * Probe the TimesFM-3 service without spending GPU time on a forecast.
+ *
+ * The wait is bounded on purpose. The service scales to zero, so the first call after an idle period
+ * pays a GPU cold start — and an unbounded probe turns that into a 504 for the *whole route*, which
+ * reads as "the indexer is down" when the truth is "one dependency is waking up". A bound converts an
+ * unanswerable question into an answer the caller can act on.
+ *
+ * 25s covers a warm response and a short cold start, and leaves room inside the function's budget for
+ * the rest of the sweep: the database ping, the capability probe and the risk manifest.
+ */
+const TIMESFM3_PROBE_TIMEOUT_MS = 25_000;
+
 export async function probeTimesfm3(
   baseUrl: string,
   fetchImpl: typeof fetch = fetch,
+  timeoutMs: number = TIMESFM3_PROBE_TIMEOUT_MS,
 ): Promise<ServiceProbe> {
   try {
     // Any HTTP status — including 404 — proves the service answered. Only a
     // transport failure means it is actually unreachable.
-    const res = await fetchImpl(baseUrl, { method: 'GET' });
+    const res = await fetchImpl(baseUrl, { method: 'GET', signal: AbortSignal.timeout(timeoutMs) });
     return { reachable: true, status: res.status };
   } catch (err) {
-    return { reachable: false, error: err instanceof Error ? err.message : String(err) };
+    const timedOut =
+      err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
+    return {
+      reachable: false,
+      error: timedOut
+        ? `no response within ${timeoutMs}ms — the service scales to zero, so a cold start can take longer than this`
+        : err instanceof Error
+          ? err.message
+          : String(err),
+    };
   }
 }
 
