@@ -13,8 +13,18 @@ const FEDERATION: NodeJS.ProcessEnv = {
   GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID: 'vercel',
 };
 
-/** Three dot-separated segments, which is the shape check the writer makes. */
-const JWT = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.c2lnbmF0dXJl';
+/**
+ * Three dot-separated segments, which is the whole of what the writer checks.
+ *
+ * Built at runtime, never written down. A JWT-shaped literal is not a credential, but it reads like
+ * one to every scanner and every future reader — and a test file is precisely where a real one would
+ * sit unnoticed. Nothing here needs to *be* a token; it needs to have a token's shape, and that is
+ * something that can be generated.
+ */
+const shapedToken = (subject: string): string =>
+  ['header', subject, 'signature'].map((part) => Buffer.from(part).toString('base64url')).join('.');
+
+const TOKEN = shapedToken('test');
 
 afterEach(() => {
   rmSync(CONFIG_PATH, { force: true });
@@ -66,8 +76,8 @@ describe('prepareWorkloadIdentity', () => {
 
 describe('rememberOidcToken', () => {
   it('stores the invocation token where the credential config looks for it', () => {
-    rememberOidcToken(JWT);
-    expect(readFileSync(TOKEN_PATH, 'utf8')).toBe(JWT);
+    rememberOidcToken(TOKEN);
+    expect(readFileSync(TOKEN_PATH, 'utf8')).toBe(TOKEN);
   });
 
   it('ignores anything that is not a JWT', () => {
@@ -77,10 +87,19 @@ describe('rememberOidcToken', () => {
     expect(existsSync(TOKEN_PATH)).toBe(false);
   });
 
+  it('refuses a near miss rather than displacing a working token', () => {
+    // Two segments is what a stripped signature or a truncated value produces, and it is close
+    // enough to look right in a log. The token already stored must survive it.
+    const good = shapedToken('good');
+    rememberOidcToken(good);
+    rememberOidcToken('header.payload');
+    expect(readFileSync(TOKEN_PATH, 'utf8')).toBe(good);
+  });
+
   it('trims surrounding whitespace', () => {
-    // A distinct payload, because the writer deliberately skips a token it has already stored —
-    // reusing `JWT` here would prove nothing about the write.
-    const rotated = 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJyb3RhdGVkIn0.c2lnbmF0dXJl';
+    // A distinct token, because the writer deliberately skips one it has already stored — reusing
+    // `TOKEN` here would prove nothing about the write.
+    const rotated = shapedToken('rotated');
     rememberOidcToken(`  ${rotated}\n`);
     expect(readFileSync(TOKEN_PATH, 'utf8')).toBe(rotated);
   });
