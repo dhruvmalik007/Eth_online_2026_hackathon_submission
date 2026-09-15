@@ -41,6 +41,13 @@ MANIFEST
 node_modules
 .env
 
+# Environment values files. The bare `.env` above does not match `.env.staging` or `.env.production`,
+# and `@ethonline2026/env`'s sync tooling reads exactly those names — so the file it asks you to fill
+# with every staging secret was committable as-is. The examples stay tracked: they are generated from
+# the catalog and a test fails if they drift.
+.env.*
+!.env.example
+
 
 # PyInstaller
 #   Usually these files are written by a python script from a template

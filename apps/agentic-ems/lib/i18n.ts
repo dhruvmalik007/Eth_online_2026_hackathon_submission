@@ -42,17 +42,11 @@ const en = {
     ctaArchitecture: "See the architecture",
     ctaPrizes: "Prize-track mapping",
     stat1k: "Subgraphs live",
-    stat1v: "5",
-    stat1s: "gateway-verified",
     stat2k: "Chains (lending)",
-    stat2v: "3",
-    stat2s: "aave v3 standardized",
-    stat3k: "Quant tools",
-    stat3v: "7",
-    stat3s: "vega · lvr · η · var",
+    stat3k: "Deployments",
     termTitle: "agentic-ems · boot log",
     metricsNote:
-      "metrics from live gateway queries · snapshot 2026-09-07 · block 25,925,399",
+      "counted from the messari registry and its live endpoint probe · packages/the-graph",
   },
   thesis: {
     kicker: "01 — Thesis",
@@ -109,8 +103,9 @@ const en = {
     h2a: "Not a mock.",
     h2b: " These endpoints answered today.",
     lead:
-      "Five gateway-verified deployments feed the system right now — consumed live from The Graph's decentralized network with API-key auth, block-height checks and indexing-error gates. Snapshot below taken 2026-09-07; block heights are the health-check values recorded in the run log.",
+      "Every endpoint in the registry is probed, and only the ones that answered are queried — the dead share is excluded, not hidden. The cards below are that probe's output, including the block each endpoint reported.",
     healthy: "healthy",
+    answering: "answering",
     pipeline: [
       {
         title: "One query pattern, many protocols",
@@ -155,7 +150,7 @@ const en = {
           {
             req: "Consume live data from a Graph provider — no mocked datasets",
             proof:
-              "5 gateway endpoints health-checked 2026-09-07; block heights 25,925,399 / 502,674,124 / 156,592,194 recorded",
+              "Every registry endpoint probed by packages/the-graph/scripts/messari-probe.ts; the probe output is committed and drives the numbers on this page",
           },
           {
             req: "Make the standards leverage clear",
@@ -432,17 +427,11 @@ const hi: Dict = {
     ctaArchitecture: "आर्किटेक्चर देखें",
     ctaPrizes: "प्राइज़-ट्रैक मैपिंग",
     stat1k: "लाइव सबग्राफ़",
-    stat1v: "5",
-    stat1s: "गेटवे-सत्यापित",
     stat2k: "चेन (लेंडिंग)",
-    stat2v: "3",
-    stat2s: "aave v3 मानकीकृत",
-    stat3k: "क्वांट टूल्स",
-    stat3v: "7",
-    stat3s: "vega · lvr · η · var",
+    stat3k: "डिप्लॉयमेंट्स",
     termTitle: "agentic-ems · बूट लॉग",
     metricsNote:
-      "लाइव गेटवे क्वेरी से मेट्रिक्स · स्नैपशॉट 2026-09-07 · ब्लॉक 25,925,399",
+      "messari रजिस्ट्री और उसके लाइव एंडपॉइंट प्रोब से गिना गया · packages/the-graph",
   },
   thesis: {
     kicker: "01 — प्रस्तावना",
@@ -499,8 +488,9 @@ const hi: Dict = {
     h2a: "मॉक नहीं।",
     h2b: " ये एंडपॉइंट आज जवाब दे रहे हैं।",
     lead:
-      "इस समय पाँच गेटवे-सत्यापित डिप्लॉयमेंट सिस्टम को डेटा दे रहे हैं — The Graph के डिसेंट्रलाइज़्ड नेटवर्क से API-key auth, ब्लॉक-हाइट चेक और इंडेक्सिंग-एरर गेट्स के साथ लाइव। नीचे स्नैपशॉट 2026-09-07 का है; ब्लॉक हाइट रन लॉग में दर्ज हेल्थ-चेक वैल्यू हैं।",
+      "रजिस्ट्री के हर एंडपॉइंट की जाँच होती है, और केवल जवाब देने वाले ही क्वेरी किए जाते हैं — डेड हिस्सा छिपाया नहीं, बाहर रखा जाता है। नीचे के कार्ड उसी प्रोब का आउटपुट हैं, जिसमें हर एंडपॉइंट का रिपोर्ट किया गया ब्लॉक भी शामिल है।",
     healthy: "हेल्दी",
+    answering: "जवाब दे रहे",
     pipeline: [
       {
         title: "एक क्वेरी पैटर्न, कई प्रोटोकॉल",
@@ -545,7 +535,7 @@ const hi: Dict = {
           {
             req: "Graph प्रोवाइडर से लाइव डेटा — मॉक डेटासेट नहीं",
             proof:
-              "5 गेटवे एंडपॉइंट 2026-09-07 को हेल्थ-चेक्ड; ब्लॉक हाइट 25,925,399 / 502,674,124 / 156,592,194 दर्ज",
+              "packages/the-graph/scripts/messari-probe.ts से हर रजिस्ट्री एंडपॉइंट की जाँच; प्रोब आउटपुट कमिट है और इस पेज के नंबर उसी से आते हैं",
           },
           {
             req: "स्टैंडर्ड्स का लाभ स्पष्ट रूप से दिखाएँ",
@@ -819,17 +809,11 @@ const fr: Dict = {
     ctaArchitecture: "Voir l'architecture",
     ctaPrizes: "Correspondance des pistes",
     stat1k: "Subgraphs live",
-    stat1v: "5",
-    stat1s: "vérifiés au gateway",
     stat2k: "Chaînes (prêt)",
-    stat2v: "3",
-    stat2s: "aave v3 standardisé",
-    stat3k: "Outils quant",
-    stat3v: "7",
-    stat3s: "vega · lvr · η · var",
+    stat3k: "Déploiements",
     termTitle: "agentic-ems · journal de démarrage",
     metricsNote:
-      "métriques issues de requêtes gateway live · instantané 2026-09-07 · bloc 25,925,399",
+      "compté depuis le registre messari et sa sonde d'endpoints · packages/the-graph",
   },
   thesis: {
     kicker: "01 — Thèse",
@@ -886,8 +870,9 @@ const fr: Dict = {
     h2a: "Pas un mock.",
     h2b: " Ces endpoints ont répondu aujourd'hui.",
     lead:
-      "Cinq déploiements vérifiés au gateway alimentent le système en ce moment — consommés en direct depuis le réseau décentralisé de The Graph avec auth par clé API, contrôles de hauteur de bloc et portes d'erreurs d'indexation. L'instantané ci-dessous date du 2026-09-07 ; les hauteurs de bloc sont les valeurs de health-check consignées.",
+      "Chaque endpoint du registre est sondé, et seuls ceux qui ont répondu sont interrogés — la part morte est exclue, pas cachée. Les cartes ci-dessous sont la sortie de cette sonde, avec le bloc rapporté par chaque endpoint.",
     healthy: "sain",
+    answering: "répondent",
     pipeline: [
       {
         title: "Un pattern de requête, plusieurs protocoles",
@@ -932,7 +917,7 @@ const fr: Dict = {
           {
             req: "Consommer des données live d'un fournisseur Graph — aucun dataset simulé",
             proof:
-              "5 endpoints gateway health-checkés le 2026-09-07 ; hauteurs de bloc 25,925,399 / 502,674,124 / 156,592,194 consignées",
+              "Chaque endpoint du registre sondé par packages/the-graph/scripts/messari-probe.ts ; la sortie de la sonde est committée et alimente les chiffres de cette page",
           },
           {
             req: "Rendre l'apport des standards explicite",

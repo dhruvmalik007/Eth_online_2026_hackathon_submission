@@ -10,6 +10,11 @@
       "types": "./dist/src/index.d.ts",
       "import": "./dist/src/index.js",
       "default": "./dist/src/index.js"
+    },
+    "./registry": {
+      "types": "./dist/src/registry/messariRegistry.d.ts",
+      "import": "./dist/src/registry/messariRegistry.js",
+      "default": "./dist/src/registry/messariRegistry.js"
     }
   },
   "scripts": {

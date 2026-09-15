@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Mail } from "lucide-react";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
+import { establishSession } from "@/lib/auth/client";
 import { useDemo } from "@/lib/demo/state";
 import { usePrivyConfigured } from "@/components/privy-provider";
 import { identityFromUser } from "@/lib/privy/identity";
@@ -46,11 +47,13 @@ function SsoUnconfigured() {
 
 function SsoStageInner() {
   const { dispatch } = useDemo();
-  const { ready, authenticated, user, logout } = usePrivy();
+  const { ready, authenticated, user, logout, getAccessToken } = usePrivy();
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState("");
   const [waitExpired, setWaitExpired] = React.useState(false);
+  /** The handoff is async, so without this a re-render mid-flight would start a second one. */
+  const handoffStarted = React.useRef(false);
 
   const { login } = useLogin({
     onComplete: () => {
@@ -82,25 +85,46 @@ function SsoStageInner() {
   React.useEffect(() => {
     if (phase !== "provisioning" || !user) return;
     const identity = identityFromUser(user);
-    if (!identity.embeddedAddress || !identity.smartAccountAddress) return;
+    const embeddedAddress = identity.embeddedAddress;
+    const smartAccountAddress = identity.smartAccountAddress;
+    if (!embeddedAddress || !smartAccountAddress) return;
+    if (handoffStarted.current) return;
+    handoffStarted.current = true;
 
-    dispatch({ type: "set-email", email: identity.email });
-    dispatch({
-      type: "set-wallet",
-      wallet: {
-        address: identity.embeddedAddress,
-        safeAddress: identity.smartAccountAddress,
-        privyUserId: identity.userId,
-        smartWalletType: identity.smartWalletType,
-      },
-    });
-    // Straight to the desk. The trader-profile questionnaire is no longer the gate after
-    // sign-in: it still exists as the `questionnaire` stage, but standing between a fresh
-    // sign-in and the first screen made every visitor pay for a form before seeing anything.
-    // Unanswered is safe rather than a broken state — downstream reads default through
-    // `state.answers?.risk ?? "balanced"`, and Settings still collects it.
-    dispatch({ type: "set-stage", stage: "chat" });
-  }, [phase, user, dispatch]);
+    // The desk's routes attribute each run to the DID they read from the session, and the session
+    // is minted here: one exchange of the Privy access token, at the first moment the user is known
+    // to be fully provisioned. Handing off before it exists would drop the user into a composer
+    // whose every request 401s — which reads as a broken app rather than a missing step, so a
+    // failure to establish is surfaced as one.
+    void (async () => {
+      const token = await getAccessToken();
+      const established = token !== null && (await establishSession(token));
+      if (!established) {
+        setError(
+          "Could not establish a session. Set AUTH_SECRET and PRIVY_VERIFICATION_KEY on this deployment, then retry.",
+        );
+        setPhase("error");
+        return;
+      }
+
+      dispatch({ type: "set-email", email: identity.email });
+      dispatch({
+        type: "set-wallet",
+        wallet: {
+          address: embeddedAddress,
+          safeAddress: smartAccountAddress,
+          privyUserId: identity.userId,
+          smartWalletType: identity.smartWalletType,
+        },
+      });
+      // Straight to the desk. The trader-profile questionnaire is no longer the gate after
+      // sign-in: it still exists as the `questionnaire` stage, but standing between a fresh
+      // sign-in and the first screen made every visitor pay for a form before seeing anything.
+      // Unanswered is safe rather than a broken state — downstream reads default through
+      // `state.answers?.risk ?? "balanced"`, and Settings still collects it.
+      dispatch({ type: "set-stage", stage: "chat" });
+    })();
+  }, [phase, user, dispatch, getAccessToken]);
 
   // Surface a useful message if the smart account never arrives — the usual
   // cause is the dashboard not having smart wallets enabled for these networks.
@@ -214,13 +238,27 @@ function SsoStageInner() {
               {waitExpired && !hasSmartAccount && (
                 <div className="mt-4 border border-down/50 bg-down/5 p-3">
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-down">
-                    Smart account not provisioned
+                    {hasEmbedded ? "Smart account not provisioned" : "Embedded wallet not created"}
                   </p>
-                  <p className="mt-1.5 text-[11px] leading-relaxed text-fg-dim">
-                    Privy created your embedded wallet, but no smart account yet. Enable{" "}
-                    <span className="text-fg">Smart wallets → type “Safe”</span> with Base, Polygon and
-                    Optimism networks in the Privy dashboard, then retry.
-                  </p>
+                  {/* Which of the two is missing decides which dashboard page is wrong, and they are
+                      different pages. Asserting "Privy created your embedded wallet" without checking
+                      sends the reader to fix Smart wallets when the embedded wallet never existed —
+                      and a Safe is owned by the embedded signer, so that setting alone cannot help. */}
+                  {hasEmbedded ? (
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-fg-dim">
+                      Your embedded wallet exists, but no smart account was created for it. Enable{" "}
+                      <span className="text-fg">Smart wallets → type “Safe”</span> with Base, Polygon and
+                      Optimism networks in the Privy dashboard, then retry.
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-fg-dim">
+                      No embedded wallet was created, so there is no signer for a smart account to be
+                      owned by. Turn on wallet creation at login under{" "}
+                      <span className="text-fg">Configuration → Embedded wallets</span> in the Privy
+                      dashboard, then retry. Smart wallets is a separate setting, and enabling it alone
+                      cannot create the account.
+                    </p>
+                  )}
                   <button
                     onClick={reset}
                     className="mt-3 border border-edge-2 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-fg-dim hover:border-amber/60 hover:text-amber"

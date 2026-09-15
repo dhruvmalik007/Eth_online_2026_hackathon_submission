@@ -86,6 +86,26 @@ CLI**. It never prints a value — a sync tool that echoes secrets writes them i
 logs and scrollback, and that convenience is not worth the cost. `gcloud` updates a version when the
 secret exists (Secret Manager secrets are immutable) and creates it when it does not.
 
+Each platform names its lanes its own way, so `sync` translates ours into theirs rather than sending
+our vocabulary verbatim:
+
+| ours | Vercel |
+|---|---|
+| `local` | `development` |
+| `staging` | `preview` |
+| `production` | `production` |
+
+That translation is load-bearing, not cosmetic. Vercel has no `staging` lane, and `vercel env add`
+rejects one with *"custom environment ids that do not exist: staging"* — which, under the `set -e` in
+the generated script, kills the loop on the first variable and injects **nothing**, while the run still
+looks like it succeeded. The generated command also passes `--non-interactive` and an explicit empty
+git branch, because otherwise the CLI answers `action_required: git_branch_required` and exits rather
+than adding a value unattended.
+
+The values file is read from the working directory (`--file`, default `.env.<environment>`) and holds
+real credentials. Keep it out of git — the root `.gitignore` covers `.env` but **not** `.env.staging`
+or `.env.production`.
+
 ### Adding a variable
 
 1. Add it to `ENV_CATALOG`.

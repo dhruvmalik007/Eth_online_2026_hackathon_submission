@@ -16,6 +16,9 @@
  *
  * ## Failure modes, deliberately distinguished
  *
+ *   - `401` there is no session, so there is nobody to attribute the run to. Checked first:
+ *     the run is scoped to a DID downstream, and a route that answered configuration
+ *     questions before asking who was calling would hand the deployment's shape to anyone.
  *   - `503` the app is **not configured** (no `INFERENCE_SERVICE_URL`, or no usable
  *     credentials). Different from an outage: retrying will not help until an env var
  *     is set, so it says so rather than looking like the service is down.
@@ -25,6 +28,7 @@
  *     could invent.
  */
 import { NextResponse } from "next/server";
+import { currentSession, unauthenticated } from "@/lib/auth/session";
 import {
   InferenceNotConfiguredError,
   createSession,
@@ -73,6 +77,9 @@ function parseBody(raw: unknown): TurnBody | { error: string } {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const session = await currentSession();
+  if (session === null) return unauthenticated();
+
   const baseUrl = inferenceBaseUrl();
   if (baseUrl === undefined) {
     return NextResponse.json(
@@ -99,7 +106,7 @@ export async function POST(request: Request): Promise<Response> {
   const signal = request.signal;
 
   try {
-    const headers = await inferenceAuthHeaders(baseUrl);
+    const headers = await inferenceAuthHeaders(baseUrl, session.did);
     const sessionId =
       parsed.sessionId ?? (await createSession(baseUrl, headers, parsed.mode, signal));
 

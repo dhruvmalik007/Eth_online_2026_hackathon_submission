@@ -115,7 +115,7 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("APPROVAL_MAX_SPEND_USD", ["execution"], "Most one agent may commit in a single intent, in whole USD.", { format: "number", default: "250000" }),
   v("PRIVY_APP_ID", ["execution", "custody", "inference"], "Privy App ID (a public identifier)."),
   v("PRIVY_APP_SECRET", ["execution", "custody", "inference"], "Privy App Secret (server-side).", { secret: true }),
-  v("PRIVY_VERIFICATION_KEY", ["execution"], "Privy verification key; removes a round-trip from cold start.", { secret: true }),
+  v("PRIVY_VERIFICATION_KEY", ["execution", "agentic-ems"], "Privy verification key; removes a round-trip from cold start.", { secret: true }),
   v("EXECUTION_SIGNER_PRIVATE_KEY", ["execution"], "Key the service signs and broadcasts with. Absent means the signer routes answer 503.", { secret: true }),
   v("EXECUTION_FALLBACK_SIGNER_PRIVATE_KEY", ["execution"], "Backup payer used only when the primary is absent.", { secret: true }),
   v("EXECUTION_SIGNER_CHAIN", ["execution"], "Chain the signer binds to.", { default: "base-sepolia" }),
@@ -143,7 +143,7 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   v("GOOGLE_CLOUD_LOCATION", ["inference", "indexer", "langchain", "risk"], "GCP region for Vertex AI.", { default: "us-central1" }),
   v("GOOGLE_SERVICE_ACCOUNT_KEY", ["inference", "indexer", "risk", "agentic-ems"], "Service-account JSON, materialised to a 0600 file at boot.", { secret: true, format: "json" }),
   v("GOOGLE_APPLICATION_CREDENTIALS", ["indexer"], "Path to the materialised service-account file.", { format: "path" }),
-  v("VERTEX_AI_MODEL", ["inference", "indexer", "langchain"], "Vertex generative model id.", { default: "gemini-2.5-pro" }),
+  v("VERTEX_AI_MODEL", ["inference", "indexer", "langchain"], "Vertex generative model id.", { default: "gemini-2.5-flash" }),
   v("VERTEX_AI_TEMPERATURE", ["inference", "langchain"], "Sampling temperature.", { format: "number" }),
   v("VERTEX_EMBEDDING_MODEL", ["inference", "indexer", "timeseries", "langchain", "risk"], "Vertex embedding model id.", { default: "text-embedding-005" }),
   v("LANGCHAIN_MODEL_PARSER", ["inference"], "Model used for the parsing role.", { default: "gemini-2.5-flash" }),
@@ -193,7 +193,13 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   // ── indexer / web ────────────────────────────────────────────────────────────────────────────
   v("NEXT_PUBLIC_INDEXER_URL", ["agentic-ems"], "Indexer base URL used by the browser.", { format: "url" }),
   v("NEXT_PUBLIC_EXECUTION_URL", ["agentic-ems"], "Execution service base URL used by the browser.", { format: "url" }),
-  v("NEXT_PUBLIC_PRIVY_APP_ID", ["agentic-ems"], "Privy App ID exposed to the browser."),
+  v("NEXT_PUBLIC_PRIVY_APP_ID", ["agentic-ems"], "Privy App ID exposed to the browser.", {
+    requiredIn: ["staging", "production"],
+  }),
+  v("AUTH_SECRET", ["agentic-ems"], "Secret the desk's session cookie is signed with. A random 32-byte value; rotating it signs everyone out.", {
+    requiredIn: ["staging", "production"],
+    secret: true,
+  }),
   v("REACTOR_API_KEY", ["agentic-ems"], "Reactor video API key for the studio.", { secret: true }),
   v("OPENAI_API_KEY", ["agentic-ems"], "OpenAI key for the upsampling route.", { secret: true }),
   v("OPENAI_BASE_URL", ["agentic-ems"], "OpenAI-compatible base URL.", { format: "url" }),
@@ -284,6 +290,12 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   }),
   v("NEXT_PUBLIC_ARC_RPC_URL", ["agentic-ems"], "Arc RPC endpoint exposed to the browser.", {
     format: "url",
+  }),
+  // WalletConnect / Reown. The project id is public by design: it ships in every dapp client bundle
+  // that offers WalletConnect, so committing it leaks nothing. It is NOT a secret, and it must never
+  // be confused with the Privy authorization key, which signs our server requests and stays server-side.
+  v("NEXT_PUBLIC_REOWN_PROJECT_ID", ["agentic-ems"], "WalletConnect project id from Reown (public, not a secret).", {
+    requiredIn: ["staging", "production"], example: "your-reown-project-id",
   }),
 ];
 

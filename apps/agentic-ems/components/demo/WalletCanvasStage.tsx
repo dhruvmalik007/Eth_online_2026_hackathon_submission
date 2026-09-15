@@ -3,7 +3,8 @@
 import * as React from "react";
 import { Check, ShieldCheck, Usb } from "lucide-react";
 import { useDemo } from "@/lib/demo/state";
-import { TOTAL_BALANCE } from "@/lib/demo/data";
+import { useNav } from "@/lib/portfolio/context";
+import { formatUsd } from "@/lib/portfolio/nav";
 
 type Step = "ledger" | "safe" | "policy" | "done";
 
@@ -23,6 +24,7 @@ const SAFE = "0x1C9a4F2bE7D0638c5Ae21B4f0D8a7E3C9f6B2d51";
 
 export function WalletCanvasStage() {
   const { state, dispatch } = useDemo();
+  const { nav } = useNav();
   const [step, setStep] = React.useState<Step>("ledger");
   const [progress, setProgress] = React.useState(0);
   const [confirmed, setConfirmed] = React.useState(false);
@@ -172,7 +174,7 @@ export function WalletCanvasStage() {
             <ShieldCheck className="mx-auto size-6 text-up" />
             <p className="mt-2 text-sm text-fg">Wallet onboarded</p>
             <p className="mt-1 font-mono text-3xl font-semibold tabular-nums text-up">
-              ${TOTAL_BALANCE.toLocaleString("en-US")}
+              {formatUsd(nav.pricedUsd)}
               <span className="ml-2 text-sm font-normal text-fg-dim">USDC</span>
             </p>
             <p className="mt-1 font-mono text-[10px] text-fg-faint">

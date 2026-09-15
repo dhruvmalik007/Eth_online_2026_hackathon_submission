@@ -7,3 +7,8 @@ tsconfig.tsbuildinfo
 !public/demo-pitch.mp4
 .DS_Store
 .vercel/output
+
+# Values files. `.env.local` and the per-environment files hold real credentials, and a CLI deploy
+# reads THIS file rather than the app's `.gitignore` — which excludes `.env` but, before this, was
+# not consulted here at all.
+.env*

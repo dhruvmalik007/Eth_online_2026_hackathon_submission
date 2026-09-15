@@ -24,7 +24,15 @@ export {
   type SchemaOptions,
 } from "./schema.js";
 export { assertCatalogKeys, catalogKeysFor, checkCatalogKeys, type CatalogKeyReport } from "./keys.js";
-export { SECRET_NAMES, SYNC_TARGETS, renderSyncScript, syncPlan, type SyncOptions, type SyncTarget } from "./sync.js";
+export {
+  SECRET_NAMES,
+  SYNC_TARGETS,
+  VERCEL_ENVIRONMENTS,
+  renderSyncScript,
+  syncPlan,
+  type SyncOptions,
+  type SyncTarget,
+} from "./sync.js";
 export { buildManifest, type EnvManifest, type EnvManifestEntry } from "./manifest.js";
 export { isSecretName, redactRecord } from "./redact.js";
 export * from "./types.js";

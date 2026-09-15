@@ -3,6 +3,8 @@
 packages:
   - "../../packages/ux-workflow"
   - "../../packages/env"
+  - "../../packages/positions"
+  - "../../packages/the-graph"
 
 allowBuilds:
   sharp: true

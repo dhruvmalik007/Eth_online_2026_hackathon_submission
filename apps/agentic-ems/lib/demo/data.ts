@@ -169,15 +169,23 @@ export const STRATEGIES: StrategyDef[] = [
   },
 ];
 
-export const TOTAL_BALANCE = 100_000;
 
-export function allocationsFor(risk: RiskProfile): { strategy: StrategyDef; pct: number; usd: number }[] {
+/**
+ * The strategy split, valued at the given total.
+ *
+ *  is required rather than defaulted: there used to be a  constant
+ * here, which meant every proposal screen showed a portfolio the user did not have. Passing the
+ * real figure, or  when it has not been read yet, makes the caller answer the question.
+ */
+export function allocationsFor(
+  risk: RiskProfile,
+  totalUsd: number | null,
+): { strategy: StrategyDef; pct: number; usd: number | null }[] {
   const alloc = ALLOCATIONS[risk] ?? ALLOCATIONS.balanced;
-  return STRATEGIES.map((strategy) => ({
-    strategy,
-    pct: alloc[strategy.id] ?? strategy.basePct,
-    usd: Math.round(((alloc[strategy.id] ?? strategy.basePct) / 100) * TOTAL_BALANCE),
-  }));
+  return STRATEGIES.map((strategy) => {
+    const pct = alloc[strategy.id] ?? strategy.basePct;
+    return { strategy, pct, usd: totalUsd === null ? null : Math.round((pct / 100) * totalUsd) };
+  });
 }
 
 /** Short ticker strip for the dashboard — values from data/ taxonomy snapshot (2026-09-03). */

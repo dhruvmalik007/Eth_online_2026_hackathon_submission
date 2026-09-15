@@ -77,7 +77,7 @@ const NODES: Node[] = [
     "reserves · rates · TVL",
   ]),
   node("g-v4", 0, 130, "graph", "Uniswap v4 PoolManager", [
-    "131k pools · $654B volume",
+    "pool registry · hook params",
     "hooks are first-class",
     "hour/day series",
   ]),
