@@ -1,4 +1,3 @@
-import type { ErrorCode } from "../../api/_lib/errorCodes.js";
 import type { RunEvent } from "./machine.js";
 
 /**
@@ -10,11 +9,40 @@ import type { RunEvent } from "./machine.js";
  * wrong, so retrying is reasonable. Collapsing the two into "error" is what made three routes look
  * broken when the truth was one missing bucket.
  *
- * `ErrorCode` is imported from the API rather than restated, because a second copy of a contract is
- * a copy that will be wrong. Imported from `errorCodes` rather than `http` for the same reason the
- * contract was split out: `http` is Node-typed, this file compiles against the DOM, and one program
- * cannot hold both without one of them losing its `Request`.
+ * ## Why the codes are written down here instead of imported
+ *
+ * They were imported, from `api/_lib/errorCodes.ts` — a leaf with no imports of its own, which
+ * resolved correctly, and which still did not fix the build. A type import puts its module's whole
+ * reachable graph in the program, and the API is written against Node's `Request` and `Response`
+ * while this file compiles against the DOM's. One program holding two declarations of the same global
+ * loses the members of whichever declaration resolves second, and which that is depends on module
+ * resolution — so it passed here and failed in the build, in files this file does not use.
+ *
+ * A browser program and a server program cannot share a compiler configuration, so they no longer
+ * share an import either. `test/errorCodeParity.test.ts` asserts this list equals the API's, and that
+ * test runs under the API's configuration, where both are visible. Drift becomes a failing test
+ * rather than a deploy that breaks somewhere else.
  */
+
+/**
+ * The API's error contract, restated for the browser.
+ *
+ * Same order as `api/_lib/errorCodes.ts`, so the parity test's diff reads as a location rather than a
+ * reshuffle.
+ */
+export const ERROR_CODES = [
+  "BAD_REQUEST",
+  "UNAUTHORIZED",
+  "NOT_FOUND",
+  "VECTOR_UNAVAILABLE",
+  "RISK_UNAVAILABLE",
+  "DATABASE_UNAVAILABLE",
+  "MODEL_UNAVAILABLE",
+  "UPSTREAM_ERROR",
+  "INTERNAL_ERROR",
+] as const;
+
+export type ErrorCode = (typeof ERROR_CODES)[number];
 
 export interface Classified {
   /** The event the machine takes. */
