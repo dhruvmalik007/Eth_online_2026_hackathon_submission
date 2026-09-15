@@ -178,5 +178,20 @@ export function toHttpError(error: unknown, context: string): HttpError {
   if (name === 'TimesFM3HttpError' || /timesfm3/i.test(message)) {
     return new HttpError('MODEL_UNAVAILABLE', `TimesFM-3 unavailable: ${message}`);
   }
+  /**
+   * A schema rejection from inside the pipeline.
+   *
+   * Without this branch the fallback below splices `error.message` into the body — and for a
+   * ZodError that message *is* the JSON-stringified issue list. The caller then gets a wall of
+   * validation internals while the headline says only "an upstream dependency failed", which names
+   * neither the cause nor anything they could do. The issues are worth a log and useless to the
+   * browser, so they stay server-side and the summary says what actually happened.
+   */
+  if (name === 'ZodError') {
+    return new HttpError(
+      'UPSTREAM_ERROR',
+      `${context} produced a payload that failed its own validation. This is a fault in this deployment, not something your request caused.`,
+    );
+  }
   return new HttpError('UPSTREAM_ERROR', `${context} failed: ${message}`);
 }
