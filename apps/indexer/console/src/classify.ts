@@ -1,4 +1,4 @@
-import type { ErrorCode } from "../../api/_lib/http.js";
+import type { ErrorCode } from "../../api/_lib/errorCodes.js";
 import type { RunEvent } from "./machine.js";
 
 /**
@@ -11,7 +11,9 @@ import type { RunEvent } from "./machine.js";
  * broken when the truth was one missing bucket.
  *
  * `ErrorCode` is imported from the API rather than restated, because a second copy of a contract is
- * a copy that will be wrong.
+ * a copy that will be wrong. Imported from `errorCodes` rather than `http` for the same reason the
+ * contract was split out: `http` is Node-typed, this file compiles against the DOM, and one program
+ * cannot hold both without one of them losing its `Request`.
  */
 
 export interface Classified {
@@ -67,7 +69,8 @@ function thinness(payload: unknown): string | null {
   if (typeof payload !== "object" || payload === null) return null;
   const record = payload as Record<string, unknown>;
 
-  if (record["empty"] === true) return "this deployment holds nothing for it yet";
+  if (record["empty"] === true)
+    return "this deployment holds nothing for it yet";
 
   const degraded = record["degraded"];
   if (Array.isArray(degraded) && degraded.length > 0) {
@@ -107,7 +110,10 @@ export function classifyFailure(
       event: "settle-unavailable",
       code,
       status,
-      summary: message.length > 0 ? message : "A dependency this command needs is not available here.",
+      summary:
+        message.length > 0
+          ? message
+          : "A dependency this command needs is not available here.",
       ...(remedy === undefined ? {} : { remedy }),
     };
   }
@@ -117,7 +123,10 @@ export function classifyFailure(
       event: "settle-refused",
       code,
       status,
-      summary: message.length > 0 ? message : "This request was rejected before it ran.",
+      summary:
+        message.length > 0
+          ? message
+          : "This request was rejected before it ran.",
     };
   }
 
@@ -170,7 +179,9 @@ export interface ErrorEnvelope {
  * would let an unknown code reach the remedy table and be reported as one of ours.
  */
 export function codeOf(value: unknown): ErrorCode | null {
-  return typeof value === "string" && KNOWN_CODES.includes(value) ? (value as ErrorCode) : null;
+  return typeof value === "string" && KNOWN_CODES.includes(value)
+    ? (value as ErrorCode)
+    : null;
 }
 
 /**
@@ -181,11 +192,14 @@ export function codeOf(value: unknown): ErrorCode | null {
  * confident wrong sentence in front of the reader.
  */
 export function readErrorEnvelope(payload: unknown): ErrorEnvelope {
-  if (typeof payload !== "object" || payload === null) return { code: null, message: "" };
+  if (typeof payload !== "object" || payload === null)
+    return { code: null, message: "" };
   const error = (payload as Record<string, unknown>)["error"];
-  if (typeof error !== "object" || error === null) return { code: null, message: "" };
+  if (typeof error !== "object" || error === null)
+    return { code: null, message: "" };
   const record = error as Record<string, unknown>;
   const code = codeOf(record["code"]);
-  const message = typeof record["message"] === "string" ? record["message"] : "";
+  const message =
+    typeof record["message"] === "string" ? record["message"] : "";
   return { code, message };
 }
