@@ -1,6 +1,6 @@
 import { handleModelStatus } from './_lib/handlers.js';
 import { getRuntime } from './_lib/runtime.js';
-import { sendWebResponse, toWebRequest } from './_lib/vercel.js';
+import { captureInvocation, sendWebResponse, toWebRequest } from './_lib/vercel.js';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 /**
@@ -14,6 +14,7 @@ export default async function handler(
   request: IncomingMessage,
   response: ServerResponse,
 ): Promise<void> {
+  captureInvocation(request);
   await sendWebResponse(
     response,
     await handleModelStatus(await toWebRequest(request), getRuntime()),

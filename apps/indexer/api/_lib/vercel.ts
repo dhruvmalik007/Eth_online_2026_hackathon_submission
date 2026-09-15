@@ -18,6 +18,24 @@ import { OIDC_HEADER, rememberOidcToken } from "./workloadIdentity.js";
 
 const BODYLESS_METHODS = new Set(["GET", "HEAD"]);
 
+/**
+ * Take the invocation's OIDC token off the Node request.
+ *
+ * Every route adapter must call this, and the reason it is a separate call rather than a line inside
+ * `toWebRequest` is a bug that already happened once: four adapters — `health`, `cache/manifest` and
+ * both `risk/*` — serve their answers without ever translating a request, and three of those read
+ * GCS. Folding the capture into the translation made credentials depend on whether an adapter
+ * *happened* to need a web `Request`, so the routes that most needed them were the ones that never
+ * got them, and the only symptom was an empty token file surfacing as a GCS parse error.
+ *
+ * `captureInvocation.test.ts` fails if an adapter stops calling it.
+ */
+export function captureInvocation(request: IncomingMessage): void {
+  const header = request.headers[OIDC_HEADER];
+  const token = Array.isArray(header) ? header[0] : header;
+  if (typeof token === "string" && token.length > 0) rememberOidcToken(token);
+}
+
 async function readBody(request: IncomingMessage): Promise<Buffer | undefined> {
   const method = (request.method ?? "GET").toUpperCase();
   if (BODYLESS_METHODS.has(method)) return undefined;
@@ -41,12 +59,6 @@ export async function toWebRequest(request: IncomingMessage): Promise<Request> {
     if (typeof value === "string") headers.set(key, value);
     else if (Array.isArray(value)) headers.set(key, value.join(", "));
   }
-
-  // Vercel signs an OIDC token for the invocation and delivers it as a header rather than an
-  // environment variable, so this is the only point in the request that can see it. It is stashed
-  // for the GCP credential exchange — nothing else reads it, and it never leaves the process.
-  const oidcToken = headers.get(OIDC_HEADER);
-  if (oidcToken !== null) rememberOidcToken(oidcToken);
 
   const body = await readBody(request);
   return new Request(url, {
