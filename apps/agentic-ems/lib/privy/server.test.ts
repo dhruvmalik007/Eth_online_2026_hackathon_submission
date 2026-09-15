@@ -94,13 +94,21 @@ afterEach(() => {
 });
 
 describe("verifyPrivyToken", () => {
-  it("returns the DID from a well-formed token", async () => {
-    const { verifyPrivyToken } = await loadVerifier();
-    const session = await verifyPrivyToken(mintToken());
-    expect(session.did).toBe(DID);
-    expect(session.sessionId).toBe("session-fixture");
-    expect(session.expiresAt).toBeGreaterThan(Math.floor(Date.now() / 1000));
-  });
+  it(
+    "returns the DID from a well-formed token",
+    async () => {
+      const { verifyPrivyToken } = await loadVerifier();
+      const session = await verifyPrivyToken(mintToken());
+      expect(session.did).toBe(DID);
+      expect(session.sessionId).toBe("session-fixture");
+      expect(session.expiresAt).toBeGreaterThan(Math.floor(Date.now() / 1000));
+    },
+    // This case is first in the file, so it pays the entire cold cost of transforming and importing
+    // the crypto stack. Alone that is about a second; under `turbo run test`, with nineteen packages
+    // in parallel, it measured 6.6s — past vitest's 5s default, so it failed on a busy machine and
+    // passed on an idle one. A budget rather than a fixture, because the work is real.
+    20_000,
+  );
 
   it("rejects a token minted for a different Privy app", async () => {
     // A valid signature over the wrong audience. A naive jwtVerify without an audience check accepts
