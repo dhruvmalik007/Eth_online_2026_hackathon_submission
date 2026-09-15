@@ -1,5 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
+
+/**
+ * The cache reader is mocked file-wide, and only the cache tests touch it. It is the seam between the
+ * route and GCS, and every branch worth asserting lives on this side of it: an absent manifest is a
+ * state, a mismatched schema is an error, and the signing is the only part that needs a bucket.
+ */
+vi.mock('../api/_lib/cache.js', () => ({
+  CACHE_SCHEMA_VERSION: 1,
+  readManifest: vi.fn(),
+  signManifest: vi.fn(),
+}));
+
+import { readManifest, signManifest } from '../api/_lib/cache.js';
 import { loadEnv } from '@ethonline2026/langchain-agent';
 import {
   ChainRiskProfileSchema,
@@ -24,6 +37,7 @@ import type {
 import { HttpError, errorResponse, json, numberParam, readBody, stringParam } from '../api/_lib/http.js';
 import {
   handleAgent,
+  handleCacheManifest,
   handleCronProbe,
   handleForecast,
   handleHealth,
@@ -90,6 +104,7 @@ function fakeRuntime(options: RuntimeOptions = {}): IndexerRuntime {
       // Present by default so the auth tests have to opt *out* to exercise the unset case; a fake
       // that omits it would make every probe test pass for the wrong reason.
       CRON_SECRET: 'test-secret',
+      CACHE_BUCKET: 'test-cache-bucket',
     },
     runner: {} as IndexerRuntime['runner'],
     metrics: {
@@ -1208,5 +1223,93 @@ describe('POST /api/cron/probe', () => {
     expect(error['code']).toBe('INTERNAL_ERROR');
     // The operator needs to know which variable to set, so the message names it.
     expect(String(error['message'])).toContain('CRON_SECRET');
+  });
+});
+
+// ── the CDN cache ───────────────────────────────────────────────────────────
+
+describe('GET /api/cache/manifest', () => {
+  // Held separately rather than indexed out of the manifest: `manifest.entries[0]` is `T | undefined`
+  // under `noUncheckedIndexedAccess`, and spreading that widens every field to optional.
+  const entry = {
+    key: 'pools',
+    path: 'cache/v1/pools.json',
+    fetchedAt: '2026-09-15T10:00:00.000Z',
+    changedAt: '2026-09-01T00:00:00.000Z',
+    sha256: 'a'.repeat(64),
+    bytes: 8214,
+  };
+
+  const manifest = {
+    version: 1,
+    generatedAt: '2026-09-15T10:00:00.000Z',
+    durationMs: 2841,
+    entries: [entry],
+    failures: [],
+    healthStatus: 'ok',
+  };
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('returns every entry with a URL that can actually be fetched', async () => {
+    vi.mocked(readManifest).mockResolvedValue(manifest);
+    vi.mocked(signManifest).mockResolvedValue({
+      ...manifest,
+      expiresAt: '2026-09-15T11:00:00.000Z',
+      entries: [{ ...entry, url: 'https://storage.googleapis.com/x?sig=abc' }],
+    });
+
+    const res = await handleCacheManifest(fakeRuntime());
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['cached']).toBe(true);
+    const entries = payload['entries'] as Record<string, unknown>[];
+    // A path is not fetchable — the bucket is private, so signing is the entire point of this hop.
+    expect(entries[0]?.['path']).toBe('cache/v1/pools.json');
+    expect(String(entries[0]?.['url'])).toContain('sig=');
+    // And `changedAt` is what separates "fresh data" from "a fresh check" once the console renders it.
+    expect(entries[0]?.['changedAt']).toBe('2026-09-01T00:00:00.000Z');
+  });
+
+  it('treats "the job has never run" as a state, not an outage', async () => {
+    vi.mocked(readManifest).mockResolvedValue(undefined);
+
+    const res = await handleCacheManifest(fakeRuntime());
+    const payload = await body(res);
+
+    // A 404 would make an unrun job look like a broken deployment, and the console would show an
+    // error where the honest answer is "nothing is cached yet".
+    expect(res.status).toBe(200);
+    expect(payload['cached']).toBe(false);
+    expect(String(payload['reading'])).toContain('has not run yet');
+  });
+
+  it('reports an unconfigured bucket without touching GCS', async () => {
+    const runtime = fakeRuntime();
+    delete (runtime.env as unknown as Record<string, unknown>)['CACHE_BUCKET'];
+
+    const res = await handleCacheManifest(runtime);
+    const payload = await body(res);
+
+    expect(res.status).toBe(200);
+    expect(payload['configured']).toBe(false);
+    expect(vi.mocked(readManifest)).not.toHaveBeenCalled();
+  });
+
+  it('surfaces a schema mismatch as an error rather than as an empty cache', async () => {
+    // The dangerous failure. Reporting "nothing cached" for a manifest this build cannot read would
+    // hide a full cache behind an empty state, and nobody would think to look further.
+    vi.mocked(readManifest).mockRejectedValue(
+      new Error('cache manifest is schema version 2; this deployment reads 1'),
+    );
+
+    const res = await handleCacheManifest(fakeRuntime());
+    const payload = await body(res);
+
+    expect(res.status).toBeGreaterThanOrEqual(500);
+    expect((payload['error'] as Record<string, unknown>)['code']).toBeDefined();
   });
 });

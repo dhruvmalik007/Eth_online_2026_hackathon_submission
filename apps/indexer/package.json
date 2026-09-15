@@ -19,6 +19,7 @@
     "@ethonline2026/langchain-agent": "workspace:*",
     "@ethonline2026/risk-analysis-data-pipeline": "workspace:*",
     "@ethonline2026/timeseries": "workspace:*",
+    "@google-cloud/storage": "^7.22.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {

@@ -104,6 +104,8 @@ export const ENV_CATALOG: readonly EnvVarSpec[] = [
   // accurate rather than noisy: the schema that declares it is langchain's, and the only deployment
   // that consumes it is the indexer, whose refresh probe fails closed without it.
   v("CRON_SECRET", ["indexer", "langchain"], "Bearer token the scheduled refresh job presents to POST /api/cron/probe.", { secret: true, requiredIn: ["staging", "production"] }),
+  // Not secret, and tagged `langchain` for the same reason as above: that schema declares it.
+  v("CACHE_BUCKET", ["indexer", "langchain"], "GCS bucket the refresh job writes and /api/cache/manifest reads (private).", { format: "string" }),
 
   // ── execution service ────────────────────────────────────────────────────────────────────────
   v("EXECUTION_MODE", ["execution"], "`dry` simulates and records; `live` may broadcast.", {

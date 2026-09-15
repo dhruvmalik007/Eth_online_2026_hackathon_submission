@@ -28,6 +28,7 @@ import {
   stringParam,
   toHttpError,
 } from './http.js';
+import { CACHE_SCHEMA_VERSION, readManifest, signManifest } from './cache.js';
 import type { IndexerRuntime, ServiceProbe } from './runtime.js';
 
 /**
@@ -255,6 +256,63 @@ export async function handleCronProbe(
     return json({ ...healthReport(runtime, sweep), recorded });
   } catch (error) {
     return errorResponse(toHttpError(error, 'cron/probe'));
+  }
+}
+
+// ── GET /api/cache/manifest ─────────────────────────────────────────────────
+
+/**
+ * The cache index, with a fetchable URL beside every entry.
+ *
+ * This route exists because the bucket is private. The console's browser is authenticated to Vercel,
+ * not to GCS, so something has to sign on its behalf — and this is that hop, and the only one. Every
+ * entry comes back with a short-lived V4 URL, so the payloads themselves are still served by Google's
+ * edge rather than through a function.
+ *
+ * An absent manifest is a **state, not an error**: it means the refresh job has never run, and the
+ * caller renders "not started" rather than an outage. A manifest written at a schema this deployment
+ * cannot read *is* an error, because that is a real mismatch and reporting it as empty would hide a
+ * full cache behind an empty state.
+ *
+ * @param runtime - The indexer runtime.
+ */
+export async function handleCacheManifest(runtime: IndexerRuntime): Promise<Response> {
+  const bucketName = runtime.env.CACHE_BUCKET?.trim();
+  if (bucketName === undefined || bucketName.length === 0) {
+    return json({
+      configured: false,
+      cached: false,
+      entries: [],
+      failures: [],
+      reading:
+        'No cache bucket is configured on this deployment, so the console reads the live routes only.',
+    });
+  }
+
+  try {
+    const manifest = await readManifest(bucketName);
+    if (manifest === undefined) {
+      return json({
+        configured: true,
+        cached: false,
+        version: CACHE_SCHEMA_VERSION,
+        generatedAt: null,
+        expiresAt: null,
+        entries: [],
+        failures: [],
+        reading:
+          'The refresh job has not run yet, so nothing is cached. The console falls back to the live routes until it does.',
+      });
+    }
+
+    return json({
+      configured: true,
+      cached: true,
+      ...(await signManifest(bucketName, manifest)),
+      reading: `Cached at ${manifest.generatedAt}. Every figure served from it was observed then, not now.`,
+    });
+  } catch (error) {
+    return errorResponse(toHttpError(error, 'cache/manifest'));
   }
 }
 

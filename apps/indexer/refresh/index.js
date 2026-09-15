@@ -102,7 +102,13 @@ async function fetchJson(path, init = {}) {
   const response = await fetch(`${config.baseUrl}${path}`, {
     ...init,
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    headers: { accept: 'application/json', ...(init.headers ?? {}) },
+    headers: {
+      accept: 'application/json',
+      ...(config.bypassSecret.length === 0
+        ? {}
+        : { 'x-vercel-protection-bypass': config.bypassSecret }),
+      ...(init.headers ?? {}),
+    },
   });
 
   const text = await response.text();
@@ -176,7 +182,8 @@ async function putObject(bucket, key, path, text, fetchedAt) {
 
   return {
     key,
-    url: `https://storage.googleapis.com/${config.bucket}/${path}`,
+    // A path, not a URL. The bucket is private, so there is no stable public address to record — the
+    // console gets a signed URL per request from `/api/cache/manifest` instead.
     path,
     ...stored,
     bytes: Buffer.byteLength(text),
@@ -194,6 +201,11 @@ async function main() {
     baseUrl: requireEnv('INDEXER_BASE_URL').replace(/\/+$/, ''),
     bucket: requireEnv('CACHE_BUCKET'),
     cronSecret: requireEnv('CRON_SECRET'),
+    // Optional, and empty rather than absent. The deployment sits behind Vercel Deployment
+    // Protection, so a machine caller has to present this or every route answers a 302 into the SSO
+    // flow — but leaving it optional means the job still works against an unprotected deployment,
+    // which is what the local battery runs against.
+    bypassSecret: process.env['VERCEL_AUTOMATION_BYPASS_SECRET']?.trim() ?? '',
   };
 
   const storage = new Storage();

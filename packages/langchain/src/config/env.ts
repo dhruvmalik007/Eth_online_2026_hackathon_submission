@@ -84,6 +84,9 @@ const envSchema = z.object({
   // a scheduled refresh job needs it. The route fails closed when it is absent, so an unset secret
   // degrades the refresh instead of opening the endpoint to anyone.
   CRON_SECRET: z.string().min(1).optional(),
+  // The cache bucket the refresh job writes and `/api/cache/manifest` reads. Absent, that route
+  // reports itself unconfigured rather than failing — the console then falls back to the live reads.
+  CACHE_BUCKET: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

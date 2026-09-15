@@ -212,6 +212,9 @@ importers:
       '@ethonline2026/timeseries':
         specifier: workspace:*
         version: link:../../packages/timeseries
+      '@google-cloud/storage':
+        specifier: ^7.22.0
+        version: 7.22.0(encoding@0.1.13)
       zod:
         specifier: ^4.5.4
         version: 4.5.4
@@ -17031,7 +17034,7 @@ snapshots:
 
   extension-port-stream@3.0.0:
     dependencies:
-      readable-stream: 3.6.2
+      readable-stream: 4.7.0
       webextension-polyfill: 0.10.0
 
   eyes@0.1.8: {}

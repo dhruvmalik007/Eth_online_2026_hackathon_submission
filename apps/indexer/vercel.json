@@ -41,6 +41,9 @@
     },
     "api/cron/probe.ts": {
       "maxDuration": 45
+    },
+    "api/cache/manifest.ts": {
+      "maxDuration": 20
     }
   }
 }
