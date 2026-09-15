@@ -31,6 +31,7 @@
     "@ethonline2026/env": "workspace:*",
     "@ethonline2026/graph-fno-indexer": "workspace:*",
     "@ethonline2026/oneinch-aqua": "workspace:*",
+    "@ethonline2026/order-execution-layer": "workspace:*",
     "@ethonline2026/risk-analysis-data-pipeline": "workspace:*",
     "@ethonline2026/timeseries": "workspace:*",
     "@graphprotocol/client-auto-pagination": "^2.0.0",

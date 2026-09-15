@@ -28,8 +28,8 @@ RUN pnpm install --frozen-lockfile --filter @ethonline2026/indexer...
 WORKDIR /app/apps/indexer
 
 ENV NODE_ENV=production
-EXPOSE 3001
+EXPOSE 8080
 
 # The same entry point `pnpm dev:local` uses. The handlers are unchanged — they already speak
 # `Request`/`Response`, so hosting them on Node's own http server is an adapter, not a rewrite.
-CMD ["pnpm", "exec", "tsx", "scripts/serve-local.ts"]
+CMD ["pnpm", "exec", "tsx", "scripts/serve.ts"]

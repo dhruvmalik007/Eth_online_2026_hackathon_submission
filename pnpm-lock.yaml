@@ -552,6 +552,9 @@ importers:
       '@ethonline2026/oneinch-aqua':
         specifier: workspace:*
         version: link:../oneInch
+      '@ethonline2026/order-execution-layer':
+        specifier: workspace:*
+        version: link:../order-execution-layer
       '@ethonline2026/risk-analysis-data-pipeline':
         specifier: workspace:*
         version: link:../risk-analysis-data-pipeline

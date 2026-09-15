@@ -13,7 +13,8 @@
     "smoke": "tsx src/index.ts smoke",
     "flight": "tsx src/index.ts flight",
     "deploy": "tsx src/index.ts deploy",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ethonline2026/env": "workspace:*",

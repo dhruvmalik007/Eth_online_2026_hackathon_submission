@@ -1,3 +1,4 @@
+import { transactionLinks } from "@ethonline2026/order-execution-layer";
 /**
  * The HTTP surface — grouped by the lineage of §5.3.
  *
@@ -790,6 +791,21 @@ export function buildApp(options: AppOptions): FastifyInstance {
     const dstTxHash = typeof receiving["txHash"] === "string" ? receiving["txHash"] : null;
     const dstChainId = typeof receiving["chainId"] === "number" ? receiving["chainId"] : null;
 
+    /**
+     * Both halves of the transfer, each on the explorer that can actually answer for it.
+     *
+     * The source hash alone is not enough for a bridge: it proves the transfer left and says nothing
+     * about whether it arrived, which is the question being asked. LI.FI publishes its own scan, so
+     * that is the primary link; the chain explorers carry the individual legs.
+     */
+    const links = transactionLinks({
+      txHash,
+      chainId: fromChainId,
+      source: "lifi",
+      ...(dstTxHash === null ? {} : { deliveredTxHash: dstTxHash }),
+      ...(dstChainId === null ? {} : { destinationChainId: dstChainId }),
+    });
+
     if (dstTxHash !== null) {
       await runtime.history.recordEvents([
         {
@@ -812,6 +828,16 @@ export function buildApp(options: AppOptions): FastifyInstance {
             srcTxHash: txHash,
             kind: "bridge",
             status: "confirmed",
+            // Flattened to strings: the event payload is a JSON column, and the domain already
+            // names these two fields for the source and destination explorers.
+            ...(links === undefined
+              ? {}
+              : {
+                  scanLabel: links.primary.label,
+                  scanUrl: links.primary.url,
+                  ...(links.sourceChain === undefined ? {} : { srcExplorerUrl: links.sourceChain.url }),
+                  ...(links.destination === undefined ? {} : { dstExplorerUrl: links.destination.url }),
+                }),
           },
         },
       ]);
@@ -825,6 +851,7 @@ export function buildApp(options: AppOptions): FastifyInstance {
       dstChainId,
       tool: typeof provider["tool"] === "string" ? provider["tool"] : null,
       substatus: typeof provider["substatus"] === "string" ? provider["substatus"] : null,
+      links: links ?? null,
       recorded: dstTxHash !== null,
     });
   });

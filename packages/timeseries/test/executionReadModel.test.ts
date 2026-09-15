@@ -17,14 +17,23 @@ class RecordingRunner implements SqlRunner {
   readonly queries: Array<{ text: string; values: readonly unknown[] }> = [];
   private rows: Record<string, unknown>[] = [];
 
+  private queued: Array<{ match: string; rows: Record<string, unknown>[] }> = [];
+
   willReturn(rows: Record<string, unknown>[]): this {
     this.rows = rows;
     return this;
   }
 
+  /** Answer one query differently from the rest — bridgeProgress issues two. */
+  willReturnFor(match: string, rows: Record<string, unknown>[]): this {
+    this.queued.push({ match, rows });
+    return this;
+  }
+
   async query(text: string, values: readonly unknown[] = []): Promise<{ rows: Record<string, unknown>[] }> {
     this.queries.push({ text, values });
-    return { rows: this.rows };
+    const hit = this.queued.find((entry) => text.includes(entry.match));
+    return { rows: hit === undefined ? this.rows : hit.rows };
   }
 
   async transaction<T>(fn: (tx: SqlRunner) => Promise<T>): Promise<T> {
@@ -231,6 +240,35 @@ describe("ExecutionReadModel — every panel is tenant-scoped", () => {
     await new ExecutionReadModel(runner, undefined as never).positions(USER);
     // Snapshots are a hypertable, so a naive read returns every observation ever.
     expect(runner.last.text).toMatch(/DISTINCT ON/i);
+  });
+
+  it("carries the provider scan link through from the broadcast event", async () => {
+    // The link is written by the service when it confirms a bridge; without this pass-through it
+    // reached the database and stopped there, which is why the LI.FI scan could not be referenced.
+    const runner = new RecordingRunner()
+      .willReturnFor("exec_steps", [])
+      .willReturnFor("exec_events", [
+        {
+          event_id: "e1",
+          user_id: USER,
+          intent_id: null,
+          step_id: null,
+          type: "step.broadcast",
+          payload: {
+            txHash: "0xabc",
+            srcTxHash: "0xdef",
+            chainId: 137,
+            label: "Bridge 1 of 1",
+            index: 0,
+            scanUrl: "https://scan.li.fi/tx/0xabc",
+            scanLabel: "LI.FI scan",
+          },
+        },
+      ]);
+
+    const rows = await new ExecutionReadModel(runner, undefined as never).bridgeProgress(USER);
+    expect(rows[0]?.scanUrl).toBe("https://scan.li.fi/tx/0xabc");
+    expect(rows[0]?.scanLabel).toBe("LI.FI scan");
   });
 
   it("returns an empty panel rather than failing on an idle dashboard", async () => {
